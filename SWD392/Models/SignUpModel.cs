@@ -6,6 +6,9 @@ namespace SWD392.Models
     {
         [Required]
         public string FirstName { get; set; } = string.Empty;
+        [Required]
+        public string Username { get; set; } = string.Empty;
+
 
         [Required]
         public string LastName { get; set; } = string.Empty;
@@ -24,10 +27,14 @@ namespace SWD392.Models
 
         public DateTime? Birthday { get; set; }
 
-        public int RoleId { get; set; } = 2; 
+        public int? RoleId { get; set; } = 2; 
 
-        public int CartId { get; set; }
+        public int? CartId { get; set; }
 
-        public int WalletId { get; set; }
+        public int? WalletId { get; set; }
+        [Required(ErrorMessage = "Số điện thoại không được để trống.")]
+        [Phone(ErrorMessage = "Số điện thoại không hợp lệ.")]
+        [RegularExpression(@"^\+?[0-9]{10,15}$", ErrorMessage = "Số điện thoại phải có từ 10 đến 15 chữ số.")]
+        public string PhoneNumber { get; set; } = string.Empty;
     }
 }
