@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
 
 namespace SWD392.Models
 {
@@ -9,7 +10,7 @@ namespace SWD392.Models
 
         [Required]
         public string LastName { get; set; } = string.Empty;
-
+        [DefaultValue("user@example.com")]
         [Required, EmailAddress]
         public string Email { get; set; } = string.Empty;
 
@@ -24,10 +25,5 @@ namespace SWD392.Models
 
         public DateTime? Birthday { get; set; }
 
-        public int RoleId { get; set; } = 2; 
-
-        public int CartId { get; set; }
-
-        public int WalletId { get; set; }
     }
 }
