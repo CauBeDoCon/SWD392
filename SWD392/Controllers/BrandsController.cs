@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using SWD392.DTOs;
 using SWD392.Models;
@@ -18,9 +19,13 @@ namespace SWD392.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetAllBrands()
+        public async Task<IActionResult> GetAllBrands([FromQuery] int? pageNumber, [FromQuery] int? pageSize)
         {
-            return Ok(await _brandRepo.GetAllBrandsAsync());
+            int currentPage = pageNumber ?? 1;
+            int currentSize = pageSize ?? 10;
+
+            var result = await _brandRepo.GetAllBrandsAsync(currentPage, currentSize);
+            return Ok(result);
         }
 
         [HttpGet("{id}")]
@@ -74,8 +79,8 @@ namespace SWD392.Controllers
         [Authorize]
         public async Task<IActionResult> DeleteBrand([FromRoute] int id)
         {
-            await _brandRepo.DeleteBrandAsync(id);
-            return Ok();
+            var message = await _brandRepo.DeleteBrandAsync(id);
+            return Ok(new { message });
         }
     }
 }

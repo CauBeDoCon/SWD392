@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 using SWD392.DB;
+using SWD392.DTOs.Pagination;
 using SWD392.Models;
 using SWD392.Repositories;
 
@@ -25,20 +26,39 @@ namespace SWD392.Repositories
             return newManufacturedCountry.Id;
         }
 
-        public async Task DeleteManufacturedCountryAsync(int id)
+        public async Task<string> DeleteManufacturedCountryAsync(int id)
         {
-            var deleteSkin = _context.manufacturedCountries!.SingleOrDefault(s => s.Id == id);
-            if (deleteSkin != null)
+            var deleteManufacturedCountry = await _context.manufacturedCountries!.FindAsync(id);
+
+            if (deleteManufacturedCountry == null)
             {
-                _context.manufacturedCountries!.Remove(deleteSkin);
-                await _context.SaveChangesAsync();
+                throw new KeyNotFoundException($"Nước sản xuất với ID {id} không tìm thấy.");
             }
+
+            _context.manufacturedCountries.Remove(deleteManufacturedCountry);
+            await _context.SaveChangesAsync();
+
+            return $"Nước sản xuất với ID {id} đã xoá thành công.";
         }
 
-        public async Task<List<ManufacturedCountryModel>> GetAllManufacturedCountriesAsync()
+        public async Task<PagedResult<ManufacturedCountryModel>> GetAllManufacturedCountriesAsync(int pageNumber, int pageSize)
         {
-            var manufacturedCountries = await _context.manufacturedCountries!.ToListAsync();
-            return _mapper.Map<List<ManufacturedCountryModel>>(manufacturedCountries);
+            int totalCount = await _context.manufacturedCountries!.CountAsync();
+
+            var manufacturedCountries = await _context.manufacturedCountries!
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+
+            var mappedData = _mapper.Map<List<ManufacturedCountryModel>>(manufacturedCountries);
+
+            return new PagedResult<ManufacturedCountryModel>
+            {
+                Items = mappedData,
+                TotalCount = totalCount,
+                PageNumber = pageNumber,
+                PageSize = pageSize
+            };
         }
 
         public async Task<ManufacturedCountryModel> GetManufacturedCountriesAsync(int id)
@@ -49,13 +69,25 @@ namespace SWD392.Repositories
 
         public async Task UpdateManufacturedCountryAsync(int id, ManufacturedCountryModel model)
         {
-            if (id == model.Id)
+            if (id != model.Id)
             {
-                var updateManufacturedCountry = _mapper.Map<ManufacturedCountry>(model);
-                _context.manufacturedCountries!.Update(updateManufacturedCountry);
-                await _context.SaveChangesAsync();
-
+                throw new ArgumentException("ID không khớp giữa request và model.");
             }
+
+            var existingEntity = await _context.manufacturedCountries!.FindAsync(id);
+            if (existingEntity == null)
+            {
+                throw new KeyNotFoundException($"Nước sản xuất với ID {id} không tìm thấy.");
+            }
+
+            _context.Entry(existingEntity).State = EntityState.Detached;
+
+            var updateManufacturedCountry = _mapper.Map<ManufacturedCountry>(model);
+
+            _context.manufacturedCountries.Attach(updateManufacturedCountry);
+            _context.Entry(updateManufacturedCountry).State = EntityState.Modified;
+
+            await _context.SaveChangesAsync();
         }
     }
 }

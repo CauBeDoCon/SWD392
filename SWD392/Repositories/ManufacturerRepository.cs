@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 using SWD392.DB;
+using SWD392.DTOs.Pagination;
 using SWD392.Models;
 using SWD392.Repositories;
 
@@ -25,20 +26,39 @@ namespace SWD392.Repositories
             return newManufacturer.Id;
         }
 
-        public async Task DeleteManufacturerAsync(int id)
+        public async Task<string> DeleteManufacturerAsync(int id)
         {
-            var deleteSkin = _context.manufacturers!.SingleOrDefault(s => s.Id == id);
-            if (deleteSkin != null)
+            var deleteManufacturer = await _context.manufacturers!.FindAsync(id);
+
+            if (deleteManufacturer == null)
             {
-                _context.manufacturers!.Remove(deleteSkin);
-                await _context.SaveChangesAsync();
+                throw new KeyNotFoundException($"Nhà sản xuất với ID {id} không tìm thấy.");
             }
+
+            _context.manufacturers.Remove(deleteManufacturer);
+            await _context.SaveChangesAsync();
+
+            return $"Nhà sản xuất với ID {id} đã xoá thành công.";
         }
 
-        public async Task<List<ManufacturerModel>> GetAllManufacturersAsync()
+        public async Task<PagedResult<ManufacturerModel>> GetAllManufacturersAsync(int pageNumber, int pageSize)
         {
-            var manufacturers = await _context.manufacturers!.ToListAsync();
-            return _mapper.Map<List<ManufacturerModel>>(manufacturers);
+            int totalCount = await _context.manufacturers!.CountAsync();
+
+            var manufacturers = await _context.manufacturers!
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+
+            var mappedData = _mapper.Map<List<ManufacturerModel>>(manufacturers);
+
+            return new PagedResult<ManufacturerModel>
+            {
+                Items = mappedData,
+                TotalCount = totalCount,
+                PageNumber = pageNumber,
+                PageSize = pageSize
+            };
         }
 
         public async Task<ManufacturerModel> GetManufacturersAsync(int id)
@@ -49,13 +69,25 @@ namespace SWD392.Repositories
 
         public async Task UpdateManufacturerAsync(int id, ManufacturerModel model)
         {
-            if (id == model.Id)
+            if (id != model.Id)
             {
-                var updateManufacturer = _mapper.Map<Manufacturer>(model);
-                _context.manufacturers!.Update(updateManufacturer);
-                await _context.SaveChangesAsync();
-
+                throw new ArgumentException("ID không khớp giữa request và model.");
             }
+
+            var existingEntity = await _context.manufacturers!.FindAsync(id);
+            if (existingEntity == null)
+            {
+                throw new KeyNotFoundException($"Nhà sản xuất với ID {id} không tìm thấy.");
+            }
+
+            _context.Entry(existingEntity).State = EntityState.Detached;
+
+            var updateManufacturer = _mapper.Map<Manufacturer>(model);
+
+            _context.manufacturers.Attach(updateManufacturer);
+            _context.Entry(updateManufacturer).State = EntityState.Modified;
+
+            await _context.SaveChangesAsync();
         }
     }
 }

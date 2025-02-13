@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using SWD392.DTOs;
 using SWD392.Models;
@@ -18,9 +19,13 @@ namespace SWD392.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetAllImages()
+        public async Task<IActionResult> GetAllImages([FromQuery] int? pageNumber, [FromQuery] int? pageSize)
         {
-            return Ok(await _imageRepo.GetAllImagesAsync());
+            int currentPage = pageNumber ?? 1;
+            int currentSize = pageSize ?? 10;
+
+            var result = await _imageRepo.GetAllImagesAsync(currentPage, currentSize);
+            return Ok(result);
         }
 
         [HttpGet("{id}")]
@@ -76,8 +81,8 @@ namespace SWD392.Controllers
         [Authorize]
         public async Task<IActionResult> DeleteImage([FromRoute] int id)
         {
-            await _imageRepo.DeleteImageAsync(id);
-            return Ok();
+            var message = await _imageRepo.DeleteImageAsync(id);
+            return Ok(new { message });
         }
     }
 }

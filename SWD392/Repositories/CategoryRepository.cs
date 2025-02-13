@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 using SWD392.DB;
+using SWD392.DTOs.Pagination;
 using SWD392.Models;
 using SWD392.Repositories;
 
@@ -25,20 +26,39 @@ namespace SWD392.Repositories
             return newCategory.Id;
         }
 
-        public async Task DeleteCategoryAsync(int id)
+        public async Task<string> DeleteCategoryAsync(int id)
         {
-            var deleteSkin = _context.categories!.SingleOrDefault(s => s.Id == id);
-            if (deleteSkin != null)
+            var deleteCategory = await _context.categories!.FindAsync(id);
+
+            if (deleteCategory == null)
             {
-                _context.categories!.Remove(deleteSkin);
-                await _context.SaveChangesAsync();
+                throw new KeyNotFoundException($"Thể loại với ID {id} không tìm thấy.");
             }
+
+            _context.categories.Remove(deleteCategory);
+            await _context.SaveChangesAsync();
+
+            return $"Thể loại với ID {id} đã xoá thành công.";
         }
 
-        public async Task<List<CategoryModel>> GetAllCategoriesAsync()
+        public async Task<PagedResult<CategoryModel>> GetAllCategoriesAsync(int pageNumber, int pageSize)
         {
-            var categories = await _context.categories!.ToListAsync();
-            return _mapper.Map<List<CategoryModel>>(categories);
+            int totalCount = await _context.categories!.CountAsync();
+
+            var categories = await _context.categories!
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+
+            var mappedData = _mapper.Map<List<CategoryModel>>(categories);
+
+            return new PagedResult<CategoryModel>
+            {
+                Items = mappedData,
+                TotalCount = totalCount,
+                PageNumber = pageNumber,
+                PageSize = pageSize
+            };
         }
 
         public async Task<CategoryModel> GetCategoriesAsync(int id)
@@ -49,13 +69,25 @@ namespace SWD392.Repositories
 
         public async Task UpdateCategoryAsync(int id, CategoryModel model)
         {
-            if (id == model.Id)
+            if (id != model.Id)
             {
-                var updateCategory = _mapper.Map<Category>(model);
-                _context.categories!.Update(updateCategory);
-                await _context.SaveChangesAsync();
-
+                throw new ArgumentException("ID không khớp giữa request và model.");
             }
+
+            var existingEntity = await _context.categories!.FindAsync(id);
+            if (existingEntity == null)
+            {
+                throw new KeyNotFoundException($"Thể loại với ID {id} không tìm thấy.");
+            }
+
+            _context.Entry(existingEntity).State = EntityState.Detached;
+
+            var updateCategory = _mapper.Map<Category>(model);
+
+            _context.categories.Attach(updateCategory);
+            _context.Entry(updateCategory).State = EntityState.Modified;
+
+            await _context.SaveChangesAsync();
         }
     }
 }
