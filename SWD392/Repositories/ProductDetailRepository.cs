@@ -1,10 +1,9 @@
-﻿using AutoMapper;
-using Microsoft.AspNetCore.Mvc.RazorPages;
+﻿using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 using SWD392.DB;
 using SWD392.Models;
 using SWD392.Repositories;
-
+using AutoMapper;
 namespace SWD392.Repositories
 {
     public class ProductDetailRepository : IProductDetailRepository

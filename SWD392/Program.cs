@@ -14,6 +14,7 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddCors(options => options.AddDefaultPolicy(policy => policy.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod()));
 builder.Services.AddSwaggerGen(options =>
 {
     options.SwaggerDoc("v1", new OpenApiInfo { Title = "SWD392", Version = "v1" });
@@ -139,9 +140,10 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
-
+app.UseCors("AllowFrontend"); // Kích hoạt CORS
 app.UseHttpsRedirection();
-app.UseAuthentication();
+app.UseAuthentication(); // Đảm bảo middleware Authentication chạy trước Authorization
+app.UseHttpsRedirection();
 app.UseAuthorization();
 app.MapControllers();
 
