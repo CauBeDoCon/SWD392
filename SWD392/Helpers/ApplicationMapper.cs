@@ -8,7 +8,7 @@ namespace SkincarePharmacyNetCore8.Helpers
     {
         public ApplicationMapper()
         {
-            CreateMap<Product, Product>().ReverseMap();
+            CreateMap<Product, ProductModel>().ReverseMap();
 
             CreateMap<Image, ImageModel>().ReverseMap();
 
