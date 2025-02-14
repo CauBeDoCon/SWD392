@@ -46,7 +46,9 @@ namespace SWD392.Controllers
 
             var model = new CategoryModel
             {
-                Name = dto.Name
+                Name = dto.Name,
+                Image = dto.Image,
+                SolutionId = dto.SolutionId
             };
 
             var newCategoryId = await _categoryRepo.AddCategoryAsync(model);
@@ -70,6 +72,9 @@ namespace SWD392.Controllers
             }
 
             existingCategory.Name = dto.Name;
+            existingCategory.Image = dto.Image;
+            existingCategory.SolutionId = dto.SolutionId;   
+
 
             await _categoryRepo.UpdateCategoryAsync(id, existingCategory);
             return Ok(existingCategory);
