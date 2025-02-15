@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using SWD392.DB;
+using SWD392.DTOs.Pagination;
 using SWD392.Models;
 
 namespace SWD392.Repositories
@@ -34,20 +35,39 @@ namespace SWD392.Repositories
             return newProduct.Id;
         }
 
-        public async Task DeleteProductAsync(int id)
+        public async Task<string> DeleteProductAsync(int id)
         {
-            var deleteSkin=_context.products!.SingleOrDefault(s=>s.Id == id);
-            if (deleteSkin != null)
+            var deleteProduct = await _context.products!.FindAsync(id);
+
+            if (deleteProduct == null)
             {
-                _context.products!.Remove(deleteSkin);
-                await _context.SaveChangesAsync();
+                throw new KeyNotFoundException($"Sản phẩm với ID {id} không tìm thấy.");
             }
+
+            _context.products.Remove(deleteProduct);
+            await _context.SaveChangesAsync();
+
+            return $"Sản phẩm với ID {id} đã xoá thành công.";
         }
 
-        public async Task<List<Models.ProductModel>> GetAllProductAsync()
+        public async Task<PagedResult<ProductModel>> GetAllProductsAsync(int pageNumber, int pageSize)
         {
-            var products = await _context.products!.ToListAsync();
-            return _mapper.Map<List<Models.ProductModel>>(products);
+            int totalCount = await _context.products!.CountAsync();
+
+            var products = await _context.products!
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+
+            var mappedData = _mapper.Map<List<ProductModel>>(products);
+
+            return new PagedResult<ProductModel>
+            {
+                Items = mappedData,
+                TotalCount = totalCount,
+                PageNumber = pageNumber,
+                PageSize = pageSize
+            };
         }
 
         public async Task<Models.ProductModel> GetProductAsync(int id)
@@ -58,13 +78,25 @@ namespace SWD392.Repositories
 
         public async Task UpdateProductAsync(int id, Models.ProductModel model)
         {
-            if(id == model.Id)
+            if (id != model.Id)
             {
-                var updateProduct= _mapper.Map<DB.Product>(model);
-                _context.products!.Update(updateProduct);
-                await _context.SaveChangesAsync();
-
+                throw new ArgumentException("ID không khớp giữa request và model.");
             }
+
+            var existingEntity = await _context.products!.FindAsync(id);
+            if (existingEntity == null)
+            {
+                throw new KeyNotFoundException($"Sản phẩm với ID {id} không tìm thấy.");
+            }
+
+            _context.Entry(existingEntity).State = EntityState.Detached;
+
+            var updateProduct = _mapper.Map<Product>(model);
+
+            _context.products.Attach(updateProduct);
+            _context.Entry(updateProduct).State = EntityState.Modified;
+
+            await _context.SaveChangesAsync();
         }
     }
 }

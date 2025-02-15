@@ -15,6 +15,8 @@ namespace SWD392.DB
         public double Price { get; set; }
         [Range(0, 1000)]
         public int Quantity { get; set; }
+
+
         public ICollection<Image> Images { get; set; } = new List<Image>();
         public ICollection<UnitProduct> UnitProducts { get; set; } = new List<UnitProduct>();
         public int BrandId { get; set; }

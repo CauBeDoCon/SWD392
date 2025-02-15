@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using SWD392.DTOs;
 using SWD392.Models;
@@ -18,9 +19,14 @@ namespace SWD392.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetAllSolutions()
+        public async Task<IActionResult> GetAllSolutions([FromQuery] int? pageNumber, [FromQuery] int? pageSize)
         {
-            return Ok(await _solutionRepo.GetAllSolutionsAsync());
+            // Nếu người dùng không truyền giá trị, sử dụng mặc định
+            int currentPage = pageNumber ?? 1;  // Mặc định là 1
+            int currentSize = pageSize ?? 10;   // Mặc định là 10
+
+            var result = await _solutionRepo.GetAllSolutionsAsync(currentPage, currentSize);
+            return Ok(result);
         }
 
         [HttpGet("{id}")]
@@ -74,8 +80,8 @@ namespace SWD392.Controllers
         [Authorize]
         public async Task<IActionResult> DeleteSolution([FromRoute] int id)
         {
-            await _solutionRepo.DeleteSolutionAsync(id);
-            return Ok();
+            var message = await _solutionRepo.DeleteSolutionAsync(id);
+            return Ok(new { message });
         }
     }
 }
