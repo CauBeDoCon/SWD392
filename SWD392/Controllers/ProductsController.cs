@@ -19,9 +19,13 @@ namespace SWD392.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetAllSkincares()
+        public async Task<IActionResult> GetAllProducts([FromQuery] int? pageNumber, [FromQuery] int? pageSize)
         {
-            return Ok(await _productRepo.GetAllProductsAsync());
+            int currentPage = pageNumber ?? 1;
+            int currentSize = pageSize ?? 10;
+
+            var result = await _productRepo.GetAllProductsAsync(currentPage, currentSize);
+            return Ok(result);
         }
 
         [HttpGet("{id}")]
@@ -56,8 +60,8 @@ namespace SWD392.Controllers
             };
 
             var newProductId = await _productRepo.AddProductAsync(model);
-            var skincare = await _productRepo.GetProductByIdAsync(newProductId);
-            return skincare == null ? NotFound() : Ok(skincare);
+            var product = await _productRepo.GetProductByIdAsync(newProductId);
+            return product == null ? NotFound() : Ok(product);
         }
 
         [HttpPut("{id}")]
@@ -69,34 +73,34 @@ namespace SWD392.Controllers
                 return BadRequest("Dữ liệu không hợp lệ.");
             }
 
-            var existingSkincare = await _productRepo.GetProductByIdAsync(id);
-            if (existingSkincare == null)
+            var existingProduct = await _productRepo.GetProductByIdAsync(id);
+            if (existingProduct == null)
             {
                 return NotFound($"Không tìm thấy sản phẩm có ID = {id}");
             }
 
-            existingSkincare.Name = dto.Name;
-            existingSkincare.Description = dto.Description;
-            existingSkincare.Price = dto.Price;
-            existingSkincare.Quantity = dto.Quantity;
-            existingSkincare.BrandId = dto.BrandId;
-            existingSkincare.PackagingId = dto.PackagingId;
-            existingSkincare.CategoryId = dto.CategoryId;
-            existingSkincare.BrandOriginId = dto.BrandOriginId;
-            existingSkincare.ManufacturerId = dto.ManufacturerId;
-            existingSkincare.ManufacturedCountryId = dto.ManufacturedCountryId;
-            existingSkincare.ProductDetailId = dto.ProductDetailId;
+            existingProduct.Name = dto.Name;
+            existingProduct.Description = dto.Description;
+            existingProduct.Price = dto.Price;
+            existingProduct.Quantity = dto.Quantity;
+            existingProduct.BrandId = dto.BrandId;
+            existingProduct.PackagingId = dto.PackagingId;
+            existingProduct.CategoryId = dto.CategoryId;
+            existingProduct.BrandOriginId = dto.BrandOriginId;
+            existingProduct.ManufacturerId = dto.ManufacturerId;
+            existingProduct.ManufacturedCountryId = dto.ManufacturedCountryId;
+            existingProduct.ProductDetailId = dto.ProductDetailId;
 
-            await _productRepo.UpdateProductAsync(id, existingSkincare);
-            return Ok(existingSkincare);
+            await _productRepo.UpdateProductAsync(id, existingProduct);
+            return Ok(existingProduct);
         }
 
         [HttpDelete("{id}")]
         [Authorize]
         public async Task<IActionResult> DeleteProduct([FromRoute] int id)
         {
-            await _productRepo.DeleteProductAsync(id);
-            return Ok();
+            var message = await _productRepo.DeleteProductAsync(id);
+            return Ok(new { message });
         }
     }
 }

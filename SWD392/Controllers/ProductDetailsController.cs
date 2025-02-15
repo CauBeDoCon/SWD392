@@ -18,9 +18,13 @@ namespace SWD392.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetAllProductDetails()
+        public async Task<IActionResult> GetAllProductDetails([FromQuery] int? pageNumber, [FromQuery] int? pageSize)
         {
-            return Ok(await _productDetailRepo.GetAllProductDetailsAsync());
+            int currentPage = pageNumber ?? 1;
+            int currentSize = pageSize ?? 10;
+
+            var result = await _productDetailRepo.GetAllProductDetailsAsync(currentPage, currentSize);
+            return Ok(result);
         }
 
         [HttpGet("{id}")]
@@ -86,8 +90,8 @@ namespace SWD392.Controllers
         [Authorize]
         public async Task<IActionResult> DeleteProductDetail([FromRoute] int id)
         {
-            await _productDetailRepo.DeleteProductDetailAsync(id);
-            return Ok();
+            var message = await _productDetailRepo.DeleteProductDetailAsync(id);
+            return Ok(new { message });
         }
     }
 }

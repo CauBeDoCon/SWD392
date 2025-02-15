@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using SWD392.DTOs;
 using SWD392.Models;
@@ -18,9 +19,14 @@ namespace SWD392.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetAllUnitProducts()
+        public async Task<IActionResult> GetAllUnitProducts([FromQuery] int? pageNumber, [FromQuery] int? pageSize)
         {
-            return Ok(await _unitProductRepo.GetAllUnitProductsAsync());
+            // Nếu người dùng không truyền giá trị, sử dụng mặc định
+            int currentPage = pageNumber ?? 1;  // Mặc định là 1
+            int currentSize = pageSize ?? 10;   // Mặc định là 10
+
+            var result = await _unitProductRepo.GetAllUnitProductsAsync(currentPage, currentSize);
+            return Ok(result);
         }
 
         [HttpGet("{id}")]
@@ -63,7 +69,7 @@ namespace SWD392.Controllers
             var existingUnitProduct = await _unitProductRepo.GetUnitProductsAsync(id);
             if (existingUnitProduct == null)
             {
-                return NotFound($"Không tìm thấy đơn vị sản phẩm có ID = {id}");
+                return NotFound($"Không tìm thấy đơn vị tính có ID = {id}");
             }
 
             existingUnitProduct.Price = dto.Price;
@@ -78,8 +84,8 @@ namespace SWD392.Controllers
         [Authorize]
         public async Task<IActionResult> DeleteUnitProduct([FromRoute] int id)
         {
-            await _unitProductRepo.DeleteUnitProductAsync(id);
-            return Ok();
+            var message = await _unitProductRepo.DeleteUnitProductAsync(id);
+            return Ok(new { message });
         }
     }
 }

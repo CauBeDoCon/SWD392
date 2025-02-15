@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using SWD392.DTOs;
 using SWD392.Models;
@@ -18,9 +19,13 @@ namespace SWD392.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetAllCategories()
+        public async Task<IActionResult> GetAllCategories([FromQuery] int? pageNumber, [FromQuery] int? pageSize)
         {
-            return Ok(await _categoryRepo.GetAllCategoriesAsync());
+            int currentPage = pageNumber ?? 1;
+            int currentSize = pageSize ?? 10;
+
+            var result = await _categoryRepo.GetAllCategoriesAsync(currentPage, currentSize);
+            return Ok(result);
         }
 
         [HttpGet("{id}")]
@@ -68,7 +73,8 @@ namespace SWD392.Controllers
 
             existingCategory.Name = dto.Name;
             existingCategory.Image = dto.Image;
-            existingCategory.SolutionId = dto.SolutionId;
+            existingCategory.SolutionId = dto.SolutionId;   
+
 
             await _categoryRepo.UpdateCategoryAsync(id, existingCategory);
             return Ok(existingCategory);
@@ -78,8 +84,8 @@ namespace SWD392.Controllers
         [Authorize]
         public async Task<IActionResult> DeleteCategory([FromRoute] int id)
         {
-            await _categoryRepo.DeleteCategoryAsync(id);
-            return Ok();
+            var message = await _categoryRepo.DeleteCategoryAsync(id);
+            return Ok(new { message });
         }
     }
 }

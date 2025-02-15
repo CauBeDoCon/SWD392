@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using SWD392.DTOs;
 using SWD392.Models;
@@ -18,9 +19,13 @@ namespace SWD392.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetAllUnits()
+        public async Task<IActionResult> GetAllUnits([FromQuery] int? pageNumber, [FromQuery] int? pageSize)
         {
-            return Ok(await _unitRepo.GetAllUnitsAsync());
+            int currentPage = pageNumber ?? 1;  // Mặc định là 1
+            int currentSize = pageSize ?? 10;   // Mặc định là 10
+
+            var result = await _unitRepo.GetAllUnitsAsync(currentPage, currentSize);
+            return Ok(result);
         }
 
         [HttpGet("{id}")]
@@ -61,7 +66,7 @@ namespace SWD392.Controllers
             var existingUnit = await _unitRepo.GetUnitsAsync(id);
             if (existingUnit == null)
             {
-                return NotFound($"Không tìm thấy đơn vị tính có ID = {id}");
+                return NotFound($"Không tìm thấy đơn vị có ID = {id}");
             }
 
             existingUnit.Name = dto.Name;
@@ -74,8 +79,8 @@ namespace SWD392.Controllers
         [Authorize]
         public async Task<IActionResult> DeleteUnit([FromRoute] int id)
         {
-            await _unitRepo.DeleteUnitAsync(id);
-            return Ok();
+            var message = await _unitRepo.DeleteUnitAsync(id);
+            return Ok(new { message });
         }
     }
 }

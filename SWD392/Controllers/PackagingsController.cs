@@ -18,9 +18,13 @@ namespace SWD392.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetAllPackagings()
+        public async Task<IActionResult> GetAllPackagings([FromQuery] int? pageNumber, [FromQuery] int? pageSize)
         {
-            return Ok(await _packagingRepo.GetAllPackagingsAsync());
+            int currentPage = pageNumber ?? 1;
+            int currentSize = pageSize ?? 10;
+
+            var result = await _packagingRepo.GetAllPackagingsAsync(currentPage, currentSize);
+            return Ok(result);
         }
 
         [HttpGet("{id}")]
@@ -74,8 +78,8 @@ namespace SWD392.Controllers
         [Authorize]
         public async Task<IActionResult> DeletePackaging([FromRoute] int id)
         {
-            await _packagingRepo.DeletePackagingAsync(id);
-            return Ok();
+            var message = await _packagingRepo.DeletePackagingAsync(id);
+            return Ok(new { message });
         }
     }
 }

@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 using SWD392.DB;
+using SWD392.DTOs.Pagination;
 using SWD392.Models;
 using SWD392.Repositories;
 
@@ -25,20 +26,39 @@ namespace SWD392.Repositories
             return newUnitProduct.Id;
         }
 
-        public async Task DeleteUnitProductAsync(int id)
+        public async Task<string> DeleteUnitProductAsync(int id)
         {
-            var deleteSkin = _context.unitProducts!.SingleOrDefault(s => s.Id == id);
-            if (deleteSkin != null)
+            var deleteUnitProduct = await _context.unitProducts!.FindAsync(id);
+
+            if (deleteUnitProduct == null)
             {
-                _context.unitProducts!.Remove(deleteSkin);
-                await _context.SaveChangesAsync();
+                throw new KeyNotFoundException($"Đơn vị tính với ID {id} không tìm thấy.");
             }
+
+            _context.unitProducts.Remove(deleteUnitProduct);
+            await _context.SaveChangesAsync();
+
+            return $"Đơn vị tính với ID {id} đã xoá thành công.";
         }
 
-        public async Task<List<UnitProductModel>> GetAllUnitProductsAsync()
+        public async Task<PagedResult<UnitProductModel>> GetAllUnitProductsAsync(int pageNumber, int pageSize)
         {
-            var unitProducts = await _context.unitProducts!.ToListAsync();
-            return _mapper.Map<List<UnitProductModel>>(unitProducts);
+            int totalCount = await _context.unitProducts!.CountAsync();
+
+            var unitProducts = await _context.unitProducts!
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+
+            var mappedData = _mapper.Map<List<UnitProductModel>>(unitProducts);
+
+            return new PagedResult<UnitProductModel>
+            {
+                Items = mappedData,
+                TotalCount = totalCount,
+                PageNumber = pageNumber,
+                PageSize = pageSize
+            };
         }
 
         public async Task<UnitProductModel> GetUnitProductsAsync(int id)
@@ -49,13 +69,25 @@ namespace SWD392.Repositories
 
         public async Task UpdateUnitProductAsync(int id, UnitProductModel model)
         {
-            if (id == model.Id)
+            if (id != model.Id)
             {
-                var updateUnitProduct = _mapper.Map<UnitProduct>(model);
-                _context.unitProducts!.Update(updateUnitProduct);
-                await _context.SaveChangesAsync();
-
+                throw new ArgumentException("ID không khớp giữa request và model.");
             }
+
+            var existingEntity = await _context.unitProducts!.FindAsync(id);
+            if (existingEntity == null)
+            {
+                throw new KeyNotFoundException($"Đơn vị tính với ID {id} không tìm thấy.");
+            }
+
+            _context.Entry(existingEntity).State = EntityState.Detached;
+
+            var updateUnitProduct = _mapper.Map<UnitProduct>(model);
+
+            _context.unitProducts.Attach(updateUnitProduct);
+            _context.Entry(updateUnitProduct).State = EntityState.Modified;
+
+            await _context.SaveChangesAsync();
         }
     }
 }
