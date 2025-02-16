@@ -12,8 +12,6 @@ namespace SkincarePharmacyNetCore8.Helpers
 
             CreateMap<Image, ImageModel>().ReverseMap();
 
-            CreateMap<UnitProduct, UnitProductModel>().ReverseMap();
-
             CreateMap<Unit, UnitModel>().ReverseMap();
 
             CreateMap<Brand, BrandModel>().ReverseMap();

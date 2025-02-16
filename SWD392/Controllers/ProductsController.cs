@@ -50,6 +50,7 @@ namespace SWD392.Controllers
                 Description = dto.Description,
                 Price = dto.Price,
                 Quantity = dto.Quantity,
+                UnitId = dto.UnitId,
                 BrandId = dto.BrandId,
                 PackagingId = dto.PackagingId,
                 CategoryId = dto.CategoryId,
@@ -83,6 +84,7 @@ namespace SWD392.Controllers
             existingProduct.Description = dto.Description;
             existingProduct.Price = dto.Price;
             existingProduct.Quantity = dto.Quantity;
+            existingProduct.UnitId = dto.UnitId;
             existingProduct.BrandId = dto.BrandId;
             existingProduct.PackagingId = dto.PackagingId;
             existingProduct.CategoryId = dto.CategoryId;
