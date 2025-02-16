@@ -94,7 +94,7 @@ namespace SWD392.Repositories
             var token = new JwtSecurityToken(
                 issuer: configuration["JWT:ValidIssuer"],
                 audience: configuration["JWT:ValidAudience"],
-                expires: DateTime.Now.AddMinutes(20),
+                expires: DateTime.Now.AddMinutes(1000),
                 claims: authClaims,
                 signingCredentials: new SigningCredentials(authenKey, SecurityAlgorithms.HmacSha512Signature)
             );
@@ -111,6 +111,7 @@ namespace SWD392.Repositories
                     user.Birthday,
                     user.PhoneNumber,
                     user.FirstName,
+                    user.LastName,
                     Roles = roles // Trả về danh sách roles
                 }
             };
