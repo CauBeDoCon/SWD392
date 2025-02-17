@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using SWD392.DB;
+using SWD392.DTOs.Pagination;
 using SWD392.Models;
 
 namespace SWD392.Repositories
@@ -22,8 +23,18 @@ namespace SWD392.Repositories
         }
         public async Task<ProductModel> GetProductByIdAsync(int id)
         {
-            var product = await _context.products.FindAsync(id);
-            return _mapper.Map<ProductModel>(product);
+            var product = await _context.products
+        .Include(p => p.Brand)
+        .Include(p => p.Category)
+        .Include(p => p.ProductDetail)
+        .Include(p=>p.Packaging)
+        .Include(p=>p.BrandOrigin)
+        .Include(p=>p.ManufacturedCountry)
+        .Include(p=>p.Manufacturer)
+        .Include(p=>p.Unit)
+        .FirstOrDefaultAsync(p => p.Id == id);
+            // return _mapper.Map<ProductModel>(product);
+             return product != null ? _mapper.Map<ProductModel>(product) : null;
         }
 
         public async Task<int> AddProductAsync(Models.ProductModel model)
@@ -34,20 +45,39 @@ namespace SWD392.Repositories
             return newProduct.Id;
         }
 
-        public async Task DeleteProductAsync(int id)
+        public async Task<string> DeleteProductAsync(int id)
         {
-            var deleteSkin=_context.products!.SingleOrDefault(s=>s.Id == id);
-            if (deleteSkin != null)
+            var deleteProduct = await _context.products!.FindAsync(id);
+
+            if (deleteProduct == null)
             {
-                _context.products!.Remove(deleteSkin);
-                await _context.SaveChangesAsync();
+                throw new KeyNotFoundException($"Sản phẩm với ID {id} không tìm thấy.");
             }
+
+            _context.products.Remove(deleteProduct);
+            await _context.SaveChangesAsync();
+
+            return $"Sản phẩm với ID {id} đã xoá thành công.";
         }
 
-        public async Task<List<Models.ProductModel>> GetAllProductAsync()
+        public async Task<PagedResult<ProductModel>> GetAllProductsAsync(int pageNumber, int pageSize)
         {
-            var products = await _context.products!.ToListAsync();
-            return _mapper.Map<List<Models.ProductModel>>(products);
+            int totalCount = await _context.products!.CountAsync();
+
+            var products = await _context.products!
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+
+            var mappedData = _mapper.Map<List<ProductModel>>(products);
+
+            return new PagedResult<ProductModel>
+            {
+                Items = mappedData,
+                TotalCount = totalCount,
+                PageNumber = pageNumber,
+                PageSize = pageSize
+            };
         }
 
         public async Task<Models.ProductModel> GetProductAsync(int id)
@@ -58,13 +88,31 @@ namespace SWD392.Repositories
 
         public async Task UpdateProductAsync(int id, Models.ProductModel model)
         {
-            if(id == model.Id)
+            if (id != model.Id)
             {
-                var updateProduct= _mapper.Map<DB.Product>(model);
-                _context.products!.Update(updateProduct);
-                await _context.SaveChangesAsync();
-
+                throw new ArgumentException("ID không khớp giữa request và model.");
             }
+
+            var existingEntity = await _context.products
+                .Include(p => p.Brand)
+                .Include(p => p.Category)
+                .Include(p => p.ProductDetail)
+                .Include(p => p.Packaging)
+                .Include(p => p.BrandOrigin)
+                .Include(p => p.ManufacturedCountry)
+                .Include(p => p.Manufacturer)
+                .Include(p => p.Unit)
+                .FirstOrDefaultAsync(p => p.Id == id);
+
+            if (existingEntity == null)
+            {
+                throw new KeyNotFoundException($"Sản phẩm với ID {id} không tìm thấy.");
+            }
+
+            _mapper.Map(model, existingEntity); // Cập nhật các thuộc tính từ model vào existingEntity
+
+            await _context.SaveChangesAsync();
         }
+
     }
 }

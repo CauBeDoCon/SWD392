@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 using SWD392.DB;
+using SWD392.DTOs.Pagination;
 using SWD392.Models;
 using SWD392.Repositories;
 using AutoMapper;
@@ -24,20 +25,39 @@ namespace SWD392.Repositories
             return newProductDetail.Id;
         }
 
-        public async Task DeleteProductDetailAsync(int id)
+        public async Task<string> DeleteProductDetailAsync(int id)
         {
-            var deleteSkin = _context.productDetails!.SingleOrDefault(s => s.Id == id);
-            if (deleteSkin != null)
+            var deleteProductDetail = await _context.productDetails!.FindAsync(id);
+
+            if (deleteProductDetail == null)
             {
-                _context.productDetails!.Remove(deleteSkin);
-                await _context.SaveChangesAsync();
+                throw new KeyNotFoundException($"Chi tiết sản phẩm với ID {id} không tìm thấy.");
             }
+
+            _context.productDetails.Remove(deleteProductDetail);
+            await _context.SaveChangesAsync();
+
+            return $"Chi tiết sản phẩm với ID {id} đã xoá thành công.";
         }
 
-        public async Task<List<ProductDetailModel>> GetAllProductDetailsAsync()
+        public async Task<PagedResult<ProductDetailModel>> GetAllProductDetailsAsync(int pageNumber, int pageSize)
         {
-            var productDetails = await _context.productDetails!.ToListAsync();
-            return _mapper.Map<List<ProductDetailModel>>(productDetails);
+            int totalCount = await _context.productDetails!.CountAsync();
+
+            var productDetails = await _context.productDetails!
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+
+            var mappedData = _mapper.Map<List<ProductDetailModel>>(productDetails);
+
+            return new PagedResult<ProductDetailModel>
+            {
+                Items = mappedData,
+                TotalCount = totalCount,
+                PageNumber = pageNumber,
+                PageSize = pageSize
+            };
         }
 
         public async Task<ProductDetailModel> GetProductDetailsAsync(int id)
@@ -48,13 +68,25 @@ namespace SWD392.Repositories
 
         public async Task UpdateProductDetailAsync(int id, ProductDetailModel model)
         {
-            if (id == model.Id)
+            if (id != model.Id)
             {
-                var updateProductDetail = _mapper.Map<ProductDetail>(model);
-                _context.productDetails!.Update(updateProductDetail);
-                await _context.SaveChangesAsync();
-
+                throw new ArgumentException("ID không khớp giữa request và model.");
             }
+
+            var existingEntity = await _context.productDetails!.FindAsync(id);
+            if (existingEntity == null)
+            {
+                throw new KeyNotFoundException($"Chi tiết sản phẩm với ID {id} không tìm thấy.");
+            }
+
+            _context.Entry(existingEntity).State = EntityState.Detached;
+
+            var updateProductDetail = _mapper.Map<ProductDetail>(model);
+
+            _context.productDetails.Attach(updateProductDetail);
+            _context.Entry(updateProductDetail).State = EntityState.Modified;
+
+            await _context.SaveChangesAsync();
         }
     }
 }

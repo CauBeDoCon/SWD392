@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 using SWD392.DB;
+using SWD392.DTOs.Pagination;
 using SWD392.Models;
 using SWD392.Repositories;
 
@@ -25,20 +26,39 @@ namespace SWD392.Repositories
             return newSolution.Id;
         }
 
-        public async Task DeleteSolutionAsync(int id)
+        public async Task<string> DeleteSolutionAsync(int id)
         {
-            var deleteSkin = _context.solutions!.SingleOrDefault(s => s.Id == id);
-            if (deleteSkin != null)
+            var deleteSolution = await _context.solutions!.FindAsync(id);
+
+            if (deleteSolution == null)
             {
-                _context.solutions!.Remove(deleteSkin);
-                await _context.SaveChangesAsync();
+                throw new KeyNotFoundException($"Danh mục với ID {id} không tìm thấy.");
             }
+
+            _context.solutions.Remove(deleteSolution);
+            await _context.SaveChangesAsync();
+
+            return $"Danh mục với ID {id} đã xoá thành công.";
         }
 
-        public async Task<List<SolutionModel>> GetAllSolutionsAsync()
+        public async Task<PagedResult<SolutionModel>> GetAllSolutionsAsync(int pageNumber, int pageSize)
         {
-            var solutions = await _context.solutions!.ToListAsync();
-            return _mapper.Map<List<SolutionModel>>(solutions);
+            int totalCount = await _context.solutions!.CountAsync();
+
+            var solutions = await _context.solutions!
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+
+            var mappedData = _mapper.Map<List<SolutionModel>>(solutions);
+
+            return new PagedResult<SolutionModel>
+            {
+                Items = mappedData,
+                TotalCount = totalCount,
+                PageNumber = pageNumber,
+                PageSize = pageSize
+            };
         }
 
         public async Task<SolutionModel> GetSolutionsAsync(int id)
@@ -49,13 +69,25 @@ namespace SWD392.Repositories
 
         public async Task UpdateSolutionAsync(int id, SolutionModel model)
         {
-            if (id == model.Id)
+            if (id != model.Id)
             {
-                var updateSolution = _mapper.Map<Solution>(model);
-                _context.solutions!.Update(updateSolution);
-                await _context.SaveChangesAsync();
-
+                throw new ArgumentException("ID không khớp giữa request và model.");
             }
+
+            var existingEntity = await _context.solutions!.FindAsync(id);
+            if (existingEntity == null)
+            {
+                throw new KeyNotFoundException($"Danh mục với ID {id} không tìm thấy.");
+            }
+
+            _context.Entry(existingEntity).State = EntityState.Detached;
+
+            var updateSolution = _mapper.Map<Solution>(model);
+
+            _context.solutions.Attach(updateSolution);
+            _context.Entry(updateSolution).State = EntityState.Modified;
+
+            await _context.SaveChangesAsync();
         }
     }
 }

@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 using SWD392.DB;
+using SWD392.DTOs.Pagination;
 using SWD392.Models;
 using SWD392.Repositories;
 
@@ -25,20 +26,39 @@ namespace SWD392.Repositories
             return newBrand.Id;
         }
 
-        public async Task DeleteBrandAsync(int id)
+        public async Task<string> DeleteBrandAsync(int id)
         {
-            var deleteSkin = _context.brands!.SingleOrDefault(s => s.Id == id);
-            if (deleteSkin != null)
+            var deleteBrand = await _context.brands!.FindAsync(id);
+
+            if (deleteBrand == null)
             {
-                _context.brands!.Remove(deleteSkin);
-                await _context.SaveChangesAsync();
+                throw new KeyNotFoundException($"Thương hiệu với ID {id} không tìm thấy.");
             }
+
+            _context.brands.Remove(deleteBrand);
+            await _context.SaveChangesAsync();
+
+            return $"Thương hiệu với ID {id} đã xoá thành công.";
         }
 
-        public async Task<List<BrandModel>> GetAllBrandsAsync()
+        public async Task<PagedResult<BrandModel>> GetAllBrandsAsync(int pageNumber, int pageSize)
         {
-            var brands = await _context.brands!.ToListAsync();
-            return _mapper.Map<List<BrandModel>>(brands);
+            int totalCount = await _context.brands!.CountAsync();
+
+            var brands = await _context.brands!
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+
+            var mappedData = _mapper.Map<List<BrandModel>>(brands);
+
+            return new PagedResult<BrandModel>
+            {
+                Items = mappedData,
+                TotalCount = totalCount,
+                PageNumber = pageNumber,
+                PageSize = pageSize
+            };
         }
 
         public async Task<BrandModel> GetBrandsAsync(int id)
@@ -49,13 +69,25 @@ namespace SWD392.Repositories
 
         public async Task UpdateBrandAsync(int id, BrandModel model)
         {
-            if (id == model.Id)
+            if (id != model.Id)
             {
-                var updateBrand = _mapper.Map<Brand>(model);
-                _context.brands!.Update(updateBrand);
-                await _context.SaveChangesAsync();
-
+                throw new ArgumentException("ID không khớp giữa request và model.");
             }
+
+            var existingEntity = await _context.brands!.FindAsync(id);
+            if (existingEntity == null)
+            {
+                throw new KeyNotFoundException($"Thương hiệu với ID {id} không tìm thấy.");
+            }
+
+            _context.Entry(existingEntity).State = EntityState.Detached;
+
+            var updateBrand = _mapper.Map<Brand>(model);
+
+            _context.brands.Attach(updateBrand);
+            _context.Entry(updateBrand).State = EntityState.Modified;
+
+            await _context.SaveChangesAsync();
         }
     }
 }

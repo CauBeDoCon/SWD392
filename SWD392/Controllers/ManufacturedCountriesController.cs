@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using SWD392.DTOs;
 using SWD392.Models;
 using SWD392.Repositories;
+using System.Threading.Tasks;
 
 namespace SWD392.Controllers
 {
@@ -18,9 +19,13 @@ namespace SWD392.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetAllManufacturedCountries()
+        public async Task<IActionResult> GetAllManufacturedCountries([FromQuery] int? pageNumber, [FromQuery] int? pageSize)
         {
-            return Ok(await _manufacturedCountryRepo.GetAllManufacturedCountriesAsync());
+            int currentPage = pageNumber ?? 1;
+            int currentSize = pageSize ?? 10;
+
+            var result = await _manufacturedCountryRepo.GetAllManufacturedCountriesAsync(currentPage, currentSize);
+            return Ok(result);
         }
 
         [HttpGet("{id}")]
@@ -58,24 +63,24 @@ namespace SWD392.Controllers
                 return BadRequest("Dữ liệu không hợp lệ.");
             }
 
-            var existingCountry = await _manufacturedCountryRepo.GetManufacturedCountriesAsync(id);
-            if (existingCountry == null)
+            var existingManufacturedCountry = await _manufacturedCountryRepo.GetManufacturedCountriesAsync(id);
+            if (existingManufacturedCountry == null)
             {
                 return NotFound($"Không tìm thấy nước sản xuất có ID = {id}");
             }
 
-            existingCountry.Name = dto.Name;
+            existingManufacturedCountry.Name = dto.Name;
 
-            await _manufacturedCountryRepo.UpdateManufacturedCountryAsync(id, existingCountry);
-            return Ok(existingCountry);
+            await _manufacturedCountryRepo.UpdateManufacturedCountryAsync(id, existingManufacturedCountry);
+            return Ok(existingManufacturedCountry);
         }
 
         [HttpDelete("{id}")]
         [Authorize]
         public async Task<IActionResult> DeleteManufacturedCountry([FromRoute] int id)
         {
-            await _manufacturedCountryRepo.DeleteManufacturedCountryAsync(id);
-            return Ok();
+            var message = await _manufacturedCountryRepo.DeleteManufacturedCountryAsync(id);
+            return Ok(new { message });
         }
     }
 }

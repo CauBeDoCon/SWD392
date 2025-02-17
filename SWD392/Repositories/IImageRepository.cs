@@ -1,15 +1,16 @@
-﻿using SWD392.Models;
+﻿using SWD392.DTOs.Pagination;
+using SWD392.Models;
 
 namespace SWD392.Repositories
 {
     public interface IImageRepository
     {
-        public Task<List<ImageModel>> GetAllImagesAsync();
+        Task<PagedResult<ImageModel>> GetAllImagesAsync(int pageNumber, int pageSize);
         public Task<ImageModel> GetImagesAsync(int id);
 
         public Task<int> AddImageAsync(ImageModel model);
 
         public Task UpdateImageAsync(int id, ImageModel model);
-        public Task DeleteImageAsync(int id);
+        public Task<string> DeleteImageAsync(int id);
     }
 }

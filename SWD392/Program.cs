@@ -14,6 +14,7 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
+
 builder.Services.AddCors(options => options.AddDefaultPolicy(policy => policy.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod()));
 builder.Services.AddCors(options =>
 {
@@ -23,6 +24,7 @@ builder.Services.AddCors(options =>
               .AllowAnyMethod()
               .AllowCredentials()); // Nếu cần gửi cookie/JWT
 });
+
 builder.Services.AddSwaggerGen(options =>
 {
     options.SwaggerDoc("v1", new OpenApiInfo { Title = "SWD392", Version = "v1" });
@@ -47,7 +49,7 @@ builder.Services.AddSwaggerGen(options =>
     });
 });
 
-builder.Services.AddCors(options => options.AddDefaultPolicy(policy => policy.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod()));
+
 builder.Services.AddControllers();
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options => {
     options.Password.RequireDigit = false;
@@ -71,8 +73,6 @@ builder.Services.AddScoped<IAccountRepository, AccountRepository>();
 builder.Services.AddScoped<IImageRepository, ImageRepository>();
 
 builder.Services.AddScoped<IUnitRepository, UnitRepository>();
-
-builder.Services.AddScoped<IUnitProductRepository, UnitProductRepository>();
 
 builder.Services.AddScoped<IBrandRepository, BrandRepository>();
 
@@ -107,7 +107,7 @@ builder.Services.AddAuthentication(options =>
         ValidAudience = builder.Configuration["JWT:ValidAudience"],
         ValidIssuer = builder.Configuration["JWT:ValidIssuer"],
         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JWT:Secret"])),
-        RoleClaimType = ClaimTypes.Role // 🔹 Thêm dòng này để lấy role
+        RoleClaimType = ClaimTypes.Role 
     };
 });
 
@@ -129,10 +129,12 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
 app.UseCors("AllowFrontend"); // Kích hoạt CORS
 app.UseHttpsRedirection();
 app.UseAuthentication(); // Đảm bảo middleware Authentication chạy trước Authorization
 app.UseHttpsRedirection();
+
 app.UseAuthorization();
 app.MapControllers();
 
