@@ -425,6 +425,9 @@ namespace SWD392.Migrations
                     b.Property<int>("Quantity")
                         .HasColumnType("int");
 
+                    b.Property<int>("UnitId")
+                        .HasColumnType("int");
+
                     b.HasKey("Id");
 
                     b.HasIndex("BrandId");
@@ -440,6 +443,8 @@ namespace SWD392.Migrations
                     b.HasIndex("PackagingId");
 
                     b.HasIndex("ProductDetailId");
+
+                    b.HasIndex("UnitId");
 
                     b.ToTable("Product");
                 });
@@ -521,32 +526,6 @@ namespace SWD392.Migrations
                     b.ToTable("Unit");
                 });
 
-            modelBuilder.Entity("SWD392.DB.UnitProduct", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("Price")
-                        .HasColumnType("int");
-
-                    b.Property<int>("ProductId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("UnitId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ProductId");
-
-                    b.HasIndex("UnitId");
-
-                    b.ToTable("UnitProduct");
-                });
-
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
                 {
                     b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole", null)
@@ -611,13 +590,13 @@ namespace SWD392.Migrations
 
             modelBuilder.Entity("SWD392.DB.Image", b =>
                 {
-                    b.HasOne("SWD392.DB.Product", "product")
+                    b.HasOne("SWD392.DB.Product", "Product")
                         .WithMany("Images")
                         .HasForeignKey("ProductId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("product");
+                    b.Navigation("Product");
                 });
 
             modelBuilder.Entity("SWD392.DB.Product", b =>
@@ -664,6 +643,12 @@ namespace SWD392.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("SWD392.DB.Unit", "Unit")
+                        .WithMany("products")
+                        .HasForeignKey("UnitId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.Navigation("Brand");
 
                     b.Navigation("BrandOrigin");
@@ -677,25 +662,8 @@ namespace SWD392.Migrations
                     b.Navigation("Packaging");
 
                     b.Navigation("ProductDetail");
-                });
-
-            modelBuilder.Entity("SWD392.DB.UnitProduct", b =>
-                {
-                    b.HasOne("SWD392.DB.Product", "products")
-                        .WithMany("UnitProducts")
-                        .HasForeignKey("ProductId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("SWD392.DB.Unit", "Unit")
-                        .WithMany("UnitProducts")
-                        .HasForeignKey("UnitId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
 
                     b.Navigation("Unit");
-
-                    b.Navigation("products");
                 });
 
             modelBuilder.Entity("SWD392.DB.Brand", b =>
@@ -731,8 +699,6 @@ namespace SWD392.Migrations
             modelBuilder.Entity("SWD392.DB.Product", b =>
                 {
                     b.Navigation("Images");
-
-                    b.Navigation("UnitProducts");
                 });
 
             modelBuilder.Entity("SWD392.DB.ProductDetail", b =>
@@ -747,7 +713,7 @@ namespace SWD392.Migrations
 
             modelBuilder.Entity("SWD392.DB.Unit", b =>
                 {
-                    b.Navigation("UnitProducts");
+                    b.Navigation("products");
                 });
 #pragma warning restore 612, 618
         }

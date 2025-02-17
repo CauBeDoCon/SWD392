@@ -13,7 +13,6 @@ namespace SWD392.DB
         #region DbSet
         public DbSet<Product>? products { get; set; }
         public DbSet<Image>? images { get; set; }  
-        public DbSet<UnitProduct>? unitProducts { get; set; }
         public DbSet<Unit>? units { get; set; }
         public DbSet<Brand>? brands { get; set; }
         public DbSet<Packaging>? packagings { get; set; }
@@ -34,18 +33,13 @@ namespace SWD392.DB
             modelBuilder.Entity<IdentityUserToken<string>>().HasKey(t => new { t.UserId, t.LoginProvider, t.Name });
 
             modelBuilder.Entity<Image>()
-                .HasOne(i => i.product)
+                .HasOne(i => i.Product)
                 .WithMany(s => s.Images)
                 .HasForeignKey(i => i.ProductId);
 
-            modelBuilder.Entity<UnitProduct>()
-            .HasOne(up => up.products)
-            .WithMany(s => s.UnitProducts)
-            .HasForeignKey(up => up.ProductId);
-
-            modelBuilder.Entity<UnitProduct>()
+            modelBuilder.Entity<Product>()
                 .HasOne(up => up.Unit)
-                .WithMany(u => u.UnitProducts)
+                .WithMany(u => u.products)
                 .HasForeignKey(up => up.UnitId);
 
             modelBuilder.Entity<Product>()

@@ -11,6 +11,6 @@ namespace SWD392.DB
         public string ImageUrl { get; set; }
         public int ProductId { get; set; }
         [ForeignKey("ProductId")]
-        public Product product { get; set; }
+        public Product Product { get; set; }
     }
 }

@@ -73,8 +73,6 @@ builder.Services.AddScoped<IImageRepository, ImageRepository>();
 
 builder.Services.AddScoped<IUnitRepository, UnitRepository>();
 
-builder.Services.AddScoped<IUnitProductRepository, UnitProductRepository>();
-
 builder.Services.AddScoped<IBrandRepository, BrandRepository>();
 
 builder.Services.AddScoped<IPackagingRepository, PackagingRepository>();
