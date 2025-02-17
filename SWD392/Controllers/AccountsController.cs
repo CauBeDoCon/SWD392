@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using SWD392.DB;
 using SWD392.DTOs;
 using SWD392.Models;
@@ -15,11 +16,12 @@ namespace SWD392.Controllers
     {
         private readonly IAccountRepository accountRepo;
         private readonly UserManager<ApplicationUser> _userManager;
-
-        public AccountsController(IAccountRepository repo, UserManager<ApplicationUser> userManage) 
+        private readonly ApplicationDbContext _context;
+        public AccountsController(IAccountRepository repo, UserManager<ApplicationUser> userManage, ApplicationDbContext context) 
         {
             accountRepo = repo;
             _userManager= userManage;
+            _context = context;
         }
         [HttpPost("SignUp")]
         public async Task<IActionResult> SignUp([FromBody] SignUpDTO signUpDto)
@@ -46,7 +48,23 @@ namespace SWD392.Controllers
 
             if (result.Succeeded)
             {
-                
+                var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == signUpDto.Email);
+
+                if (user != null)
+                {
+                    var wallet = new Wallet
+                    {
+                        AmountOfMoney = 0 
+                    };
+
+                    _context.Wallets.Add(wallet);
+                    await _context.SaveChangesAsync();
+
+                    
+                    user.WalletId = wallet.WalletId;
+                    _context.Users.Update(user);
+                    await _context.SaveChangesAsync();
+                }
                 return Ok(new { Message = "Đăng ký thành công!" });
                
             }
