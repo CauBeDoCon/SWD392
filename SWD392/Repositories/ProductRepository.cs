@@ -65,9 +65,17 @@ namespace SWD392.Repositories
             int totalCount = await _context.products!.CountAsync();
 
             var products = await _context.products!
-                .Skip((pageNumber - 1) * pageSize)
-                .Take(pageSize)
-                .ToListAsync();
+        .Include(p => p.Unit)
+        .Include(p => p.Brand)
+        .Include(p => p.Packaging)
+        .Include(p => p.Category)
+        .Include(p => p.BrandOrigin)
+        .Include(p => p.Manufacturer)
+        .Include(p => p.ManufacturedCountry)
+        .Include(p => p.ProductDetail)
+        .Skip((pageNumber - 1) * pageSize)
+        .Take(pageSize)
+        .ToListAsync();
 
             var mappedData = _mapper.Map<List<ProductModel>>(products);
 
