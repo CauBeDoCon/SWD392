@@ -56,14 +56,12 @@ namespace SWD392.Controllers
                     return StatusCode(500, new { Message = "Lỗi hệ thống: Không tìm thấy tài khoản sau khi đăng ký!" });
                 }
 
-                // ✅ Tạo WalletId ngẫu nhiên nhưng không trùng lặp
                 int newWalletId;
                 do
                 {
-                    newWalletId = Math.Abs(Guid.NewGuid().GetHashCode()); // Tạo giá trị ngẫu nhiên
-                } while (await _context.Wallets.AnyAsync(w => w.WalletId == newWalletId)); // Kiểm tra trùng lặp
+                    newWalletId = Math.Abs(Guid.NewGuid().GetHashCode()); 
+                } while (await _context.Wallets.AnyAsync(w => w.WalletId == newWalletId)); 
 
-                // ✅ Tạo Wallet mới
                 var wallet = new Wallet
                 {
                     AmountOfMoney = 0
@@ -72,7 +70,6 @@ namespace SWD392.Controllers
                 _context.Wallets.Add(wallet);
                 await _context.SaveChangesAsync();
 
-                // ✅ Lúc này, WalletId đã được tự động sinh, chỉ cần lấy lại từ DB
                 user.WalletId = wallet.WalletId;
                 _context.Users.Update(user);
                 await _context.SaveChangesAsync();

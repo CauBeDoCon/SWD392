@@ -70,8 +70,6 @@ namespace SWD392.Controllers
                 Amount = request.Amount,
                 CreatedTime = DateTime.UtcNow
             };
-
-            // ✅ Gọi service tạo URL thanh toán và gửi UserId trong `vnp_OrderInfo`
             string paymentUrl = _vnPayService.CreatePaymentUrl(HttpContext, paymentRequest, userId);
 
             return Ok(new { PaymentUrl = paymentUrl });
@@ -88,8 +86,6 @@ namespace SWD392.Controllers
                 {
                     return BadRequest(new { Message = "Giao dịch thất bại hoặc bị từ chối." });
                 }
-
-                // ✅ Lấy `UserId` từ `vnp_OrderInfo`
                 var vnp_OrderInfo = response.OrderDescription;
                 string vnp_UserId = vnp_OrderInfo.Replace("Thanh toán VNPay - UserId: ", "").Trim();
 
@@ -149,8 +145,8 @@ namespace SWD392.Controllers
                     Message = "Giao dịch thành công!",
                     TransactionId = response.TransactionId,
                     UserId = vnp_UserId,
-                    Amount = vnp_Amount, // 🔹 Số tiền chính xác vừa nạp
-                    NewBalance = user.Wallet.AmountOfMoney // 🔹 Số dư mới
+                    Amount = vnp_Amount, 
+                    NewBalance = user.Wallet.AmountOfMoney 
                 });
             }
             catch (Exception ex)
