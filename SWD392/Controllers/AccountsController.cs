@@ -30,7 +30,19 @@ namespace SWD392.Controllers
         {
             if (!new EmailAddressAttribute().IsValid(signUpDto.Email))
             {
-                return BadRequest("Email không hợp lệ.");
+                return BadRequest(new { Message = "Email không hợp lệ." });
+            }
+
+            var existingUserByEmail = await _userManager.FindByEmailAsync(signUpDto.Email);
+            if (existingUserByEmail != null)
+            {
+                return BadRequest(new { Message = "Email đã tồn tại. Vui lòng sử dụng email khác!" });
+            }
+
+            var existingUserByPhone = await _context.Users.FirstOrDefaultAsync(u => u.PhoneNumber == signUpDto.PhoneNumber);
+            if (existingUserByPhone != null)
+            {
+                return BadRequest(new { Message = "Số điện thoại đã tồn tại. Vui lòng sử dụng số khác!" });
             }
 
             var signUpModel = new SignUpModel
