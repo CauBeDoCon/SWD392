@@ -28,6 +28,11 @@ namespace SWD392.Controllers
         [HttpPost("SignUp")]
         public async Task<IActionResult> SignUp([FromBody] SignUpDTO signUpDto)
         {
+            if (signUpDto.Password.Length < 8)
+            {
+                return BadRequest(new { Message = "Mật khẩu phải có ít nhất 8 ký tự." });
+            }
+
             if (!new EmailAddressAttribute().IsValid(signUpDto.Email))
             {
                 return BadRequest(new { Message = "Email không hợp lệ." });
@@ -37,6 +42,12 @@ namespace SWD392.Controllers
             if (existingUserByEmail != null)
             {
                 return BadRequest(new { Message = "Email đã tồn tại. Vui lòng sử dụng email khác!" });
+            }
+
+            var existingUserByUsername = await _userManager.FindByNameAsync(signUpDto.Username);
+            if (existingUserByUsername != null)
+            {
+                return BadRequest(new { Message = "Username đã tồn tại. Vui lòng sử dụng Username khác!" });
             }
 
             var existingUserByPhone = await _context.Users.FirstOrDefaultAsync(u => u.PhoneNumber == signUpDto.PhoneNumber);
