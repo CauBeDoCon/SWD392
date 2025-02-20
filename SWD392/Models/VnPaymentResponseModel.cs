@@ -10,11 +10,14 @@
         public string TransactionId { get; set; }
         public string Token { get; set; }
         public string VnPayResponseCode { get; set; }
+
+        public decimal Amount { get; set; }
     }
 
     public class VnPaymentRequestModel
     {
-        public int OrderId { get; set; }
+
+        public string UserId { get; set; }
         public string FullName { get; set; }
         public double Amount { get; set; }
         public string Description { get; set; }

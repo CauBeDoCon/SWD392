@@ -1,4 +1,5 @@
-﻿using SWD392.DB;
+﻿using Microsoft.AspNetCore.Authorization;
+using SWD392.DB;
 using SWD392.Models;
 using System.Security.Policy;
 
@@ -12,7 +13,7 @@ namespace SWD392.Services
         {
             _config = config;
         }
-        public string CreatePaymentUrl(HttpContext context, VnPaymentRequestModel model)
+        public string CreatePaymentUrl(HttpContext context, VnPaymentRequestModel model, string userId)
         {
             var tick = DateTime.Now.Ticks.ToString();
             var vnpay = new VnPayLibrary();
@@ -26,7 +27,7 @@ namespace SWD392.Services
             vnpay.AddRequestData("vnp_CurrCode", _config["VnPay:CurrCode"]);
             vnpay.AddRequestData("vnp_IpAddr", Utils.GetIpAddress(context));
             vnpay.AddRequestData("vnp_Locale", _config["VnPay:Locale"]);
-            vnpay.AddRequestData("vnp_OrderInfo", "Thanh toan don hang:" + model.OrderId);
+            vnpay.AddRequestData("vnp_OrderInfo", "Thanh toán VNPay - UserId: " + userId);
             vnpay.AddRequestData("vnp_OrderType", "other");
             vnpay.AddRequestData("vnp_ReturnUrl", _config["VnPay:PaymentBackReturnUrl"]);
             vnpay.AddRequestData("vnp_TxnRef",tick);
@@ -36,7 +37,7 @@ namespace SWD392.Services
             return paymentUrl;
             
         }
-
+        
         public VnPaymentResponseModel PaymentExecute(IQueryCollection collections)
         {
             var vnpay= new VnPayLibrary();
@@ -48,7 +49,7 @@ namespace SWD392.Services
                 }
             }
             var vnp_orderId = Convert.ToInt64(vnpay.GetResponseData("vnp_TxnRef"));
-            var vnp_TransactionId = Convert.ToInt64(vnpay.GetResponseData("TransactionNo"));
+            var vnp_TransactionId = Convert.ToInt64(vnpay.GetResponseData("vnp_TransactionNo"));
             var vnp_SecureHash = collections.FirstOrDefault(p => p.Key == "vnp_SecureHash").Value;
             var vnp_ResponseCode = vnpay.GetResponseData("vnp_ResponseCode");
             var vnp_OrderInfo = vnpay.GetResponseData("vnp_OrderInfo");

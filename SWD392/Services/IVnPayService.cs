@@ -4,7 +4,7 @@ namespace SWD392.Services
 {
     public interface IVnPayService
     {
-        string CreatePaymentUrl(HttpContext context,VnPaymentRequestModel model);
+        string CreatePaymentUrl(HttpContext context,VnPaymentRequestModel model,string userId);
         VnPaymentResponseModel PaymentExecute(IQueryCollection collections);
 
     }

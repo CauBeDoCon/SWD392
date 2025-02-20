@@ -23,6 +23,8 @@ namespace SWD392.Controllers
             _userManager= userManage;
             _context = context;
         }
+
+
         [HttpPost("SignUp")]
         public async Task<IActionResult> SignUp([FromBody] SignUpDTO signUpDto)
         {
@@ -34,14 +36,14 @@ namespace SWD392.Controllers
             var signUpModel = new SignUpModel
             {
                 FirstName = signUpDto.FirstName,
-                Username= signUpDto.Username,
+                Username = signUpDto.Username,
                 LastName = signUpDto.LastName,
                 Email = signUpDto.Email,
                 Password = signUpDto.Password,
                 ConfirmPassword = signUpDto.ConfirmPassword,
                 Address = signUpDto.Address,
                 Birthday = signUpDto.Birthday,
-                PhoneNumber= signUpDto.PhoneNumber
+                PhoneNumber = signUpDto.PhoneNumber
             };
 
             var result = await accountRepo.SignUpAsync(signUpModel);
@@ -49,28 +51,44 @@ namespace SWD392.Controllers
             if (result.Succeeded)
             {
                 var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == signUpDto.Email);
-
-                if (user != null)
+                if (user == null)
                 {
-                    var wallet = new Wallet
-                    {
-                        AmountOfMoney = 0 
-                    };
-
-                    _context.Wallets.Add(wallet);
-                    await _context.SaveChangesAsync();
-
-                    
-                    user.WalletId = wallet.WalletId;
-                    _context.Users.Update(user);
-                    await _context.SaveChangesAsync();
+                    return StatusCode(500, new { Message = "Lỗi hệ thống: Không tìm thấy tài khoản sau khi đăng ký!" });
                 }
+
+                // ✅ Tạo WalletId ngẫu nhiên nhưng không trùng lặp
+                int newWalletId;
+                do
+                {
+                    newWalletId = Math.Abs(Guid.NewGuid().GetHashCode()); // Tạo giá trị ngẫu nhiên
+                } while (await _context.Wallets.AnyAsync(w => w.WalletId == newWalletId)); // Kiểm tra trùng lặp
+
+                // ✅ Tạo Wallet mới
+                var wallet = new Wallet
+                {
+                    AmountOfMoney = 0
+                };
+
+                _context.Wallets.Add(wallet);
+                await _context.SaveChangesAsync();
+
+                // ✅ Lúc này, WalletId đã được tự động sinh, chỉ cần lấy lại từ DB
+                user.WalletId = wallet.WalletId;
+                _context.Users.Update(user);
+                await _context.SaveChangesAsync();
+
+                Console.WriteLine($"✅ Đã tạo WalletId {wallet.WalletId} cho User {user.Id}");
+
                 return Ok(new { Message = "Đăng ký thành công!" });
-               
             }
 
             return BadRequest(new { Errors = result.Errors.Select(e => e.Description) });
         }
+
+
+
+
+
 
         [HttpPost("SignIn")]
         public async Task<IActionResult> SignIn([FromBody] SignInModel signInModel)
