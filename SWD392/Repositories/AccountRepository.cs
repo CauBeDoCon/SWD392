@@ -111,6 +111,7 @@ namespace SWD392.Repositories
                     user.Birthday,
                     user.PhoneNumber,
                     user.FirstName,
+                    user.LastName,
                     Roles = roles // Trả về danh sách roles
                 }
             };

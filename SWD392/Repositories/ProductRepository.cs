@@ -23,8 +23,18 @@ namespace SWD392.Repositories
         }
         public async Task<ProductModel> GetProductByIdAsync(int id)
         {
-            var product = await _context.products.FindAsync(id);
-            return _mapper.Map<ProductModel>(product);
+            var product = await _context.products
+        .Include(p => p.Brand)
+        .Include(p => p.Category)
+        .Include(p => p.ProductDetail)
+        .Include(p=>p.Packaging)
+        .Include(p=>p.BrandOrigin)
+        .Include(p=>p.ManufacturedCountry)
+        .Include(p=>p.Manufacturer)
+        .Include(p=>p.Unit)
+        .FirstOrDefaultAsync(p => p.Id == id);
+            // return _mapper.Map<ProductModel>(product);
+             return product != null ? _mapper.Map<ProductModel>(product) : null;
         }
 
         public async Task<int> AddProductAsync(Models.ProductModel model)
@@ -55,9 +65,17 @@ namespace SWD392.Repositories
             int totalCount = await _context.products!.CountAsync();
 
             var products = await _context.products!
-                .Skip((pageNumber - 1) * pageSize)
-                .Take(pageSize)
-                .ToListAsync();
+        .Include(p => p.Unit)
+        .Include(p => p.Brand)
+        .Include(p => p.Packaging)
+        .Include(p => p.Category)
+        .Include(p => p.BrandOrigin)
+        .Include(p => p.Manufacturer)
+        .Include(p => p.ManufacturedCountry)
+        .Include(p => p.ProductDetail)
+        .Skip((pageNumber - 1) * pageSize)
+        .Take(pageSize)
+        .ToListAsync();
 
             var mappedData = _mapper.Map<List<ProductModel>>(products);
 
@@ -83,20 +101,26 @@ namespace SWD392.Repositories
                 throw new ArgumentException("ID không khớp giữa request và model.");
             }
 
-            var existingEntity = await _context.products!.FindAsync(id);
+            var existingEntity = await _context.products
+                .Include(p => p.Brand)
+                .Include(p => p.Category)
+                .Include(p => p.ProductDetail)
+                .Include(p => p.Packaging)
+                .Include(p => p.BrandOrigin)
+                .Include(p => p.ManufacturedCountry)
+                .Include(p => p.Manufacturer)
+                .Include(p => p.Unit)
+                .FirstOrDefaultAsync(p => p.Id == id);
+
             if (existingEntity == null)
             {
                 throw new KeyNotFoundException($"Sản phẩm với ID {id} không tìm thấy.");
             }
 
-            _context.Entry(existingEntity).State = EntityState.Detached;
-
-            var updateProduct = _mapper.Map<Product>(model);
-
-            _context.products.Attach(updateProduct);
-            _context.Entry(updateProduct).State = EntityState.Modified;
+            _mapper.Map(model, existingEntity); // Cập nhật các thuộc tính từ model vào existingEntity
 
             await _context.SaveChangesAsync();
         }
+
     }
 }

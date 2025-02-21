@@ -50,14 +50,14 @@ namespace SWD392.Controllers
                 Description = dto.Description,
                 Price = dto.Price,
                 Quantity = dto.Quantity,
-                UnitId = dto.UnitId,
-                BrandId = dto.BrandId,
-                PackagingId = dto.PackagingId,
-                CategoryId = dto.CategoryId,
-                BrandOriginId = dto.BrandOriginId,
-                ManufacturerId = dto.ManufacturerId,
-                ManufacturedCountryId = dto.ManufacturedCountryId,
-                ProductDetailId = dto.ProductDetailId
+                Unit = new UnitModel { Id = dto.UnitId },
+                Brand = new BrandModel { Id = dto.BrandId },
+                Packaging = new PackagingModel { Id = dto.PackagingId },
+                Category = new CategoryModel { Id = dto.CategoryId },
+                BrandOrigin = new BrandOriginModel { Id = dto.BrandOriginId },
+                Manufacturer = new ManufacturerModel { Id = dto.ManufacturerId },
+                ManufacturedCountry = new ManufacturedCountryModel { Id = dto.ManufacturedCountryId },
+                ProductDetail = new ProductDetailModel { Id = dto.ProductDetailId }
             };
 
             var newProductId = await _productRepo.AddProductAsync(model);
@@ -84,14 +84,14 @@ namespace SWD392.Controllers
             existingProduct.Description = dto.Description;
             existingProduct.Price = dto.Price;
             existingProduct.Quantity = dto.Quantity;
-            existingProduct.UnitId = dto.UnitId;
-            existingProduct.BrandId = dto.BrandId;
-            existingProduct.PackagingId = dto.PackagingId;
-            existingProduct.CategoryId = dto.CategoryId;
-            existingProduct.BrandOriginId = dto.BrandOriginId;
-            existingProduct.ManufacturerId = dto.ManufacturerId;
-            existingProduct.ManufacturedCountryId = dto.ManufacturedCountryId;
-            existingProduct.ProductDetailId = dto.ProductDetailId;
+            existingProduct.Unit = new UnitModel { Id = dto.UnitId };
+            existingProduct.Brand = new BrandModel { Id = dto.BrandId };
+            existingProduct.Packaging = new PackagingModel { Id = dto.PackagingId };
+            existingProduct.Category = new CategoryModel { Id = dto.CategoryId };
+            existingProduct.BrandOrigin = new BrandOriginModel { Id = dto.BrandOriginId };
+            existingProduct.Manufacturer = new ManufacturerModel { Id = dto.ManufacturerId };
+            existingProduct.ManufacturedCountry = new ManufacturedCountryModel { Id = dto.ManufacturedCountryId };
+            existingProduct.ProductDetail = new ProductDetailModel { Id = dto.ProductDetailId };
 
             await _productRepo.UpdateProductAsync(id, existingProduct);
             return Ok(existingProduct);
