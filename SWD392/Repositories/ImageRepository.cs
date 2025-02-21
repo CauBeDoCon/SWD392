@@ -60,7 +60,7 @@ namespace SWD392.Repositories
                 PageSize = pageSize
             };
         }
-
+        
         public async Task<ImageModel> GetImagesAsync(int id)
         {
             var images = await _context.images.FindAsync(id);
@@ -88,6 +88,13 @@ namespace SWD392.Repositories
             _context.Entry(updateImage).State = EntityState.Modified;
 
             await _context.SaveChangesAsync();
+        }
+
+        public async Task<List<Image>> GetImagesByProductID(int productId)
+        {
+                return await _context.images
+            .Where(img => img.ProductId == productId)
+            .ToListAsync();
         }
     }
 }
