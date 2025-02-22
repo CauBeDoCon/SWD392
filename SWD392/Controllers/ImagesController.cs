@@ -31,8 +31,19 @@ namespace SWD392.Controllers
         [HttpGet("{id}")]
         public async Task<IActionResult> GetImageById(int id)
         {
-            var image = await _imageRepo.GetImagesAsync(id);
-            return image == null ? NotFound() : Ok(image);
+            try
+            {
+                var image = await _imageRepo.GetImagesAsync(id);
+                return Ok(image);
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new { message = ex.Message });
+            }
+            catch (Exception)
+            {
+                return StatusCode(500, new { message = "Đã có lỗi xảy ra." });
+            }
         }
 
         [HttpPost]
@@ -61,28 +72,49 @@ namespace SWD392.Controllers
         {
             if (dto == null)
             {
-                return BadRequest("Dữ liệu không hợp lệ.");
+                return BadRequest(new { message = "Dữ liệu không hợp lệ." });
             }
 
-            var existingImage = await _imageRepo.GetImagesAsync(id);
-            if (existingImage == null)
+            try
             {
-                return NotFound($"Không tìm thấy hình ảnh có ID = {id}");
+                var existingImage = await _imageRepo.GetImagesAsync(id);
+                existingImage.ImageUrl = dto.ImageUrl;
+                existingImage.ProductId = dto.ProductId;
+
+                await _imageRepo.UpdateImageAsync(id, existingImage);
+                return Ok(existingImage);
             }
-
-            existingImage.ImageUrl = dto.ImageUrl;
-            existingImage.ProductId = dto.ProductId;
-
-            await _imageRepo.UpdateImageAsync(id, existingImage);
-            return Ok(existingImage);
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new { message = ex.Message });
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+            catch (Exception)
+            {
+                return StatusCode(500, new { message = "Đã có lỗi xảy ra." });
+            }
         }
 
         [HttpDelete("{id}")]
         [Authorize]
         public async Task<IActionResult> DeleteImage([FromRoute] int id)
         {
-            var message = await _imageRepo.DeleteImageAsync(id);
-            return Ok(new { message });
+            try
+            {
+                var message = await _imageRepo.DeleteImageAsync(id);
+                return Ok(new { message });
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new { message = ex.Message });
+            }
+            catch (Exception)
+            {
+                return StatusCode(500, new { message = "Đã có lỗi xảy ra." });
+            }
         }
     }
 }

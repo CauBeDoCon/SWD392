@@ -63,8 +63,14 @@ namespace SWD392.Repositories
 
         public async Task<BrandOriginModel> GetBrandOriginsAsync(int id)
         {
-            var brandOrigins = await _context.brandOrigins.FindAsync(id);
-            return _mapper.Map<BrandOriginModel>(brandOrigins);
+            var brandOrigin = await _context.brandOrigins.FindAsync(id);
+
+            if (brandOrigin == null)
+            {
+                throw new KeyNotFoundException($"Xuất xứ thương hiệu với ID {id} không tìm thấy.");
+            }
+
+            return _mapper.Map<BrandOriginModel>(brandOrigin);
         }
 
         public async Task UpdateBrandOriginAsync(int id, BrandOriginModel model)

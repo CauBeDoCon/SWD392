@@ -22,6 +22,11 @@ namespace SWD392.DB
         public DbSet<Manufacturer>? manufacturers { get; set; }
         public DbSet<ManufacturedCountry>? manufacturedCountries { get; set; }
         public DbSet<ProductDetail>? productDetails { get; set; }
+        public DbSet<CartProduct>? cartProducts { get; set; }
+        public DbSet<Cart>? carts { get; set; }
+        public DbSet<Comment>? comments { get; set; }
+        public DbSet<Review>? reviews { get; set; }
+        public DbSet<ApplicationUser>? users { get; set; }
         #endregion
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -81,6 +86,46 @@ namespace SWD392.DB
                 .HasOne(p => p.ProductDetail)
                 .WithMany(pd => pd.products)
                 .HasForeignKey(p => p.ProductDetailId);
+
+            modelBuilder.Entity<CartProduct>()
+                .HasOne(i => i.Product)
+                .WithMany(s => s.CartProducts)
+                .HasForeignKey(i => i.ProductId);
+
+            modelBuilder.Entity<Review>()
+                .HasOne(r => r.Comment)
+                .WithOne(c => c.Review)
+                .HasForeignKey<Comment>(c => c.ReviewId);
+
+            modelBuilder.Entity<Comment>()
+                .HasIndex(c => c.ReviewId)
+                .IsUnique();
+
+            modelBuilder.Entity<Comment>()
+                .HasOne(i => i.User)
+                .WithMany(s => s.Comments)
+                .HasForeignKey(i => i.UserId)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder.Entity<Review>()
+                .HasOne(i => i.User)
+                .WithMany(s => s.Reviews)
+                .HasForeignKey(i => i.UserId)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder.Entity<CartProduct>()
+                .HasOne(i => i.Cart)
+                .WithMany(s => s.CartProducts)
+                .HasForeignKey(i => i.CartId);
+
+            modelBuilder.Entity<Cart>()
+                .HasOne(r => r.User)
+                .WithOne(c => c.Cart)
+                .HasForeignKey<ApplicationUser>(c => c.CartId);
+
+            modelBuilder.Entity<ApplicationUser>()
+                .HasIndex(c => c.CartId)
+                .IsUnique();
 
         }
     }

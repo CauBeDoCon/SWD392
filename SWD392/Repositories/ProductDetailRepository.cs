@@ -63,8 +63,14 @@ namespace SWD392.Repositories
 
         public async Task<ProductDetailModel> GetProductDetailsAsync(int id)
         {
-            var productDetails = await _context.productDetails.FindAsync(id);
-            return _mapper.Map<ProductDetailModel>(productDetails);
+            var productDetail = await _context.productDetails.FindAsync(id);
+
+            if (productDetail == null)
+            {
+                throw new KeyNotFoundException($"Chi tiết sản phẩm với ID {id} không tìm thấy.");
+            }
+
+            return _mapper.Map<ProductDetailModel>(productDetail);
         }
 
         public async Task UpdateProductDetailAsync(int id, ProductDetailModel model)

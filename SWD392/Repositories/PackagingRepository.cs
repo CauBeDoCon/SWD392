@@ -63,8 +63,14 @@ namespace SWD392.Repositories
 
         public async Task<PackagingModel> GetPackagingsAsync(int id)
         {
-            var packagings = await _context.packagings.FindAsync(id);
-            return _mapper.Map<PackagingModel>(packagings);
+            var packaging = await _context.packagings.FindAsync(id);
+
+            if (packaging == null)
+            {
+                throw new KeyNotFoundException($"Quy cách với ID {id} không tìm thấy.");
+            }
+
+            return _mapper.Map<PackagingModel>(packaging);
         }
 
         public async Task UpdatePackagingAsync(int id, PackagingModel model)

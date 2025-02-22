@@ -63,8 +63,14 @@ namespace SWD392.Repositories
 
         public async Task<ManufacturedCountryModel> GetManufacturedCountriesAsync(int id)
         {
-            var manufacturedCountries = await _context.manufacturedCountries.FindAsync(id);
-            return _mapper.Map<ManufacturedCountryModel>(manufacturedCountries);
+            var manufacturedCountry = await _context.manufacturedCountries.FindAsync(id);
+
+            if (manufacturedCountry == null)
+            {
+                throw new KeyNotFoundException($"Nước sản xuất với ID {id} không tìm thấy.");
+            }
+
+            return _mapper.Map<ManufacturedCountryModel>(manufacturedCountry);
         }
 
         public async Task UpdateManufacturedCountryAsync(int id, ManufacturedCountryModel model)

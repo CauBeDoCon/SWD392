@@ -63,8 +63,14 @@ namespace SWD392.Repositories
 
         public async Task<SolutionModel> GetSolutionsAsync(int id)
         {
-            var solutions = await _context.solutions.FindAsync(id);
-            return _mapper.Map<SolutionModel>(solutions);
+            var solution = await _context.solutions.FindAsync(id);
+
+            if (solution == null)
+            {
+                throw new KeyNotFoundException($"Danh mục với ID {id} không tìm thấy.");
+            }
+
+            return _mapper.Map<SolutionModel>(solution);
         }
 
         public async Task UpdateSolutionAsync(int id, SolutionModel model)

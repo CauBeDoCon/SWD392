@@ -30,8 +30,19 @@ namespace SWD392.Controllers
         [HttpGet("{id}")]
         public async Task<IActionResult> GetPackagingById(int id)
         {
-            var packaging = await _packagingRepo.GetPackagingsAsync(id);
-            return packaging == null ? NotFound() : Ok(packaging);
+            try
+            {
+                var packaging = await _packagingRepo.GetPackagingsAsync(id);
+                return Ok(packaging);
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new { message = ex.Message });
+            }
+            catch (Exception)
+            {
+                return StatusCode(500, new { message = "Đã có lỗi xảy ra." });
+            }
         }
 
         [HttpPost]
@@ -59,27 +70,48 @@ namespace SWD392.Controllers
         {
             if (dto == null)
             {
-                return BadRequest("Dữ liệu không hợp lệ.");
+                return BadRequest(new { message = "Dữ liệu không hợp lệ." });
             }
 
-            var existingPackaging = await _packagingRepo.GetPackagingsAsync(id);
-            if (existingPackaging == null)
+            try
             {
-                return NotFound($"Không tìm thấy quy cách có ID = {id}");
+                var existingPackaging = await _packagingRepo.GetPackagingsAsync(id);
+                existingPackaging.Name = dto.Name;
+
+                await _packagingRepo.UpdatePackagingAsync(id, existingPackaging);
+                return Ok(existingPackaging);
             }
-
-            existingPackaging.Name = dto.Name;
-
-            await _packagingRepo.UpdatePackagingAsync(id, existingPackaging);
-            return Ok(existingPackaging);
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new { message = ex.Message });
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+            catch (Exception)
+            {
+                return StatusCode(500, new { message = "Đã có lỗi xảy ra." });
+            }
         }
 
         [HttpDelete("{id}")]
         [Authorize]
         public async Task<IActionResult> DeletePackaging([FromRoute] int id)
         {
-            var message = await _packagingRepo.DeletePackagingAsync(id);
-            return Ok(new { message });
+            try
+            {
+                var message = await _packagingRepo.DeletePackagingAsync(id);
+                return Ok(new { message });
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new { message = ex.Message });
+            }
+            catch (Exception)
+            {
+                return StatusCode(500, new { message = "Đã có lỗi xảy ra." });
+            }
         }
     }
 }

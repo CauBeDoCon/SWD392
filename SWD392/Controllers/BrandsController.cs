@@ -31,8 +31,19 @@ namespace SWD392.Controllers
         [HttpGet("{id}")]
         public async Task<IActionResult> GetBrandById(int id)
         {
-            var brand = await _brandRepo.GetBrandsAsync(id);
-            return brand == null ? NotFound() : Ok(brand);
+            try
+            {
+                var brand = await _brandRepo.GetBrandsAsync(id);
+                return Ok(brand);
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new { message = ex.Message });
+            }
+            catch (Exception)
+            {
+                return StatusCode(500, new { message = "Đã có lỗi xảy ra." });
+            }
         }
 
         [HttpPost]
@@ -60,27 +71,48 @@ namespace SWD392.Controllers
         {
             if (dto == null)
             {
-                return BadRequest("Dữ liệu không hợp lệ.");
+                return BadRequest(new { message = "Dữ liệu không hợp lệ." });
             }
 
-            var existingBrand = await _brandRepo.GetBrandsAsync(id);
-            if (existingBrand == null)
+            try
             {
-                return NotFound($"Không tìm thấy thương hiệu có ID = {id}");
+                var existingBrand = await _brandRepo.GetBrandsAsync(id);
+                existingBrand.Name = dto.Name;
+
+                await _brandRepo.UpdateBrandAsync(id, existingBrand);
+                return Ok(existingBrand);
             }
-
-            existingBrand.Name = dto.Name;
-
-            await _brandRepo.UpdateBrandAsync(id, existingBrand);
-            return Ok(existingBrand);
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new { message = ex.Message });
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+            catch (Exception)
+            {
+                return StatusCode(500, new { message = "Đã có lỗi xảy ra." });
+            }
         }
 
         [HttpDelete("{id}")]
         [Authorize]
         public async Task<IActionResult> DeleteBrand([FromRoute] int id)
         {
-            var message = await _brandRepo.DeleteBrandAsync(id);
-            return Ok(new { message });
+            try
+            {
+                var message = await _brandRepo.DeleteBrandAsync(id);
+                return Ok(new { message });
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new { message = ex.Message });
+            }
+            catch (Exception)
+            {
+                return StatusCode(500, new { message = "Đã có lỗi xảy ra." });
+            }
         }
     }
 }

@@ -31,8 +31,19 @@ namespace SWD392.Controllers
         [HttpGet("{id}")]
         public async Task<IActionResult> GetManufacturedCountryById(int id)
         {
-            var manufacturedCountry = await _manufacturedCountryRepo.GetManufacturedCountriesAsync(id);
-            return manufacturedCountry == null ? NotFound() : Ok(manufacturedCountry);
+            try
+            {
+                var manufacturedCountry = await _manufacturedCountryRepo.GetManufacturedCountriesAsync(id);
+                return Ok(manufacturedCountry);
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new { message = ex.Message });
+            }
+            catch (Exception)
+            {
+                return StatusCode(500, new { message = "Đã có lỗi xảy ra." });
+            }
         }
 
         [HttpPost]
@@ -60,27 +71,48 @@ namespace SWD392.Controllers
         {
             if (dto == null)
             {
-                return BadRequest("Dữ liệu không hợp lệ.");
+                return BadRequest(new { message = "Dữ liệu không hợp lệ." });
             }
 
-            var existingManufacturedCountry = await _manufacturedCountryRepo.GetManufacturedCountriesAsync(id);
-            if (existingManufacturedCountry == null)
+            try
             {
-                return NotFound($"Không tìm thấy nước sản xuất có ID = {id}");
+                var existingManufacturedCountry = await _manufacturedCountryRepo.GetManufacturedCountriesAsync(id);
+                existingManufacturedCountry.Name = dto.Name;
+
+                await _manufacturedCountryRepo.UpdateManufacturedCountryAsync(id, existingManufacturedCountry);
+                return Ok(existingManufacturedCountry);
             }
-
-            existingManufacturedCountry.Name = dto.Name;
-
-            await _manufacturedCountryRepo.UpdateManufacturedCountryAsync(id, existingManufacturedCountry);
-            return Ok(existingManufacturedCountry);
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new { message = ex.Message });
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+            catch (Exception)
+            {
+                return StatusCode(500, new { message = "Đã có lỗi xảy ra." });
+            }
         }
 
         [HttpDelete("{id}")]
         [Authorize]
         public async Task<IActionResult> DeleteManufacturedCountry([FromRoute] int id)
         {
-            var message = await _manufacturedCountryRepo.DeleteManufacturedCountryAsync(id);
-            return Ok(new { message });
+            try
+            {
+                var message = await _manufacturedCountryRepo.DeleteManufacturedCountryAsync(id);
+                return Ok(new { message });
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new { message = ex.Message });
+            }
+            catch (Exception)
+            {
+                return StatusCode(500, new { message = "Đã có lỗi xảy ra." });
+            }
         }
     }
 }

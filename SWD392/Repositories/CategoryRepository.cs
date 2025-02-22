@@ -63,8 +63,14 @@ namespace SWD392.Repositories
 
         public async Task<CategoryModel> GetCategoriesAsync(int id)
         {
-            var categories = await _context.categories.FindAsync(id);
-            return _mapper.Map<CategoryModel>(categories);
+            var category = await _context.categories.FindAsync(id);
+
+            if (category == null)
+            {
+                throw new KeyNotFoundException($"Thể loại với ID {id} không tìm thấy.");
+            }
+
+            return _mapper.Map<CategoryModel>(category);
         }
 
         public async Task UpdateCategoryAsync(int id, CategoryModel model)

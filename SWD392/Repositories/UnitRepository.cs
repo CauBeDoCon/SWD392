@@ -63,8 +63,14 @@ namespace SWD392.Repositories
 
         public async Task<UnitModel> GetUnitsAsync(int id)
         {
-            var units = await _context.units.FindAsync(id);
-            return _mapper.Map<UnitModel>(units);
+            var unit = await _context.units.FindAsync(id);
+
+            if (unit == null)
+            {
+                throw new KeyNotFoundException($"Đơn vị với ID {id} không tìm thấy.");
+            }
+
+            return _mapper.Map<UnitModel>(unit);
         }
 
         public async Task UpdateUnitAsync(int id, UnitModel model)

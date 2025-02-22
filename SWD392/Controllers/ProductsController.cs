@@ -31,8 +31,19 @@ namespace SWD392.Controllers
         [HttpGet("{id}")]
         public async Task<IActionResult> GetProductById(int id)
         {
-            var product = await _productRepo.GetProductByIdAsync(id);
-            return product == null ? NotFound() : Ok(product);
+            try
+            {
+                var product = await _productRepo.GetProductsAsync(id);
+                return Ok(product);
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new { message = ex.Message });
+            }
+            catch (Exception)
+            {
+                return StatusCode(500, new { message = "Đã có lỗi xảy ra." });
+            }
         }
 
         [HttpPost]
@@ -61,7 +72,7 @@ namespace SWD392.Controllers
             };
 
             var newProductId = await _productRepo.AddProductAsync(model);
-            var product = await _productRepo.GetProductByIdAsync(newProductId);
+            var product = await _productRepo.GetProductsAsync(newProductId);
             return product == null ? NotFound() : Ok(product);
         }
 
@@ -71,38 +82,59 @@ namespace SWD392.Controllers
         {
             if (dto == null)
             {
-                return BadRequest("Dữ liệu không hợp lệ.");
+                return BadRequest(new { message = "Dữ liệu không hợp lệ." });
             }
 
-            var existingProduct = await _productRepo.GetProductByIdAsync(id);
-            if (existingProduct == null)
+            try
             {
-                return NotFound($"Không tìm thấy sản phẩm có ID = {id}");
+                var existingProduct = await _productRepo.GetProductsAsync(id);
+                existingProduct.Name = dto.Name;
+                existingProduct.Description = dto.Description;
+                existingProduct.Price = dto.Price;
+                existingProduct.Quantity = dto.Quantity;
+                existingProduct.UnitId = dto.UnitId;
+                existingProduct.BrandId = dto.BrandId;
+                existingProduct.PackagingId = dto.PackagingId;
+                existingProduct.CategoryId = dto.CategoryId;
+                existingProduct.BrandOriginId = dto.BrandOriginId;
+                existingProduct.ManufacturerId = dto.ManufacturerId;
+                existingProduct.ManufacturedCountryId = dto.ManufacturedCountryId;
+                existingProduct.ProductDetailId = dto.ProductDetailId;
+
+                await _productRepo.UpdateProductAsync(id, existingProduct);
+                return Ok(existingProduct);
             }
-
-            existingProduct.Name = dto.Name;
-            existingProduct.Description = dto.Description;
-            existingProduct.Price = dto.Price;
-            existingProduct.Quantity = dto.Quantity;
-            existingProduct.UnitId = dto.UnitId;
-            existingProduct.BrandId = dto.BrandId;
-            existingProduct.PackagingId = dto.PackagingId;
-            existingProduct.CategoryId = dto.CategoryId;
-            existingProduct.BrandOriginId = dto.BrandOriginId;
-            existingProduct.ManufacturerId = dto.ManufacturerId;
-            existingProduct.ManufacturedCountryId = dto.ManufacturedCountryId;
-            existingProduct.ProductDetailId = dto.ProductDetailId;
-
-            await _productRepo.UpdateProductAsync(id, existingProduct);
-            return Ok(existingProduct);
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new { message = ex.Message });
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+            catch (Exception)
+            {
+                return StatusCode(500, new { message = "Đã có lỗi xảy ra." });
+            }
         }
 
         [HttpDelete("{id}")]
         [Authorize]
         public async Task<IActionResult> DeleteProduct([FromRoute] int id)
         {
-            var message = await _productRepo.DeleteProductAsync(id);
-            return Ok(new { message });
+            try
+            {
+                var message = await _productRepo.DeleteProductAsync(id);
+                return Ok(new { message });
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new { message = ex.Message });
+            }
+            catch (Exception)
+            {
+                return StatusCode(500, new { message = "Đã có lỗi xảy ra." });
+            }
         }
     }
 }

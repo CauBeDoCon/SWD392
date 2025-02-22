@@ -7,7 +7,7 @@ namespace SWD392.Repositories
     public interface IProductRepository
     {
         Task<PagedResult<ProductModel>> GetAllProductsAsync(int pageNumber, int pageSize);
-        public Task<Models.ProductModel> GetProductByIdAsync(int id);
+        public Task<ProductModel> GetProductsAsync(int id);
 
         public Task<int> AddProductAsync(Models.ProductModel model);
 

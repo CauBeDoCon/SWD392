@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using SWD392.DB;
+using SWD392.DTOs;
 using SWD392.Models;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
@@ -128,10 +129,8 @@ namespace SWD392.Repositories
                 Birthday = model.Birthday,
                 PhoneNumber = model.PhoneNumber,
                 CartId = model.CartId,
-                WalletId = model.WalletId
             };
             var result = await userManager.CreateAsync(user, model.Password);
-
             if (!result.Succeeded)
             {
                 Console.WriteLine("Lỗi khi tạo tài khoản:");
@@ -155,6 +154,40 @@ namespace SWD392.Repositories
         public async Task<List<ApplicationUser>> GetAllAccountsAsync()
         {
             return await userManager.Users.ToListAsync();
+        }
+
+        public async Task<ApplicationUser?> GetUserByIdAsync(string userId)
+        {
+            return await userManager.FindByIdAsync(userId);
+        }
+
+        public async Task<IdentityResult> UpdateAccountAsync(string accountId, UpdateAccountDto updateAccountDto)
+        {
+            // Tìm tài khoản theo accountId
+            var account = await userManager.FindByIdAsync(accountId);
+            if (account == null)
+            {
+                return IdentityResult.Failed(new IdentityError { Description = "Không tìm thấy tài khoản." });
+            }
+
+            // Cập nhật các thông tin nếu có giá trị mới được truyền vào
+            if (!string.IsNullOrWhiteSpace(updateAccountDto.FirstName))
+                account.FirstName = updateAccountDto.FirstName;
+
+            if (!string.IsNullOrWhiteSpace(updateAccountDto.LastName))
+                account.LastName = updateAccountDto.LastName;
+
+            if (!string.IsNullOrWhiteSpace(updateAccountDto.Address))
+                account.Address = updateAccountDto.Address;
+
+            if (!string.IsNullOrWhiteSpace(updateAccountDto.PhoneNumber))
+                account.PhoneNumber = updateAccountDto.PhoneNumber;
+
+            if (updateAccountDto.Birthday.HasValue)
+                account.Birthday = updateAccountDto.Birthday.Value;
+
+            // Cập nhật tài khoản
+            return await userManager.UpdateAsync(account);
         }
     }
 }

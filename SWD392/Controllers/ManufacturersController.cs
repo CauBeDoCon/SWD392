@@ -30,8 +30,19 @@ namespace SWD392.Controllers
         [HttpGet("{id}")]
         public async Task<IActionResult> GetManufacturerById(int id)
         {
-            var manufacturer = await _manufacturerRepo.GetManufacturersAsync(id);
-            return manufacturer == null ? NotFound() : Ok(manufacturer);
+            try
+            {
+                var manufacturer = await _manufacturerRepo.GetManufacturersAsync(id);
+                return Ok(manufacturer);
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new { message = ex.Message });
+            }
+            catch (Exception)
+            {
+                return StatusCode(500, new { message = "Đã có lỗi xảy ra." });
+            }
         }
 
         [HttpPost]
@@ -59,27 +70,48 @@ namespace SWD392.Controllers
         {
             if (dto == null)
             {
-                return BadRequest("Dữ liệu không hợp lệ.");
+                return BadRequest(new { message = "Dữ liệu không hợp lệ." });
             }
 
-            var existingManufacturer = await _manufacturerRepo.GetManufacturersAsync(id);
-            if (existingManufacturer == null)
+            try
             {
-                return NotFound($"Không tìm thấy nhà sản xuất có ID = {id}");
+                var existingManufacturer = await _manufacturerRepo.GetManufacturersAsync(id);
+                existingManufacturer.Name = dto.Name;
+
+                await _manufacturerRepo.UpdateManufacturerAsync(id, existingManufacturer);
+                return Ok(existingManufacturer);
             }
-
-            existingManufacturer.Name = dto.Name;
-
-            await _manufacturerRepo.UpdateManufacturerAsync(id, existingManufacturer);
-            return Ok(existingManufacturer);
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new { message = ex.Message });
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+            catch (Exception)
+            {
+                return StatusCode(500, new { message = "Đã có lỗi xảy ra." });
+            }
         }
 
         [HttpDelete("{id}")]
         [Authorize]
         public async Task<IActionResult> DeleteManufacturer([FromRoute] int id)
         {
-            var message = await _manufacturerRepo.DeleteManufacturerAsync(id);
-            return Ok(new { message });
+            try
+            {
+                var message = await _manufacturerRepo.DeleteManufacturerAsync(id);
+                return Ok(new { message });
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new { message = ex.Message });
+            }
+            catch (Exception)
+            {
+                return StatusCode(500, new { message = "Đã có lỗi xảy ra." });
+            }
         }
     }
 }

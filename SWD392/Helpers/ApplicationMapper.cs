@@ -29,6 +29,12 @@ namespace SkincarePharmacyNetCore8.Helpers
             CreateMap<ManufacturedCountry, ManufacturedCountryModel>().ReverseMap();
 
             CreateMap<ProductDetail, ProductDetailModel>().ReverseMap();
+
+            CreateMap<CartProduct, CartProductModel>().ReverseMap();
+
+            CreateMap<Comment, CommentModel>().ReverseMap();
+
+            CreateMap<Review, ReviewModel>().ReverseMap();
         }
     }
 }

@@ -32,8 +32,19 @@ namespace SWD392.Controllers
         [HttpGet("{id}")]
         public async Task<IActionResult> GetSolutionById(int id)
         {
-            var solution = await _solutionRepo.GetSolutionsAsync(id);
-            return solution == null ? NotFound() : Ok(solution);
+            try
+            {
+                var solution = await _solutionRepo.GetSolutionsAsync(id);
+                return Ok(solution);
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new { message = ex.Message });
+            }
+            catch (Exception)
+            {
+                return StatusCode(500, new { message = "Đã có lỗi xảy ra." });
+            }
         }
 
         [HttpPost]
@@ -61,27 +72,48 @@ namespace SWD392.Controllers
         {
             if (dto == null)
             {
-                return BadRequest("Dữ liệu không hợp lệ.");
+                return BadRequest(new { message = "Dữ liệu không hợp lệ." });
             }
 
-            var existingSolution = await _solutionRepo.GetSolutionsAsync(id);
-            if (existingSolution == null)
+            try
             {
-                return NotFound($"Không tìm thấy danh mục có ID = {id}");
+                var existingSolution = await _solutionRepo.GetSolutionsAsync(id);
+                existingSolution.Name = dto.Name;
+
+                await _solutionRepo.UpdateSolutionAsync(id, existingSolution);
+                return Ok(existingSolution);
             }
-
-            existingSolution.Name = dto.Name;
-
-            await _solutionRepo.UpdateSolutionAsync(id, existingSolution);
-            return Ok(existingSolution);
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new { message = ex.Message });
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+            catch (Exception)
+            {
+                return StatusCode(500, new { message = "Đã có lỗi xảy ra." });
+            }
         }
 
         [HttpDelete("{id}")]
         [Authorize]
         public async Task<IActionResult> DeleteSolution([FromRoute] int id)
         {
-            var message = await _solutionRepo.DeleteSolutionAsync(id);
-            return Ok(new { message });
+            try
+            {
+                var message = await _solutionRepo.DeleteSolutionAsync(id);
+                return Ok(new { message });
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new { message = ex.Message });
+            }
+            catch (Exception)
+            {
+                return StatusCode(500, new { message = "Đã có lỗi xảy ra." });
+            }
         }
     }
 }

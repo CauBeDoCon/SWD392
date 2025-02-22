@@ -16,16 +16,6 @@ namespace SWD392.Repositories
             _context = context;
             _mapper = mapper;
         }
-        public async Task<List<ProductModel>> GetAllProductsAsync()
-        {
-            var products = await _context.products.ToListAsync();
-            return _mapper.Map<List<ProductModel>>(products);
-        }
-        public async Task<ProductModel> GetProductByIdAsync(int id)
-        {
-            var product = await _context.products.FindAsync(id);
-            return _mapper.Map<ProductModel>(product);
-        }
 
         public async Task<int> AddProductAsync(Models.ProductModel model)
         {
@@ -70,10 +60,16 @@ namespace SWD392.Repositories
             };
         }
 
-        public async Task<Models.ProductModel> GetProductAsync(int id)
+        public async Task<ProductModel> GetProductsAsync(int id)
         {
-            var products = await _context.products.FindAsync(id);
-            return _mapper.Map<Models.ProductModel>(products);
+            var product = await _context.products.FindAsync(id);
+
+            if (product == null)
+            {
+                throw new KeyNotFoundException($"Sản phẩm với ID {id} không tìm thấy.");
+            }
+
+            return _mapper.Map<ProductModel>(product);
         }
 
         public async Task UpdateProductAsync(int id, Models.ProductModel model)

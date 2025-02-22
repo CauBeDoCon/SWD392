@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using SWD392.DB;
 using SWD392.DTOs;
 using SWD392.Models;
@@ -15,12 +16,15 @@ namespace SWD392.Controllers
     {
         private readonly IAccountRepository accountRepo;
         private readonly UserManager<ApplicationUser> _userManager;
+        private readonly ApplicationDbContext _context;
 
-        public AccountsController(IAccountRepository repo, UserManager<ApplicationUser> userManage) 
+        public AccountsController(IAccountRepository repo, UserManager<ApplicationUser> userManage, ApplicationDbContext context) 
         {
             accountRepo = repo;
             _userManager= userManage;
+            _context = context;
         }
+
         [HttpPost("SignUp")]
         public async Task<IActionResult> SignUp([FromBody] SignUpDTO signUpDto)
         {
@@ -46,7 +50,29 @@ namespace SWD392.Controllers
 
             if (result.Succeeded)
             {
-                
+                var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == signUpDto.Email);
+                if (user == null)
+                {
+                    return StatusCode(500, new { Message = "Lỗi hệ thống: Không tìm thấy tài khoản sau khi đăng ký!" });
+                }
+
+                int newCartId;
+                do
+                {
+                    newCartId = Math.Abs(Guid.NewGuid().GetHashCode());
+                } while (await _context.carts.AnyAsync(w => w.Id == newCartId));
+
+                var cart = new Cart { };
+
+                _context.carts.Add(cart);
+                await _context.SaveChangesAsync();
+
+                user.CartId = cart.Id;
+                _context.Users.Update(user);
+                await _context.SaveChangesAsync();
+
+                Console.WriteLine($"✅ Đã tạo CartId {cart.Id} cho User {user.Id}");
+
                 return Ok(new { Message = "Đăng ký thành công!" });
                
             }
@@ -70,6 +96,41 @@ namespace SWD392.Controllers
         public async Task<IActionResult> GetAllAccounts()
         {
             return Ok(await accountRepo.GetAllAccountsAsync());
+        }
+
+        [HttpGet("{userId}")]
+        public async Task<IActionResult> GetUserById(string userId)
+        {
+            var user = await accountRepo.GetUserByIdAsync(userId);
+            if (user == null)
+            {
+                return NotFound(new { Message = "Không tìm thấy người dùng!" });
+            }
+
+            return Ok(new
+            {
+                user.Id,
+                user.UserName,
+                user.Email,
+                user.Address,
+                user.Birthday,
+                user.PhoneNumber,
+                user.FirstName,
+                user.LastName
+            });
+        }
+
+        [HttpPut("UpdateAccount/{accountId}")]
+        public async Task<IActionResult> UpdateAccount(string accountId, [FromBody] UpdateAccountDto updateAccountDto)
+        {
+            var result = await accountRepo.UpdateAccountAsync(accountId, updateAccountDto);
+
+            if (result.Succeeded)
+            {
+                return Ok(new { Message = "Cập nhật tài khoản thành công!" });
+            }
+
+            return BadRequest(new { Errors = result.Errors.Select(e => e.Description) });
         }
 
     }

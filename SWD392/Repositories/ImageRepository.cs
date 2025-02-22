@@ -63,8 +63,14 @@ namespace SWD392.Repositories
 
         public async Task<ImageModel> GetImagesAsync(int id)
         {
-            var images = await _context.images.FindAsync(id);
-            return _mapper.Map<ImageModel>(images);
+            var image = await _context.images.FindAsync(id);
+
+            if (image == null)
+            {
+                throw new KeyNotFoundException($"Hình ảnh với ID {id} không tìm thấy.");
+            }
+
+            return _mapper.Map<ImageModel>(image);
         }
 
         public async Task UpdateImageAsync(int id, ImageModel model)

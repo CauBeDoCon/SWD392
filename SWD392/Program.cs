@@ -89,6 +89,12 @@ builder.Services.AddScoped<IManufacturedCountryRepository, ManufacturedCountryRe
 
 builder.Services.AddScoped<IProductDetailRepository, ProductDetailRepository>();
 
+builder.Services.AddScoped<ICartProductRepository, CartProductRepository>();
+
+builder.Services.AddScoped<ICommentRepository, CommentRepository>();
+
+builder.Services.AddScoped<IReviewRepository, ReviewRepository>();
+
 
 builder.Services.AddAuthentication(options =>
 {

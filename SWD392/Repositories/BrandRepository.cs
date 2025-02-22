@@ -63,8 +63,14 @@ namespace SWD392.Repositories
 
         public async Task<BrandModel> GetBrandsAsync(int id)
         {
-            var brands = await _context.brands.FindAsync(id);
-            return _mapper.Map<BrandModel>(brands);
+            var brand = await _context.brands.FindAsync(id);
+
+            if (brand == null)
+            {
+                throw new KeyNotFoundException($"Thương hiệu với ID {id} không tìm thấy.");
+            }
+
+            return _mapper.Map<BrandModel>(brand);
         }
 
         public async Task UpdateBrandAsync(int id, BrandModel model)

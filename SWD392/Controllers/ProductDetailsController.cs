@@ -30,8 +30,19 @@ namespace SWD392.Controllers
         [HttpGet("{id}")]
         public async Task<IActionResult> GetProductDetailById(int id)
         {
-            var productDetail = await _productDetailRepo.GetProductDetailsAsync(id);
-            return productDetail == null ? NotFound() : Ok(productDetail);
+            try
+            {
+                var productDetail = await _productDetailRepo.GetProductDetailsAsync(id);
+                return Ok(productDetail);
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new { message = ex.Message });
+            }
+            catch (Exception)
+            {
+                return StatusCode(500, new { message = "Đã có lỗi xảy ra." });
+            }
         }
 
         [HttpPost]
@@ -65,33 +76,54 @@ namespace SWD392.Controllers
         {
             if (dto == null)
             {
-                return BadRequest("Dữ liệu không hợp lệ.");
+                return BadRequest(new { message = "Dữ liệu không hợp lệ." });
             }
 
-            var existingProductDetail = await _productDetailRepo.GetProductDetailsAsync(id);
-            if (existingProductDetail == null)
+            try
             {
-                return NotFound($"Không tìm thấy chi tiết sản phẩm có ID = {id}");
+                var existingProductDetail = await _productDetailRepo.GetProductDetailsAsync(id);
+                existingProductDetail.ProductDescription = dto.ProductDescription;
+                existingProductDetail.Ingredient = dto.Ingredient;
+                existingProductDetail.Effect = dto.Effect;
+                existingProductDetail.HowToUse = dto.HowToUse;
+                existingProductDetail.SideEffect = dto.SideEffect;
+                existingProductDetail.Note = dto.Note;
+                existingProductDetail.Preserve = dto.Preserve;
+
+                await _productDetailRepo.UpdateProductDetailAsync(id, existingProductDetail);
+                return Ok(existingProductDetail);
             }
-
-            existingProductDetail.ProductDescription = dto.ProductDescription;
-            existingProductDetail.Ingredient = dto.Ingredient;
-            existingProductDetail.Effect = dto.Effect;
-            existingProductDetail.HowToUse = dto.HowToUse;
-            existingProductDetail.SideEffect = dto.SideEffect;
-            existingProductDetail.Note = dto.Note;
-            existingProductDetail.Preserve = dto.Preserve;
-
-            await _productDetailRepo.UpdateProductDetailAsync(id, existingProductDetail);
-            return Ok(existingProductDetail);
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new { message = ex.Message });
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+            catch (Exception)
+            {
+                return StatusCode(500, new { message = "Đã có lỗi xảy ra." });
+            }
         }
 
         [HttpDelete("{id}")]
         [Authorize]
         public async Task<IActionResult> DeleteProductDetail([FromRoute] int id)
         {
-            var message = await _productDetailRepo.DeleteProductDetailAsync(id);
-            return Ok(new { message });
+            try
+            {
+                var message = await _productDetailRepo.DeleteProductDetailAsync(id);
+                return Ok(new { message });
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new { message = ex.Message });
+            }
+            catch (Exception)
+            {
+                return StatusCode(500, new { message = "Đã có lỗi xảy ra." });
+            }
         }
     }
 }

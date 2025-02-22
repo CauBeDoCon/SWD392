@@ -31,8 +31,19 @@ namespace SWD392.Controllers
         [HttpGet("{id}")]
         public async Task<IActionResult> GetCategoryById(int id)
         {
-            var category = await _categoryRepo.GetCategoriesAsync(id);
-            return category == null ? NotFound() : Ok(category);
+            try
+            {
+                var category = await _categoryRepo.GetCategoriesAsync(id);
+                return Ok(category);
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new { message = ex.Message });
+            }
+            catch (Exception)
+            {
+                return StatusCode(500, new { message = "Đã có lỗi xảy ra." });
+            }
         }
 
         [HttpPost]
@@ -62,30 +73,50 @@ namespace SWD392.Controllers
         {
             if (dto == null)
             {
-                return BadRequest("Dữ liệu không hợp lệ.");
+                return BadRequest(new { message = "Dữ liệu không hợp lệ." });
             }
 
-            var existingCategory = await _categoryRepo.GetCategoriesAsync(id);
-            if (existingCategory == null)
+            try
             {
-                return NotFound($"Không tìm thấy thể loại có ID = {id}");
+                var existingCategory = await _categoryRepo.GetCategoriesAsync(id);
+                existingCategory.Name = dto.Name;
+                existingCategory.Image = dto.Image;
+                existingCategory.SolutionId = dto.SolutionId;
+
+                await _categoryRepo.UpdateCategoryAsync(id, existingCategory);
+                return Ok(existingCategory);
             }
-
-            existingCategory.Name = dto.Name;
-            existingCategory.Image = dto.Image;
-            existingCategory.SolutionId = dto.SolutionId;   
-
-
-            await _categoryRepo.UpdateCategoryAsync(id, existingCategory);
-            return Ok(existingCategory);
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new { message = ex.Message });
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+            catch (Exception)
+            {
+                return StatusCode(500, new { message = "Đã có lỗi xảy ra." });
+            }
         }
 
         [HttpDelete("{id}")]
         [Authorize]
         public async Task<IActionResult> DeleteCategory([FromRoute] int id)
         {
-            var message = await _categoryRepo.DeleteCategoryAsync(id);
-            return Ok(new { message });
+            try
+            {
+                var message = await _categoryRepo.DeleteCategoryAsync(id);
+                return Ok(new { message });
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new { message = ex.Message });
+            }
+            catch (Exception)
+            {
+                return StatusCode(500, new { message = "Đã có lỗi xảy ra." });
+            }
         }
     }
 }

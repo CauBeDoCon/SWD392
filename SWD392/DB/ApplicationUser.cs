@@ -11,7 +11,10 @@ namespace SWD392.DB
         public string PhoneNumber { get; set; } = string.Empty;
         public DateTime? Birthday { get; set; }
         public int? CartId { get; set; }
-        public int? WalletId { get; set; }
+        public ICollection<Comment> Comments { get; set; } = new List<Comment>();
+        public ICollection<Review> Reviews { get; set; } = new List<Review>();
+        [ForeignKey("CartId")]
+        public Cart Cart { get; set; }
 
     }
 }

@@ -31,8 +31,19 @@ namespace SWD392.Controllers
         [HttpGet("{id}")]
         public async Task<IActionResult> GetUnitById(int id)
         {
-            var unit = await _unitRepo.GetUnitsAsync(id);
-            return unit == null ? NotFound() : Ok(unit);
+            try
+            {
+                var unit = await _unitRepo.GetUnitsAsync(id);
+                return Ok(unit);
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new { message = ex.Message });
+            }
+            catch (Exception)
+            {
+                return StatusCode(500, new { message = "Đã có lỗi xảy ra." });
+            }
         }
 
         [HttpPost]
@@ -60,27 +71,48 @@ namespace SWD392.Controllers
         {
             if (dto == null)
             {
-                return BadRequest("Dữ liệu không hợp lệ.");
+                return BadRequest(new { message = "Dữ liệu không hợp lệ." });
             }
 
-            var existingUnit = await _unitRepo.GetUnitsAsync(id);
-            if (existingUnit == null)
+            try
             {
-                return NotFound($"Không tìm thấy đơn vị có ID = {id}");
+                var existingUnit = await _unitRepo.GetUnitsAsync(id);
+                existingUnit.Name = dto.Name;
+
+                await _unitRepo.UpdateUnitAsync(id, existingUnit);
+                return Ok(existingUnit);
             }
-
-            existingUnit.Name = dto.Name;
-
-            await _unitRepo.UpdateUnitAsync(id, existingUnit);
-            return Ok(existingUnit);
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new { message = ex.Message });
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+            catch (Exception)
+            {
+                return StatusCode(500, new { message = "Đã có lỗi xảy ra." });
+            }
         }
 
         [HttpDelete("{id}")]
         [Authorize]
         public async Task<IActionResult> DeleteUnit([FromRoute] int id)
         {
-            var message = await _unitRepo.DeleteUnitAsync(id);
-            return Ok(new { message });
+            try
+            {
+                var message = await _unitRepo.DeleteUnitAsync(id);
+                return Ok(new { message });
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new { message = ex.Message });
+            }
+            catch (Exception)
+            {
+                return StatusCode(500, new { message = "Đã có lỗi xảy ra." });
+            }
         }
     }
 }

@@ -63,8 +63,14 @@ namespace SWD392.Repositories
 
         public async Task<ManufacturerModel> GetManufacturersAsync(int id)
         {
-            var manufacturers = await _context.manufacturers.FindAsync(id);
-            return _mapper.Map<ManufacturerModel>(manufacturers);
+            var manufacturer = await _context.manufacturers.FindAsync(id);
+
+            if (manufacturer == null)
+            {
+                throw new KeyNotFoundException($"Nhà sản xuất với ID {id} không tìm thấy.");
+            }
+
+            return _mapper.Map<ManufacturerModel>(manufacturer);
         }
 
         public async Task UpdateManufacturerAsync(int id, ManufacturerModel model)
