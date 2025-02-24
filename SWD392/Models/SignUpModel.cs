@@ -29,7 +29,7 @@ namespace SWD392.Models
         public DateTime? Birthday { get; set; }
 
 
-        public int? RoleId { get; set; } = 2; 
+        public string Role { get; set; }
 
         public int? CartId { get; set; }
 
