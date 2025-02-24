@@ -133,20 +133,17 @@ namespace SWD392.Repositories
 
             if (result.Succeeded)
             {
-                // 🔥 Kiểm tra nếu Role hợp lệ trước khi gán
                 var validRoles = new List<string> { AppRole.Admin, AppRole.Manager, AppRole.Doctor, AppRole.Staff, AppRole.Customer };
                 if (!validRoles.Contains(model.Role))
                 {
                     return IdentityResult.Failed(new IdentityError { Description = "Role không hợp lệ!" });
                 }
 
-                // 🔥 Nếu Role chưa tồn tại, tạo mới trong database
                 if (!await roleManager.RoleExistsAsync(model.Role))
                 {
                     await roleManager.CreateAsync(new IdentityRole(model.Role));
                 }
 
-                // 🛠 Gán đúng Role thay vì luôn gán "Customer"
                 await userManager.AddToRoleAsync(user, model.Role);
 
                 Console.WriteLine($"✅ Đã gán role '{model.Role}' cho user '{user.UserName}'");
