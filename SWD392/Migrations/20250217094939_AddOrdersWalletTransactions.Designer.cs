@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using SWD392.DB;
 
@@ -11,9 +12,11 @@ using SWD392.DB;
 namespace SWD392.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250217094939_AddOrdersWalletTransactions")]
+    partial class AddOrdersWalletTransactions
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -167,10 +170,6 @@ namespace SWD392.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Avatar")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<DateTime?>("Birthday")
                         .HasColumnType("datetime2");
 
@@ -243,9 +242,7 @@ namespace SWD392.Migrations
                         .HasDatabaseName("UserNameIndex")
                         .HasFilter("[NormalizedUserName] IS NOT NULL");
 
-                    b.HasIndex("WalletId")
-                        .IsUnique()
-                        .HasFilter("[WalletId] IS NOT NULL");
+                    b.HasIndex("WalletId");
 
                     b.ToTable("AspNetUsers", (string)null);
                 });
@@ -707,12 +704,9 @@ namespace SWD392.Migrations
 
             modelBuilder.Entity("SWD392.DB.ApplicationUser", b =>
                 {
-                    b.HasOne("SWD392.DB.Wallet", "Wallet")
-                        .WithOne("User")
-                        .HasForeignKey("SWD392.DB.ApplicationUser", "WalletId")
-                        .OnDelete(DeleteBehavior.Restrict);
-
-                    b.Navigation("Wallet");
+                    b.HasOne("SWD392.DB.Wallet", null)
+                        .WithMany("Users")
+                        .HasForeignKey("WalletId");
                 });
 
             modelBuilder.Entity("SWD392.DB.Category", b =>
@@ -896,8 +890,7 @@ namespace SWD392.Migrations
                 {
                     b.Navigation("Transactions");
 
-                    b.Navigation("User")
-                        .IsRequired();
+                    b.Navigation("Users");
                 });
 #pragma warning restore 612, 618
         }

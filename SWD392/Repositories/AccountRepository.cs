@@ -72,27 +72,28 @@ namespace SWD392.Repositories
                 return null;
             }
 
-            // 🔹 Lấy danh sách Roles của user
             var roles = await userManager.GetRolesAsync(user);
             Console.WriteLine($"User '{user.UserName}' roles count: {roles.Count}");
             foreach (var role in roles)
             {
                 Console.WriteLine($"Role: {role}");
             }
-            // 🔹 Tạo token JWT
+
+           
             var authClaims = new List<Claim>
     {
-         new Claim(ClaimTypes.NameIdentifier, user.Id),  //
+        new Claim(ClaimTypes.NameIdentifier, user.Id), 
         new Claim(ClaimTypes.Name, user.UserName),
         new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
     };
 
-            // 🔹 Thêm roles vào token (nếu có)
             foreach (var role in roles)
             {
                 authClaims.Add(new Claim(ClaimTypes.Role, role));
             }
+
             await userManager.AddToRoleAsync(user, "Customer");
+
             var authenKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["JWT:Secret"]));
 
             var token = new JwtSecurityToken(
@@ -117,9 +118,11 @@ namespace SWD392.Repositories
                     user.FirstName,
                     user.LastName,
                     Roles = roles // Trả về danh sách roles
+
                 }
             };
         }
+
 
         public async  Task<IdentityResult> SignUpAsync(SignUpModel model)
         {

@@ -22,6 +22,11 @@ namespace SWD392.DB
         public DbSet<Manufacturer>? manufacturers { get; set; }
         public DbSet<ManufacturedCountry>? manufacturedCountries { get; set; }
         public DbSet<ProductDetail>? productDetails { get; set; }
+        public DbSet<Order>? Orders { get; set; }
+        public DbSet<OrderDetail>? OrderDetails { get; set; }
+        public DbSet<Wallet>? Wallets { get; set; }
+        public DbSet<Transaction>? Transactions { get; set; }
+
         #endregion
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -31,6 +36,12 @@ namespace SWD392.DB
             modelBuilder.Entity<IdentityUserLogin<string>>().HasKey(l => new { l.LoginProvider, l.ProviderKey });
             modelBuilder.Entity<IdentityUserRole<string>>().HasKey(r => new { r.UserId, r.RoleId });
             modelBuilder.Entity<IdentityUserToken<string>>().HasKey(t => new { t.UserId, t.LoginProvider, t.Name });
+
+            modelBuilder.Entity<ApplicationUser>()
+            .HasOne(u => u.Wallet)
+            .WithOne(w => w.User)
+            .HasForeignKey<ApplicationUser>(u => u.WalletId)
+            .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<Image>()
                 .HasOne(i => i.Product)
