@@ -27,7 +27,17 @@ namespace SWD392.Controllers
             var result = await _imageRepo.GetAllImagesAsync(currentPage, currentSize);
             return Ok(result);
         }
-
+        [HttpGet("GetImagesByProductID/{id}")]
+        public async Task<IActionResult> GetImagesByProductID(int id)
+        {
+           
+             var images = await _imageRepo.GetImagesByProductID(id);
+        if (images == null || images.Count == 0)
+        {
+            return NotFound("Không tìm thấy hình ảnh nào.");
+        }
+        return Ok(images);
+        }
         [HttpGet("{id}")]
         public async Task<IActionResult> GetImageById(int id)
         {

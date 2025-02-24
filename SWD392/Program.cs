@@ -8,6 +8,7 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using SWD392.Helpers;
 using System.Security.Claims;
+using SWD392.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -15,13 +16,14 @@ var builder = WebApplication.CreateBuilder(args);
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 
+builder.Services.AddCors(options => options.AddDefaultPolicy(policy => policy.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod()));
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowFrontend", policy =>
-        policy.WithOrigins("http://localhost:5173")
+        policy.WithOrigins("http://localhost:5173") // Cho phép frontend React
               .AllowAnyHeader()
               .AllowAnyMethod()
-              .AllowCredentials());
+              .AllowCredentials()); // Nếu cần gửi cookie/JWT
 });
 
 builder.Services.AddSwaggerGen(options =>
@@ -60,7 +62,7 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options => {
 })
 .AddEntityFrameworkStores<ApplicationDbContext>()
 .AddDefaultTokenProviders();
-
+builder.Services.AddSingleton<IVnPayService, VnPayService>();
 builder.Services.AddDbContext<ApplicationDbContext>(options => { options.UseSqlServer(builder.Configuration.GetConnectionString("MyPharmaStore")); });
 
 builder.Services.AddAutoMapper(typeof(Program));
@@ -106,6 +108,7 @@ builder.Services.AddAuthentication(options =>
         ValidAudience = builder.Configuration["JWT:ValidAudience"],
         ValidIssuer = builder.Configuration["JWT:ValidIssuer"],
         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JWT:Secret"])),
+        NameClaimType = ClaimTypes.NameIdentifier,
         RoleClaimType = ClaimTypes.Role 
     };
 });
@@ -122,15 +125,18 @@ using (var scope = app.Services.CreateScope())
     await RoleInitializer.InitializeRoles(services);
 }
 
+
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
 }
-app.UseCors("AllowFrontend");
+
+app.UseCors("AllowFrontend"); // Kích hoạt CORS
 app.UseHttpsRedirection();
-app.UseAuthentication();
+app.UseAuthentication(); // Đảm bảo middleware Authentication chạy trước Authorization
 app.UseHttpsRedirection();
+
 app.UseAuthorization();
 app.MapControllers();
 

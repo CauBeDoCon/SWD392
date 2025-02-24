@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using SWD392.DB;
+using SWD392.DTOs;
 using SWD392.Models;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
@@ -14,9 +15,11 @@ namespace SWD392.Repositories
         private readonly UserManager<ApplicationUser> userManager;
         private readonly SignInManager<ApplicationUser> signInManager;
         private readonly IConfiguration configuration;
-
-        public AccountRepository(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager, IConfiguration configuration) 
+        private readonly ApplicationDbContext _context;
+        public AccountRepository(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager, IConfiguration configuration,ApplicationDbContext context) 
         { 
+            
+            _context = context;
             this.userManager= userManager;
             this.signInManager = signInManager;
             this.configuration = configuration;
@@ -69,26 +72,28 @@ namespace SWD392.Repositories
                 return null;
             }
 
-            // 🔹 Lấy danh sách Roles của user
             var roles = await userManager.GetRolesAsync(user);
             Console.WriteLine($"User '{user.UserName}' roles count: {roles.Count}");
             foreach (var role in roles)
             {
                 Console.WriteLine($"Role: {role}");
             }
-            // 🔹 Tạo token JWT
+
+           
             var authClaims = new List<Claim>
     {
+        new Claim(ClaimTypes.NameIdentifier, user.Id), 
         new Claim(ClaimTypes.Name, user.UserName),
         new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
     };
 
-            // 🔹 Thêm roles vào token (nếu có)
             foreach (var role in roles)
             {
                 authClaims.Add(new Claim(ClaimTypes.Role, role));
             }
+
             await userManager.AddToRoleAsync(user, "Customer");
+
             var authenKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["JWT:Secret"]));
 
             var token = new JwtSecurityToken(
@@ -111,10 +116,13 @@ namespace SWD392.Repositories
                     user.Birthday,
                     user.PhoneNumber,
                     user.FirstName,
+                    user.LastName,
                     Roles = roles // Trả về danh sách roles
+
                 }
             };
         }
+
 
         public async  Task<IdentityResult> SignUpAsync(SignUpModel model)
         {
@@ -155,6 +163,43 @@ namespace SWD392.Repositories
         public async Task<List<ApplicationUser>> GetAllAccountsAsync()
         {
             return await userManager.Users.ToListAsync();
+        }
+
+        public Task<ApplicationUser> GetAccountByIdAsync(string userId)
+        {
+            return _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
+        }
+        public async Task<IdentityResult> UpdateAccountInfoAsync(string userId, UpdateAccountInfo updateAccountDto)  
+        {
+            var account = await userManager.FindByIdAsync(userId);
+            if (account == null)
+            {
+                return IdentityResult.Failed(new IdentityError { Description = "Không tìm thấy tài khoản." });
+            }
+            // Cập nhật các thông tin nếu có giá trị mới được truyền vào
+            if (!string.IsNullOrWhiteSpace(updateAccountDto.FirstName))
+                account.FirstName = updateAccountDto.FirstName;
+
+            if (!string.IsNullOrWhiteSpace(updateAccountDto.LastName))
+                account.LastName = updateAccountDto.LastName;
+
+            if (!string.IsNullOrWhiteSpace(updateAccountDto.Address))
+                account.Address = updateAccountDto.Address;
+
+            if (!string.IsNullOrWhiteSpace(updateAccountDto.PhoneNumber))
+                account.PhoneNumber = updateAccountDto.PhoneNumber;
+
+            if (!string.IsNullOrWhiteSpace(updateAccountDto.Email))
+                account.Email = updateAccountDto.Email;
+
+            if (!string.IsNullOrWhiteSpace(updateAccountDto.Avatar))
+                account.Avatar = updateAccountDto.Avatar;
+
+            if (updateAccountDto.Birthday.HasValue)
+                account.Birthday = updateAccountDto.Birthday.Value;
+
+            // Cập nhật tài khoản
+            return await userManager.UpdateAsync(account);
         }
     }
 }

@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using SWD392.DB;
+using SWD392.DTOs;
 using SWD392.Models;
 
 namespace SWD392.Repositories
@@ -10,5 +11,7 @@ namespace SWD392.Repositories
         public Task<object?> SignInAsync(SignInModel model);
 
         public Task<List<ApplicationUser>> GetAllAccountsAsync();
+        public Task<ApplicationUser> GetAccountByIdAsync(string id);
+        public Task<IdentityResult> UpdateAccountInfoAsync(string id,UpdateAccountInfo updateAccountInfo);
     }
 }

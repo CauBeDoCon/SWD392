@@ -9,9 +9,12 @@ namespace SWD392.DB
         public string LastName { get; set; } = string.Empty;
         public string Address { get; set; } = string.Empty;
         public string PhoneNumber { get; set; } = string.Empty;
+        public string Avatar { get; set; } = string.Empty;
         public DateTime? Birthday { get; set; }
         public int? CartId { get; set; }
         public int? WalletId { get; set; }
 
+        [ForeignKey("WalletId")]
+        public Wallet Wallet { get; set; }
     }
 }
