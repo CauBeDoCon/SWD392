@@ -16,11 +16,11 @@ namespace SWD392.Repositories
         private readonly UserManager<ApplicationUser> userManager;
         private readonly SignInManager<ApplicationUser> signInManager;
         private readonly IConfiguration configuration;
+
         private readonly ApplicationDbContext _context;
         private readonly RoleManager<IdentityRole> roleManager;
 
         public AccountRepository(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager, IConfiguration configuration,RoleManager<IdentityRole> roleManager, ApplicationDbContext context) 
-
         { 
             
             _context = context;

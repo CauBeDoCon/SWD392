@@ -12,7 +12,6 @@ using System.ComponentModel.DataAnnotations;
 using System.Security.Claims;
 using System.Data;
 
-
 namespace SWD392.Controllers
 {
     [Route("api/[controller]")]
@@ -167,9 +166,10 @@ namespace SWD392.Controllers
                 return Ok(new { Message = "Cập nhật tài khoản thành công!" });
             }
 
+         return BadRequest(new { Errors = result.Errors.Select(e => e.Description) });
+         }
 
-            return BadRequest(new { Errors = result.Errors.Select(e => e.Description) });
-        }
+
         [HttpPost("SignUpAdmin")]
         public async Task<IActionResult> SignUpAdmin([FromBody] SignUpDTO signUpDto)
         {
