@@ -2,10 +2,8 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using SWD392.DB;
-using SWD392.Helpers;
-
 using SWD392.DTOs;
-
+using SWD392.Helpers;
 using SWD392.Models;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
@@ -19,11 +17,10 @@ namespace SWD392.Repositories
         private readonly SignInManager<ApplicationUser> signInManager;
         private readonly IConfiguration configuration;
 
+        private readonly ApplicationDbContext _context;
         private readonly RoleManager<IdentityRole> roleManager;
 
-        public AccountRepository(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager, IConfiguration configuration,RoleManager<IdentityRole> roleManager,ApplicationDbContext context) 
-
-        private readonly ApplicationDbContext _context;
+        public AccountRepository(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager, IConfiguration configuration,RoleManager<IdentityRole> roleManager, ApplicationDbContext context) 
         { 
             
             _context = context;
