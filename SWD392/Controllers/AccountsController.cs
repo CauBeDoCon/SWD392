@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -8,7 +9,11 @@ using SWD392.Helpers;
 using SWD392.Models;
 using SWD392.Repositories;
 using System.ComponentModel.DataAnnotations;
+
 using System.Data;
+
+using System.Security.Claims;
+
 
 namespace SWD392.Controllers
 {
@@ -125,7 +130,46 @@ namespace SWD392.Controllers
         {
             return Ok(await accountRepo.GetAllAccountsAsync());
         }
-
+       
+        [HttpGet("GetCurrentAccount")]
+        public async Task<IActionResult> GetCurrentAccount()
+        {
+            // Trích xuất userId từ JWT token (từ ClaimTypes.NameIdentifier)
+             var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(userId))
+            {
+                return Unauthorized();
+            }
+            
+            // Gọi service để lấy thông tin tài khoản hiện tại theo userId
+            var account = await accountRepo.GetAccountByIdAsync(userId);
+            if (account == null)
+            {
+                return NotFound("Không tìm thấy tài khoản.");
+            }
+            return Ok(account);
+        }
+        [HttpPut("UpdateAccountInfo")]
+        [Authorize]
+        public async Task<IActionResult> UpdateAccountInfo([FromBody] UpdateAccountInfo dto)
+        {
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(userId))
+            {
+                return Unauthorized();
+            }
+            
+            if (dto == null)
+            {
+                return BadRequest("Dữ liệu không hợp lệ.");
+            }
+            var result = await accountRepo.UpdateAccountInfoAsync(userId, dto);
+            if (result.Succeeded)
+            {
+                return Ok(new { Message = "Cập nhật tài khoản thành công!" });
+            }
+         return BadRequest(new { Errors = result.Errors.Select(e => e.Description) });
+         }
 
         [HttpPost("SignUpAdmin")]
         public async Task<IActionResult> SignUpAdmin([FromBody] SignUpDTO signUpDto)

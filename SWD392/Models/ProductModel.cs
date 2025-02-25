@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using SWD392.DB;
 
 namespace SWD392.Models
 {
@@ -17,20 +18,20 @@ namespace SWD392.Models
         [Range(0, 1000)]
         public int Quantity { get; set; }
 
-        public int UnitId { get; set; }
+        public required UnitModel Unit { get; set; }
 
-        public int BrandId { get; set; }
+        public required BrandModel Brand { get; set; }
 
-        public int PackagingId { get; set; }
+        public required PackagingModel Packaging { get; set; }
 
-        public int CategoryId { get; set; }
+        public required CategoryModel Category { get; set; }
 
-        public int BrandOriginId { get; set; }
+        public required BrandOriginModel BrandOrigin { get; set; }
 
-        public int ManufacturerId { get; set; }
+        public required ManufacturerModel Manufacturer { get; set; }
 
-        public int ManufacturedCountryId { get; set; }
+        public required ManufacturedCountryModel ManufacturedCountry { get; set; }
 
-        public int ProductDetailId { get; set; }
+        public required ProductDetailModel ProductDetail { get; set; }
     }
 }

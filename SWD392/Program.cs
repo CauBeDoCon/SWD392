@@ -16,13 +16,14 @@ var builder = WebApplication.CreateBuilder(args);
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 
+builder.Services.AddCors(options => options.AddDefaultPolicy(policy => policy.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod()));
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowFrontend", policy =>
-        policy.WithOrigins("http://localhost:5173")
+        policy.WithOrigins("http://localhost:5173") // Cho phép frontend React
               .AllowAnyHeader()
               .AllowAnyMethod()
-              .AllowCredentials());
+              .AllowCredentials()); // Nếu cần gửi cookie/JWT
 });
 
 builder.Services.AddSwaggerGen(options =>
@@ -124,15 +125,18 @@ using (var scope = app.Services.CreateScope())
     await RoleInitializer.InitializeRoles(services);
 }
 
+
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
 }
-app.UseCors("AllowFrontend");
+
+app.UseCors("AllowFrontend"); // Kích hoạt CORS
 app.UseHttpsRedirection();
-app.UseAuthentication();
+app.UseAuthentication(); // Đảm bảo middleware Authentication chạy trước Authorization
 app.UseHttpsRedirection();
+
 app.UseAuthorization();
 app.MapControllers();
 

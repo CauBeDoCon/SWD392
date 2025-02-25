@@ -12,7 +12,7 @@ namespace SWD392.DB
         public int WalletId { get; set; }
 
         [Required]
-        public string Account { get; set; }
+        public double amount { get; set; }
 
         public DateTime CreatedTransaction { get; set; }
 
