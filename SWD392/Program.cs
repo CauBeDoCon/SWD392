@@ -8,6 +8,7 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using SWD392.Helpers;
 using System.Security.Claims;
+using SWD392.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -60,7 +61,7 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options => {
 })
 .AddEntityFrameworkStores<ApplicationDbContext>()
 .AddDefaultTokenProviders();
-
+builder.Services.AddSingleton<IVnPayService, VnPayService>();
 builder.Services.AddDbContext<ApplicationDbContext>(options => { options.UseSqlServer(builder.Configuration.GetConnectionString("MyPharmaStore")); });
 
 builder.Services.AddAutoMapper(typeof(Program));
@@ -95,6 +96,12 @@ builder.Services.AddScoped<ICommentRepository, CommentRepository>();
 
 builder.Services.AddScoped<IReviewRepository, ReviewRepository>();
 
+builder.Services.AddScoped<IOrderRepository, OrderRepository>();
+
+builder.Services.AddScoped<IOrderDetailRepository, OrderDetailRepository>();
+
+builder.Services.AddScoped<ICartRepository, CartRepository>();
+
 
 builder.Services.AddAuthentication(options =>
 {
@@ -112,6 +119,7 @@ builder.Services.AddAuthentication(options =>
         ValidAudience = builder.Configuration["JWT:ValidAudience"],
         ValidIssuer = builder.Configuration["JWT:ValidIssuer"],
         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JWT:Secret"])),
+        NameClaimType = ClaimTypes.NameIdentifier,
         RoleClaimType = ClaimTypes.Role 
     };
 });
@@ -137,6 +145,7 @@ app.UseCors("AllowFrontend");
 app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseHttpsRedirection();
+app.UseMiddleware<AuthorizationMiddleware>();
 app.UseAuthorization();
 app.MapControllers();
 

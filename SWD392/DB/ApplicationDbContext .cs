@@ -27,6 +27,11 @@ namespace SWD392.DB
         public DbSet<Comment>? comments { get; set; }
         public DbSet<Review>? reviews { get; set; }
         public DbSet<ApplicationUser>? users { get; set; }
+        public DbSet<Order>? Orders { get; set; }
+        public DbSet<OrderDetail>? OrderDetails { get; set; }
+        public DbSet<Wallet>? Wallets { get; set; }
+        public DbSet<Transaction>? Transactions { get; set; }
+
         #endregion
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -36,6 +41,12 @@ namespace SWD392.DB
             modelBuilder.Entity<IdentityUserLogin<string>>().HasKey(l => new { l.LoginProvider, l.ProviderKey });
             modelBuilder.Entity<IdentityUserRole<string>>().HasKey(r => new { r.UserId, r.RoleId });
             modelBuilder.Entity<IdentityUserToken<string>>().HasKey(t => new { t.UserId, t.LoginProvider, t.Name });
+
+            modelBuilder.Entity<ApplicationUser>()
+            .HasOne(u => u.Wallet)
+            .WithOne(w => w.User)
+            .HasForeignKey<ApplicationUser>(u => u.WalletId)
+            .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<Image>()
                 .HasOne(i => i.Product)
@@ -118,6 +129,11 @@ namespace SWD392.DB
                 .WithMany(s => s.CartProducts)
                 .HasForeignKey(i => i.CartId);
 
+            modelBuilder.Entity<Order>()
+                .HasOne(i => i.Cart)
+                .WithMany(s => s.Orders)
+                .HasForeignKey(i => i.CartId);
+
             modelBuilder.Entity<Cart>()
                 .HasOne(r => r.User)
                 .WithOne(c => c.Cart)
@@ -127,6 +143,25 @@ namespace SWD392.DB
                 .HasIndex(c => c.CartId)
                 .IsUnique();
 
+            modelBuilder.Entity<OrderDetail>()
+                .HasOne(i => i.Product)
+                .WithMany(s => s.OrderDetails)
+                .HasForeignKey(i => i.ProductId);
+
+            modelBuilder.Entity<OrderDetail>()
+                .HasOne(r => r.Review)
+                .WithOne(c => c.OrderDetail)
+                .HasForeignKey<Review>(c => c.OrderDetailId);
+
+            modelBuilder.Entity<Review>()
+                .HasIndex(c => c.OrderDetailId)
+                .IsUnique();
+
+            modelBuilder.Entity<Order>()
+                .HasOne(i => i.User)
+                .WithMany(s => s.Orders)
+                .HasForeignKey(i => i.UserId)
+                .OnDelete(DeleteBehavior.NoAction);
         }
     }
 }

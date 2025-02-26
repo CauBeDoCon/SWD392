@@ -9,6 +9,7 @@ namespace SWD392.DB
         [Key]
         public int Id { get; set; }
         public ICollection<CartProduct> CartProducts { get; set; } = new List<CartProduct>();
+        public ICollection<Order> Orders { get; set; } = new List<Order>();
         public ApplicationUser User { get; set; }
     }
 }

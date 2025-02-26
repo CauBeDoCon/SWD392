@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using SWD392.DB;
 using SWD392.DTOs;
+using SWD392.Helpers;
 using SWD392.Models;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
@@ -15,12 +16,14 @@ namespace SWD392.Repositories
         private readonly UserManager<ApplicationUser> userManager;
         private readonly SignInManager<ApplicationUser> signInManager;
         private readonly IConfiguration configuration;
+        private readonly RoleManager<IdentityRole> roleManager;
 
-        public AccountRepository(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager, IConfiguration configuration) 
+        public AccountRepository(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager, IConfiguration configuration,RoleManager<IdentityRole> roleManager) 
         { 
             this.userManager= userManager;
             this.signInManager = signInManager;
             this.configuration = configuration;
+            this.roleManager = roleManager;
         }
         //public async Task<string?> SignInAsync(SignInModel model)
         //{
@@ -60,36 +63,30 @@ namespace SWD392.Repositories
         //        );
         //    return new JwtSecurityTokenHandler().WriteToken(token);
         //}
-        public async Task<object?> SignInAsync(SignInModel model)
+        public async Task<object> SignInAsync(SignInModel model)
         {
-            var result = await signInManager.PasswordSignInAsync(model.Username, model.Password, false, false);
+            
             var user = await userManager.FindByNameAsync(model.Username);
+            var passwordValid = await userManager.CheckPasswordAsync(user, model.Password);
 
-            if (user == null || !result.Succeeded)
+            if (user == null || !passwordValid)
             {
                 return null;
             }
-
-            // 🔹 Lấy danh sách Roles của user
-            var roles = await userManager.GetRolesAsync(user);
-            Console.WriteLine($"User '{user.UserName}' roles count: {roles.Count}");
-            foreach (var role in roles)
-            {
-                Console.WriteLine($"Role: {role}");
-            }
-            // 🔹 Tạo token JWT
             var authClaims = new List<Claim>
-    {
-        new Claim(ClaimTypes.Name, user.UserName),
-        new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
-    };
-
-            // 🔹 Thêm roles vào token (nếu có)
+            {
+                 new Claim(ClaimTypes.NameIdentifier, user.Id), 
+                 new Claim(ClaimTypes.Name, user.UserName),
+                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
+            };
+            var roles = await userManager.GetRolesAsync(user);
             foreach (var role in roles)
             {
-                authClaims.Add(new Claim(ClaimTypes.Role, role));
+                authClaims.Add(new Claim(ClaimTypes.Role, role.ToString()));
             }
+
             await userManager.AddToRoleAsync(user, "Customer");
+
             var authenKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["JWT:Secret"]));
 
             var token = new JwtSecurityToken(
@@ -112,12 +109,13 @@ namespace SWD392.Repositories
                     user.Birthday,
                     user.PhoneNumber,
                     user.FirstName,
-                    Roles = roles // Trả về danh sách roles
+                    Roles = roles 
                 }
             };
         }
 
-        public async  Task<IdentityResult> SignUpAsync(SignUpModel model)
+
+        public async Task<IdentityResult> SignUpAsync(SignUpModel model)
         {
             var user = new ApplicationUser
             {
@@ -130,27 +128,34 @@ namespace SWD392.Repositories
                 PhoneNumber = model.PhoneNumber,
                 CartId = model.CartId,
             };
+
             var result = await userManager.CreateAsync(user, model.Password);
-            if (!result.Succeeded)
+
+            if (result.Succeeded)
             {
-                Console.WriteLine("Lỗi khi tạo tài khoản:");
-                foreach (var error in result.Errors)
+                var validRoles = new List<string> { AppRole.Admin, AppRole.Manager, AppRole.Doctor, AppRole.Staff, AppRole.Customer };
+                if (!validRoles.Contains(model.Role))
                 {
-                    Console.WriteLine($"- {error.Description}");
+                    return IdentityResult.Failed(new IdentityError { Description = "Role không hợp lệ!" });
                 }
-            }
-            await userManager.AddToRoleAsync(user, "Customer");
-            if (!result.Succeeded)
-            {
-                Console.WriteLine($"❌ Lỗi khi gán role: {string.Join(", ", result.Errors.Select(e => e.Description))}");
+
+                if (!await roleManager.RoleExistsAsync(model.Role))
+                {
+                    await roleManager.CreateAsync(new IdentityRole(model.Role));
+                }
+
+                await userManager.AddToRoleAsync(user, model.Role);
+
+                Console.WriteLine($"✅ Đã gán role '{model.Role}' cho user '{user.UserName}'");
             }
             else
             {
-                Console.WriteLine($"✅ Đã gán role 'Customer' cho user '{user.UserName}'");
+                Console.WriteLine($"❌ Lỗi khi tạo user: {string.Join(", ", result.Errors.Select(e => e.Description))}");
             }
-            return result;
 
+            return result;
         }
+
         public async Task<List<ApplicationUser>> GetAllAccountsAsync()
         {
             return await userManager.Users.ToListAsync();

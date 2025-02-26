@@ -12,8 +12,8 @@ using SWD392.DB;
 namespace SWD392.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250222033427_addcartrela")]
-    partial class addcartrela
+    [Migration("20250225092552_init")]
+    partial class init
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -229,6 +229,9 @@ namespace SWD392.Migrations
                         .HasMaxLength(256)
                         .HasColumnType("nvarchar(256)");
 
+                    b.Property<int?>("WalletId")
+                        .HasColumnType("int");
+
                     b.HasKey("Id");
 
                     b.HasIndex("CartId")
@@ -242,6 +245,10 @@ namespace SWD392.Migrations
                         .IsUnique()
                         .HasDatabaseName("UserNameIndex")
                         .HasFilter("[NormalizedUserName] IS NOT NULL");
+
+                    b.HasIndex("WalletId")
+                        .IsUnique()
+                        .HasFilter("[WalletId] IS NOT NULL");
 
                     b.ToTable("AspNetUsers", (string)null);
                 });
@@ -438,6 +445,65 @@ namespace SWD392.Migrations
                     b.ToTable("Manufacturer");
                 });
 
+            modelBuilder.Entity("SWD392.DB.Order", b =>
+                {
+                    b.Property<int>("OrderId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("OrderId"));
+
+                    b.Property<int?>("DiscountId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("OrderDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<decimal>("TotalAmount")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("OrderId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("Order");
+                });
+
+            modelBuilder.Entity("SWD392.DB.OrderDetail", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("OrderId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ProductId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Quantity")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("Subtotal")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("OrderId");
+
+                    b.ToTable("OrderDetails");
+                });
+
             modelBuilder.Entity("SWD392.DB.Packaging", b =>
                 {
                     b.Property<int>("Id")
@@ -612,6 +678,51 @@ namespace SWD392.Migrations
                     b.ToTable("Solution");
                 });
 
+            modelBuilder.Entity("SWD392.DB.Transaction", b =>
+                {
+                    b.Property<int>("TransactionId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("TransactionId"));
+
+                    b.Property<string>("Account")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("AccountName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("AccountNumber")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("BankName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("CreatedTransaction")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("ReasonWithdrawReject")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("TransactionEnum")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("WalletId")
+                        .HasColumnType("int");
+
+                    b.HasKey("TransactionId");
+
+                    b.HasIndex("WalletId");
+
+                    b.ToTable("Transaction");
+                });
+
             modelBuilder.Entity("SWD392.DB.Unit", b =>
                 {
                     b.Property<int>("Id")
@@ -628,6 +739,22 @@ namespace SWD392.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Unit");
+                });
+
+            modelBuilder.Entity("SWD392.DB.Wallet", b =>
+                {
+                    b.Property<int>("WalletId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("WalletId"));
+
+                    b.Property<decimal>("AmountOfMoney")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.HasKey("WalletId");
+
+                    b.ToTable("Wallet");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -687,7 +814,14 @@ namespace SWD392.Migrations
                         .WithOne("User")
                         .HasForeignKey("SWD392.DB.ApplicationUser", "CartId");
 
+                    b.HasOne("SWD392.DB.Wallet", "Wallet")
+                        .WithOne("User")
+                        .HasForeignKey("SWD392.DB.ApplicationUser", "WalletId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
                     b.Navigation("Cart");
+
+                    b.Navigation("Wallet");
                 });
 
             modelBuilder.Entity("SWD392.DB.CartProduct", b =>
@@ -748,6 +882,28 @@ namespace SWD392.Migrations
                         .IsRequired();
 
                     b.Navigation("Product");
+                });
+
+            modelBuilder.Entity("SWD392.DB.Order", b =>
+                {
+                    b.HasOne("SWD392.DB.ApplicationUser", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("SWD392.DB.OrderDetail", b =>
+                {
+                    b.HasOne("SWD392.DB.Order", "Order")
+                        .WithMany("OrderDetails")
+                        .HasForeignKey("OrderId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Order");
                 });
 
             modelBuilder.Entity("SWD392.DB.Product", b =>
@@ -828,6 +984,17 @@ namespace SWD392.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("SWD392.DB.Transaction", b =>
+                {
+                    b.HasOne("SWD392.DB.Wallet", "Wallet")
+                        .WithMany("Transactions")
+                        .HasForeignKey("WalletId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Wallet");
+                });
+
             modelBuilder.Entity("SWD392.DB.ApplicationUser", b =>
                 {
                     b.Navigation("Comments");
@@ -868,6 +1035,11 @@ namespace SWD392.Migrations
                     b.Navigation("products");
                 });
 
+            modelBuilder.Entity("SWD392.DB.Order", b =>
+                {
+                    b.Navigation("OrderDetails");
+                });
+
             modelBuilder.Entity("SWD392.DB.Packaging", b =>
                 {
                     b.Navigation("products");
@@ -899,6 +1071,14 @@ namespace SWD392.Migrations
             modelBuilder.Entity("SWD392.DB.Unit", b =>
                 {
                     b.Navigation("products");
+                });
+
+            modelBuilder.Entity("SWD392.DB.Wallet", b =>
+                {
+                    b.Navigation("Transactions");
+
+                    b.Navigation("User")
+                        .IsRequired();
                 });
 #pragma warning restore 612, 618
         }

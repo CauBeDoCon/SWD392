@@ -9,32 +9,32 @@ namespace SWD392.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class CartProductsController : ControllerBase
+    public class OrdersController : ControllerBase
     {
-        private readonly ICartProductRepository _cartProductRepo;
+        private readonly IOrderRepository _orderRepo;
 
-        public CartProductsController(ICartProductRepository repo)
+        public OrdersController(IOrderRepository repo)
         {
-            _cartProductRepo = repo;
+            _orderRepo = repo;
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetAllCartProducts([FromQuery] int? pageNumber, [FromQuery] int? pageSize)
+        public async Task<IActionResult> GetAllOrders([FromQuery] int? pageNumber, [FromQuery] int? pageSize)
         {
             int currentPage = pageNumber ?? 1;
             int currentSize = pageSize ?? 10;
 
-            var result = await _cartProductRepo.GetAllCartProductsAsync(currentPage, currentSize);
+            var result = await _orderRepo.GetAllOrdersAsync(currentPage, currentSize);
             return Ok(result);
         }
 
         [HttpGet("{id}")]
-        public async Task<IActionResult> GetCartProductById(int id)
+        public async Task<IActionResult> GetOrderById(int id)
         {
             try
             {
-                var cartProduct = await _cartProductRepo.GetCartProductsAsync(id);
-                return Ok(cartProduct);
+                var order = await _orderRepo.GetOrdersAsync(id);
+                return Ok(order);
             }
             catch (KeyNotFoundException ex)
             {
@@ -48,29 +48,30 @@ namespace SWD392.Controllers
 
         [HttpPost]
         [Authorize]
-        public async Task<IActionResult> AddNewCartProduct([FromBody] UpdateCartProductDto dto)
+        public async Task<IActionResult> AddNewOrder([FromBody] UpdateOrderDto dto)
         {
             if (dto == null)
             {
                 return BadRequest("Dữ liệu không hợp lệ.");
             }
 
-            var model = new CartProductModel
+            var model = new OrderModel
             {
-                Quantity = dto.Quantity,
+                UserId = dto.UserId,
+                OrderDate = dto.OrderDate,
+                TotalAmount = dto.TotalAmount,
                 Status = dto.Status,
-                CartId = dto.CartId,
-                ProductId = dto.ProductId
+                CartId = dto.CartId
             };
 
-            var newCartProductId = await _cartProductRepo.AddCartProductAsync(model);
-            var cartProduct = await _cartProductRepo.GetCartProductsAsync(newCartProductId);
-            return cartProduct == null ? NotFound() : Ok(cartProduct);
+            var newOrderId = await _orderRepo.AddOrderAsync(model);
+            var order = await _orderRepo.GetOrdersAsync(newOrderId);
+            return order == null ? NotFound() : Ok(order);
         }
 
         [HttpPut("{id}")]
         [Authorize]
-        public async Task<IActionResult> UpdateCartProduct(int id, [FromBody] UpdateCartProductDto dto)
+        public async Task<IActionResult> UpdateOrder(int id, [FromBody] UpdateOrderDto dto)
         {
             if (dto == null)
             {
@@ -79,14 +80,15 @@ namespace SWD392.Controllers
 
             try
             {
-                var existingCartProduct = await _cartProductRepo.GetCartProductsAsync(id);
-                existingCartProduct.Quantity = dto.Quantity;
-                existingCartProduct.Status = dto.Status;
-                existingCartProduct.CartId = dto.CartId;
-                existingCartProduct.ProductId = dto.ProductId;
+                var existingOrder = await _orderRepo.GetOrdersAsync(id);
+                existingOrder.UserId = dto.UserId;
+                existingOrder.OrderDate = dto.OrderDate;
+                existingOrder.TotalAmount = dto.TotalAmount;
+                existingOrder.Status = dto.Status;
+                existingOrder.CartId = dto.CartId;
 
-                await _cartProductRepo.UpdateCartProductAsync(id, existingCartProduct);
-                return Ok(existingCartProduct);
+                await _orderRepo.UpdateOrderAsync(id, existingOrder);
+                return Ok(existingOrder);
             }
             catch (KeyNotFoundException ex)
             {
@@ -104,11 +106,11 @@ namespace SWD392.Controllers
 
         [HttpDelete("{id}")]
         [Authorize]
-        public async Task<IActionResult> DeleteCartProduct([FromRoute] int id)
+        public async Task<IActionResult> DeleteOrder([FromRoute] int id)
         {
             try
             {
-                var message = await _cartProductRepo.DeleteCartProductAsync(id);
+                var message = await _orderRepo.DeleteOrderAsync(id);
                 return Ok(new { message });
             }
             catch (KeyNotFoundException ex)

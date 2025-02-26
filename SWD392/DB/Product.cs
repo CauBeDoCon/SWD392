@@ -28,6 +28,8 @@ namespace SWD392.DB
 
         public ICollection<CartProduct> CartProducts { get; set; } = new List<CartProduct>();
 
+        public ICollection<OrderDetail> OrderDetails { get; set; } = new List<OrderDetail>();
+
         public int BrandId { get; set; }
         [ForeignKey("BrandId")]
         public Brand Brand { get; set; }

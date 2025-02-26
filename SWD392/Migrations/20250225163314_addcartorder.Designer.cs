@@ -12,8 +12,8 @@ using SWD392.DB;
 namespace SWD392.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250213143509_init2")]
-    partial class init2
+    [Migration("20250225163314_addcartorder")]
+    partial class addcartorder
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -213,6 +213,7 @@ namespace SWD392.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("PhoneNumber")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<bool>("PhoneNumberConfirmed")
@@ -233,6 +234,10 @@ namespace SWD392.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("CartId")
+                        .IsUnique()
+                        .HasFilter("[CartId] IS NOT NULL");
+
                     b.HasIndex("NormalizedEmail")
                         .HasDatabaseName("EmailIndex");
 
@@ -240,6 +245,10 @@ namespace SWD392.Migrations
                         .IsUnique()
                         .HasDatabaseName("UserNameIndex")
                         .HasFilter("[NormalizedUserName] IS NOT NULL");
+
+                    b.HasIndex("WalletId")
+                        .IsUnique()
+                        .HasFilter("[WalletId] IS NOT NULL");
 
                     b.ToTable("AspNetUsers", (string)null);
                 });
@@ -280,6 +289,49 @@ namespace SWD392.Migrations
                     b.ToTable("BrandOrigin");
                 });
 
+            modelBuilder.Entity("SWD392.DB.Cart", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Cart");
+                });
+
+            modelBuilder.Entity("SWD392.DB.CartProduct", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("CartId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ProductId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Quantity")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CartId");
+
+                    b.HasIndex("ProductId");
+
+                    b.ToTable("CartProduct");
+                });
+
             modelBuilder.Entity("SWD392.DB.Category", b =>
                 {
                     b.Property<int>("Id")
@@ -305,6 +357,38 @@ namespace SWD392.Migrations
                     b.HasIndex("SolutionId");
 
                     b.ToTable("Category");
+                });
+
+            modelBuilder.Entity("SWD392.DB.Comment", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Content")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("ReviewDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("ReviewId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ReviewId")
+                        .IsUnique();
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("Comment");
                 });
 
             modelBuilder.Entity("SWD392.DB.Image", b =>
@@ -363,6 +447,69 @@ namespace SWD392.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Manufacturer");
+                });
+
+            modelBuilder.Entity("SWD392.DB.Order", b =>
+                {
+                    b.Property<int>("OrderId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("OrderId"));
+
+                    b.Property<int>("CartId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("OrderDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<decimal>("TotalAmount")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("OrderId");
+
+                    b.HasIndex("CartId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("Order");
+                });
+
+            modelBuilder.Entity("SWD392.DB.OrderDetail", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("OrderId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ProductId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Quantity")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("Subtotal")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("OrderId");
+
+                    b.HasIndex("ProductId");
+
+                    b.ToTable("OrderDetails");
                 });
 
             modelBuilder.Entity("SWD392.DB.Packaging", b =>
@@ -427,6 +574,9 @@ namespace SWD392.Migrations
                     b.Property<int>("Quantity")
                         .HasColumnType("int");
 
+                    b.Property<int>("UnitId")
+                        .HasColumnType("int");
+
                     b.HasKey("Id");
 
                     b.HasIndex("BrandId");
@@ -442,6 +592,8 @@ namespace SWD392.Migrations
                     b.HasIndex("PackagingId");
 
                     b.HasIndex("ProductDetailId");
+
+                    b.HasIndex("UnitId");
 
                     b.ToTable("Product");
                 });
@@ -487,6 +639,41 @@ namespace SWD392.Migrations
                     b.ToTable("ProductDetail");
                 });
 
+            modelBuilder.Entity("SWD392.DB.Review", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Content")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("OrderDetailId")
+                        .HasColumnType("int");
+
+                    b.Property<double>("Rating")
+                        .HasColumnType("float");
+
+                    b.Property<DateTime>("ReviewDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("OrderDetailId")
+                        .IsUnique();
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("Review");
+                });
+
             modelBuilder.Entity("SWD392.DB.Solution", b =>
                 {
                     b.Property<int>("Id")
@@ -503,6 +690,51 @@ namespace SWD392.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Solution");
+                });
+
+            modelBuilder.Entity("SWD392.DB.Transaction", b =>
+                {
+                    b.Property<int>("TransactionId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("TransactionId"));
+
+                    b.Property<string>("Account")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("AccountName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("AccountNumber")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("BankName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("CreatedTransaction")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("ReasonWithdrawReject")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("TransactionEnum")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("WalletId")
+                        .HasColumnType("int");
+
+                    b.HasKey("TransactionId");
+
+                    b.HasIndex("WalletId");
+
+                    b.ToTable("Transaction");
                 });
 
             modelBuilder.Entity("SWD392.DB.Unit", b =>
@@ -523,30 +755,20 @@ namespace SWD392.Migrations
                     b.ToTable("Unit");
                 });
 
-            modelBuilder.Entity("SWD392.DB.UnitProduct", b =>
+            modelBuilder.Entity("SWD392.DB.Wallet", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<int>("WalletId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("WalletId"));
 
-                    b.Property<int>("Price")
-                        .HasColumnType("int");
+                    b.Property<decimal>("AmountOfMoney")
+                        .HasColumnType("decimal(18,2)");
 
-                    b.Property<int>("ProductId")
-                        .HasColumnType("int");
+                    b.HasKey("WalletId");
 
-                    b.Property<int>("UnitId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ProductId");
-
-                    b.HasIndex("UnitId");
-
-                    b.ToTable("UnitProduct");
+                    b.ToTable("Wallet");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -600,6 +822,41 @@ namespace SWD392.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("SWD392.DB.ApplicationUser", b =>
+                {
+                    b.HasOne("SWD392.DB.Cart", "Cart")
+                        .WithOne("User")
+                        .HasForeignKey("SWD392.DB.ApplicationUser", "CartId");
+
+                    b.HasOne("SWD392.DB.Wallet", "Wallet")
+                        .WithOne("User")
+                        .HasForeignKey("SWD392.DB.ApplicationUser", "WalletId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("Cart");
+
+                    b.Navigation("Wallet");
+                });
+
+            modelBuilder.Entity("SWD392.DB.CartProduct", b =>
+                {
+                    b.HasOne("SWD392.DB.Cart", "Cart")
+                        .WithMany("CartProducts")
+                        .HasForeignKey("CartId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("SWD392.DB.Product", "Product")
+                        .WithMany("CartProducts")
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Cart");
+
+                    b.Navigation("Product");
+                });
+
             modelBuilder.Entity("SWD392.DB.Category", b =>
                 {
                     b.HasOne("SWD392.DB.Solution", "Solution")
@@ -611,15 +868,72 @@ namespace SWD392.Migrations
                     b.Navigation("Solution");
                 });
 
+            modelBuilder.Entity("SWD392.DB.Comment", b =>
+                {
+                    b.HasOne("SWD392.DB.Review", "Review")
+                        .WithOne("Comment")
+                        .HasForeignKey("SWD392.DB.Comment", "ReviewId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("SWD392.DB.ApplicationUser", "User")
+                        .WithMany("Comments")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.Navigation("Review");
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("SWD392.DB.Image", b =>
                 {
-                    b.HasOne("SWD392.DB.Product", "product")
+                    b.HasOne("SWD392.DB.Product", "Product")
                         .WithMany("Images")
                         .HasForeignKey("ProductId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("product");
+                    b.Navigation("Product");
+                });
+
+            modelBuilder.Entity("SWD392.DB.Order", b =>
+                {
+                    b.HasOne("SWD392.DB.Cart", "Cart")
+                        .WithMany("Orders")
+                        .HasForeignKey("CartId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("SWD392.DB.ApplicationUser", "User")
+                        .WithMany("Orders")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.Navigation("Cart");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("SWD392.DB.OrderDetail", b =>
+                {
+                    b.HasOne("SWD392.DB.Order", "Order")
+                        .WithMany("OrderDetails")
+                        .HasForeignKey("OrderId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("SWD392.DB.Product", "Product")
+                        .WithMany("OrderDetails")
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Order");
+
+                    b.Navigation("Product");
                 });
 
             modelBuilder.Entity("SWD392.DB.Product", b =>
@@ -666,6 +980,12 @@ namespace SWD392.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("SWD392.DB.Unit", "Unit")
+                        .WithMany("products")
+                        .HasForeignKey("UnitId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.Navigation("Brand");
 
                     b.Navigation("BrandOrigin");
@@ -679,25 +999,47 @@ namespace SWD392.Migrations
                     b.Navigation("Packaging");
 
                     b.Navigation("ProductDetail");
-                });
-
-            modelBuilder.Entity("SWD392.DB.UnitProduct", b =>
-                {
-                    b.HasOne("SWD392.DB.Product", "products")
-                        .WithMany("UnitProducts")
-                        .HasForeignKey("ProductId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("SWD392.DB.Unit", "Unit")
-                        .WithMany("UnitProducts")
-                        .HasForeignKey("UnitId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
 
                     b.Navigation("Unit");
+                });
 
-                    b.Navigation("products");
+            modelBuilder.Entity("SWD392.DB.Review", b =>
+                {
+                    b.HasOne("SWD392.DB.OrderDetail", "OrderDetail")
+                        .WithOne("Review")
+                        .HasForeignKey("SWD392.DB.Review", "OrderDetailId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("SWD392.DB.ApplicationUser", "User")
+                        .WithMany("Reviews")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.Navigation("OrderDetail");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("SWD392.DB.Transaction", b =>
+                {
+                    b.HasOne("SWD392.DB.Wallet", "Wallet")
+                        .WithMany("Transactions")
+                        .HasForeignKey("WalletId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Wallet");
+                });
+
+            modelBuilder.Entity("SWD392.DB.ApplicationUser", b =>
+                {
+                    b.Navigation("Comments");
+
+                    b.Navigation("Orders");
+
+                    b.Navigation("Reviews");
                 });
 
             modelBuilder.Entity("SWD392.DB.Brand", b =>
@@ -708,6 +1050,16 @@ namespace SWD392.Migrations
             modelBuilder.Entity("SWD392.DB.BrandOrigin", b =>
                 {
                     b.Navigation("products");
+                });
+
+            modelBuilder.Entity("SWD392.DB.Cart", b =>
+                {
+                    b.Navigation("CartProducts");
+
+                    b.Navigation("Orders");
+
+                    b.Navigation("User")
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("SWD392.DB.Category", b =>
@@ -725,6 +1077,17 @@ namespace SWD392.Migrations
                     b.Navigation("products");
                 });
 
+            modelBuilder.Entity("SWD392.DB.Order", b =>
+                {
+                    b.Navigation("OrderDetails");
+                });
+
+            modelBuilder.Entity("SWD392.DB.OrderDetail", b =>
+                {
+                    b.Navigation("Review")
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("SWD392.DB.Packaging", b =>
                 {
                     b.Navigation("products");
@@ -732,14 +1095,22 @@ namespace SWD392.Migrations
 
             modelBuilder.Entity("SWD392.DB.Product", b =>
                 {
+                    b.Navigation("CartProducts");
+
                     b.Navigation("Images");
 
-                    b.Navigation("UnitProducts");
+                    b.Navigation("OrderDetails");
                 });
 
             modelBuilder.Entity("SWD392.DB.ProductDetail", b =>
                 {
                     b.Navigation("products");
+                });
+
+            modelBuilder.Entity("SWD392.DB.Review", b =>
+                {
+                    b.Navigation("Comment")
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("SWD392.DB.Solution", b =>
@@ -749,7 +1120,15 @@ namespace SWD392.Migrations
 
             modelBuilder.Entity("SWD392.DB.Unit", b =>
                 {
-                    b.Navigation("UnitProducts");
+                    b.Navigation("products");
+                });
+
+            modelBuilder.Entity("SWD392.DB.Wallet", b =>
+                {
+                    b.Navigation("Transactions");
+
+                    b.Navigation("User")
+                        .IsRequired();
                 });
 #pragma warning restore 612, 618
         }
