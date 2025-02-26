@@ -26,6 +26,8 @@ namespace SWD392.DB
 
         public ICollection<Image> Images { get; set; } = new List<Image>();
 
+        public ICollection<CartProduct> CartProducts { get; set; } = new List<CartProduct>();
+
         public int BrandId { get; set; }
         [ForeignKey("BrandId")]
         public Brand Brand { get; set; }
