@@ -23,9 +23,14 @@ namespace SWD392.DB
 
         public int? DiscountId { get; set; }
 
+        public int CartId { get; set; }
+
         [ForeignKey("UserId")]
         [JsonIgnore]
         public ApplicationUser User { get; set; }
+
+        [ForeignKey("CartId")]
+        public Cart Cart { get; set; }
 
         public ICollection<OrderDetail> OrderDetails { get; set; } = new List<OrderDetail>();
     }

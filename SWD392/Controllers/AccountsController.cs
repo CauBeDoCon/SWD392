@@ -84,6 +84,23 @@ namespace SWD392.Controllers
                     return StatusCode(500, new { Message = "Lỗi hệ thống: Không tìm thấy tài khoản sau khi đăng ký!" });
                 }
 
+                int newCartId;
+                do
+                {
+                    newCartId = Math.Abs(Guid.NewGuid().GetHashCode());
+                } while (await _context.carts.AnyAsync(w => w.Id == newCartId));
+
+                var cart = new Cart { };
+
+                _context.carts.Add(cart);
+                await _context.SaveChangesAsync();
+
+                user.CartId = cart.Id;
+                _context.Users.Update(user);
+                await _context.SaveChangesAsync();
+
+                Console.WriteLine($"✅ Đã tạo CartId {cart.Id} cho User {user.Id}");
+
                 int newWalletId;
                 do
                 {

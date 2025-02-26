@@ -30,7 +30,8 @@ namespace SWD392.Controllers
                     OrderDate = o.OrderDate,
                     TotalAmount = o.TotalAmount,
                     Status = o.Status,
-                    DiscountId = o.DiscountId
+                    DiscountId = o.DiscountId,
+                    CartId = o.CartId
                 })
                 .ToListAsync();
         }
@@ -52,7 +53,8 @@ namespace SWD392.Controllers
                 OrderDate = order.OrderDate,
                 TotalAmount = order.TotalAmount,
                 Status = order.Status,
-                DiscountId = order.DiscountId
+                DiscountId = order.DiscountId,
+                CartId = order.CartId
             };
         }
 
@@ -65,7 +67,8 @@ namespace SWD392.Controllers
                 OrderDate = orderDto.OrderDate,
                 TotalAmount = orderDto.TotalAmount,
                 Status = orderDto.Status,
-                DiscountId = orderDto.DiscountId
+                DiscountId = orderDto.DiscountId,
+                CartId = orderDto.CartId
             };
 
             _context.Orders.Add(order);
@@ -93,6 +96,7 @@ namespace SWD392.Controllers
             order.TotalAmount = orderDto.TotalAmount;
             order.Status = orderDto.Status;
             order.DiscountId = orderDto.DiscountId;
+            order.CartId = orderDto.CartId;
 
             await _context.SaveChangesAsync();
             return NoContent();

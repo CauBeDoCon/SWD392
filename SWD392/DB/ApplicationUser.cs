@@ -14,6 +14,9 @@ namespace SWD392.DB
         public int? CartId { get; set; }
         public int? WalletId { get; set; }
 
+        [ForeignKey("CartId")]
+        public Cart Cart { get; set; }
+
         [ForeignKey("WalletId")]
         public Wallet Wallet { get; set; }
     }

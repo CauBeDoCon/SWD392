@@ -26,6 +26,8 @@ namespace SWD392.DB
         public DbSet<OrderDetail>? OrderDetails { get; set; }
         public DbSet<Wallet>? Wallets { get; set; }
         public DbSet<Transaction>? Transactions { get; set; }
+        public DbSet<CartProduct>? cartProducts { get; set; }
+        public DbSet<Cart>? carts { get; set; }
 
         #endregion
 
@@ -92,6 +94,30 @@ namespace SWD392.DB
                 .HasOne(p => p.ProductDetail)
                 .WithMany(pd => pd.products)
                 .HasForeignKey(p => p.ProductDetailId);
+
+            modelBuilder.Entity<CartProduct>()
+                .HasOne(i => i.Product)
+                .WithMany(s => s.CartProducts)
+                .HasForeignKey(i => i.ProductId);
+
+            modelBuilder.Entity<CartProduct>()
+                .HasOne(i => i.Cart)
+                .WithMany(s => s.CartProducts)
+                .HasForeignKey(i => i.CartId);
+
+            modelBuilder.Entity<Order>()
+                .HasOne(i => i.Cart)
+                .WithMany(s => s.Orders)
+                .HasForeignKey(i => i.CartId);
+
+            modelBuilder.Entity<Cart>()
+                .HasOne(r => r.User)
+                .WithOne(c => c.Cart)
+                .HasForeignKey<ApplicationUser>(c => c.CartId);
+
+            modelBuilder.Entity<ApplicationUser>()
+                .HasIndex(c => c.CartId)
+                .IsUnique();
 
         }
     }

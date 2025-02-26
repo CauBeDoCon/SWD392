@@ -8,6 +8,7 @@
         public decimal TotalAmount { get; set; }
         public string Status { get; set; }
         public int? DiscountId { get; set; }
+        public int CartId { get; set; }
     }
 
 }
