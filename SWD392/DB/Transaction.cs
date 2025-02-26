@@ -20,7 +20,9 @@ namespace SWD392.DB
         public string BankName { get; set; }
         public string AccountName { get; set; }
         public string AccountNumber { get; set; }
-        public string ReasonWithdrawReject { get; set; }
+        [Required]
+        public decimal Amount { get; set; }
+        public string? ReasonWithdrawReject { get; set; }
 
         public string TransactionEnum { get; set; }
 
