@@ -16,8 +16,14 @@ public class CartController : ControllerBase
     [HttpGet("{cartId}")]
     public async Task<IActionResult> GetCartProducts(int cartId)
     {
-        var products = await _cartRepository.GetCartProductsAsync(cartId);
-        return Ok(products);
+        var cartProducts = await _cartRepository.GetCartProductsAsync(cartId);
+
+        if (cartProducts == null || !cartProducts.Any())
+        {
+            return NotFound(new { message = "Cart is empty!" });
+        }
+
+        return Ok(cartProducts);
     }
 
     [HttpDelete("{cartId}/product/{productId}")]

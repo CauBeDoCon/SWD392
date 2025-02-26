@@ -12,5 +12,7 @@ namespace SWD392.Repositories
 
         public Task UpdateOrderAsync(int id, OrderModel model);
         public Task<string> DeleteOrderAsync(int id);
+        // Phương thức mới cho quy trình đặt hàng đầy đủ
+        Task<bool> PlaceOrderAsync(int cartId, string userId);
     }
 }

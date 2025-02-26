@@ -95,5 +95,84 @@ namespace SWD392.Repositories
 
             await _context.SaveChangesAsync();
         }
+
+        public async Task<bool> PlaceOrderAsync(int cartId, string userId)
+        {
+            using var transaction = await _context.Database.BeginTransactionAsync();
+            try
+            {
+                // Lấy giỏ hàng kèm thông tin CartProducts và Product
+                var cart = await _context.carts
+                    .Include(c => c.CartProducts)
+                        .ThenInclude(cp => cp.Product)
+                    .FirstOrDefaultAsync(c => c.Id == cartId);
+
+                if (cart == null || !cart.CartProducts.Any())
+                {
+                    return false; // Giỏ hàng trống hoặc không tồn tại
+                }
+
+                // Tính tổng tiền đơn hàng
+                double totalAmount = cart.CartProducts.Sum(cp => cp.Quantity * cp.Product.Price);
+
+                // Kiểm tra tồn kho của từng sản phẩm
+                foreach (var cp in cart.CartProducts)
+                {
+                    if (cp.Product.StockRemaining < cp.Quantity)
+                    {
+                        throw new Exception($"Sản phẩm {cp.Product.Name} không đủ số lượng tồn kho.");
+                    }
+                }
+
+                // Tạo Order với trạng thái ban đầu "Pending"
+                var order = new Order
+                {
+                    UserId = userId,
+                    OrderDate = DateTime.UtcNow,
+                    TotalAmount = (decimal)totalAmount,
+                    Status = "Pending",
+                    CartId = cartId
+                };
+                _context.Orders.Add(order);
+                await _context.SaveChangesAsync();
+
+                // Xử lý từng sản phẩm trong giỏ hàng
+                foreach (var cp in cart.CartProducts)
+                {
+                    // Trừ số lượng tồn kho
+                    cp.Product.StockRemaining -= cp.Quantity;
+
+                    // Tạo OrderDetail cho sản phẩm này
+                    var orderDetail = new OrderDetail
+                    {
+                        OrderId = order.OrderId,
+                        ProductId = cp.ProductId,
+                        Quantity = cp.Quantity,
+                        Subtotal = (decimal)(cp.Quantity * cp.Product.Price)
+                    };
+                    _context.OrderDetails.Add(orderDetail);
+
+                    // Nếu muốn, cập nhật trạng thái của CartProduct
+                    cp.Status = "Ordered";
+                }
+
+                // Xoá toàn bộ sản phẩm trong giỏ hàng sau khi đặt hàng thành công
+                _context.cartProducts.RemoveRange(cart.CartProducts);
+
+                // Cập nhật trạng thái đơn hàng thành "Success"
+                order.Status = "Success";
+
+                await _context.SaveChangesAsync();
+                await transaction.CommitAsync();
+
+                return true;
+            }
+            catch (Exception)
+            {
+                await transaction.RollbackAsync();
+                // Có thể log lỗi nếu cần
+                return false;
+            }
+        }
     }
 }

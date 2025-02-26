@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using SWD392.DTOs;
 using SWD392.Models;
 using SWD392.Repositories;
+using System.Security.Claims;
 
 namespace SWD392.Controllers
 {
@@ -102,6 +103,26 @@ namespace SWD392.Controllers
             {
                 return StatusCode(500, new { message = "Đã có lỗi xảy ra." });
             }
+        }
+
+        [HttpPost("place-order/{cartId}")]
+        [Authorize]
+        public async Task<IActionResult> PlaceOrder(int cartId)
+        {
+            // Lấy userId từ token
+            string userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userId))
+            {
+                return Unauthorized(new { message = "User không hợp lệ." });
+            }
+
+            var result = await _orderRepo.PlaceOrderAsync(cartId, userId);
+            if (!result)
+            {
+                return BadRequest(new { message = "Đặt hàng thất bại: không đủ số lượng tồn kho hoặc lỗi khác." });
+            }
+
+            return Ok(new { message = "Đặt hàng thành công!" });
         }
 
         [HttpDelete("{id}")]

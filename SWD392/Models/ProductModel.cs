@@ -14,8 +14,13 @@ namespace SWD392.Models
         [Range(0, double.MaxValue)]
         public double Price { get; set; }
 
-        [Range(0, 1000)]
-        public int Quantity { get; set; }
+        // Số lượng ban đầu khi nhập hàng
+        [Range(0, 10000)]
+        public int InitialStock { get; set; }
+
+        // Số lượng còn lại sau khi bán
+        [Range(0, 10000)]
+        public int StockRemaining { get; set; }
 
         public int UnitId { get; set; }
 

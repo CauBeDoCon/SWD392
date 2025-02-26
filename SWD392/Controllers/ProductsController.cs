@@ -60,7 +60,8 @@ namespace SWD392.Controllers
                 Name = dto.Name,
                 Description = dto.Description,
                 Price = dto.Price,
-                Quantity = dto.Quantity,
+                InitialStock = dto.InitialStock,
+                StockRemaining = dto.StockRemaining,
                 UnitId = dto.UnitId,
                 BrandId = dto.BrandId,
                 PackagingId = dto.PackagingId,
@@ -91,7 +92,8 @@ namespace SWD392.Controllers
                 existingProduct.Name = dto.Name;
                 existingProduct.Description = dto.Description;
                 existingProduct.Price = dto.Price;
-                existingProduct.Quantity = dto.Quantity;
+                existingProduct.InitialStock = dto.InitialStock;
+                existingProduct.StockRemaining = dto.StockRemaining;
                 existingProduct.UnitId = dto.UnitId;
                 existingProduct.BrandId = dto.BrandId;
                 existingProduct.PackagingId = dto.PackagingId;
