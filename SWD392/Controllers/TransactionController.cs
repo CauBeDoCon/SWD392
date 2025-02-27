@@ -35,7 +35,9 @@ namespace SWD392.Controllers
                     AccountName = t.AccountName,
                     AccountNumber = t.AccountNumber,
                     ReasonWithdrawReject = t.ReasonWithdrawReject,
-                    TransactionEnum = t.TransactionEnum
+                    TransactionEnum = t.TransactionEnum,
+                    Amount=t.Amount,
+                    Type= t.Type
                 })
                 .ToListAsync();
         }
@@ -60,7 +62,9 @@ namespace SWD392.Controllers
                 AccountName = transaction.AccountName,
                 AccountNumber = transaction.AccountNumber,
                 ReasonWithdrawReject = transaction.ReasonWithdrawReject,
-                TransactionEnum = transaction.TransactionEnum
+                TransactionEnum = transaction.TransactionEnum,
+                Amount = transaction.Amount,
+                Type = transaction.Type
             };
         }
 
@@ -114,7 +118,10 @@ namespace SWD392.Controllers
                 AccountName = transaction.AccountName,
                 AccountNumber = transaction.AccountNumber,
                 TransactionEnum = transaction.TransactionEnum,
-                ReasonWithdrawReject = transaction.ReasonWithdrawReject
+                ReasonWithdrawReject = transaction.ReasonWithdrawReject,
+                Amount = transaction.Amount,
+                Type = transaction.Type
+
             });
         }
 
@@ -206,7 +213,9 @@ namespace SWD392.Controllers
                     AccountName = t.AccountName,
                     AccountNumber = t.AccountNumber,
                     ReasonWithdrawReject = t.ReasonWithdrawReject,
-                    TransactionEnum = t.TransactionEnum
+                    TransactionEnum = t.TransactionEnum,
+                    Amount = t.Amount,
+                    Type = t.Type
                 })
                 .ToListAsync();
 
@@ -229,7 +238,9 @@ namespace SWD392.Controllers
                     AccountName = t.AccountName,
                     AccountNumber = t.AccountNumber,
                     ReasonWithdrawReject = t.ReasonWithdrawReject,
-                    TransactionEnum = t.TransactionEnum
+                    TransactionEnum = t.TransactionEnum,
+                    Amount = t.Amount,
+                    Type = t.Type
                 })
                 .ToListAsync();
 
