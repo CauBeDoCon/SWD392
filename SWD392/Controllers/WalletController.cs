@@ -131,7 +131,7 @@ namespace SWD392.Controllers
                     CreatedTransaction = DateTime.UtcNow,
                     BankName = "VNPay",
                     AccountName = user.FirstName,
-                    AccountNumber = "N/A",
+                    AccountNumber = "VNPay",
                     Amount = vnp_Amount,
                     TransactionEnum = "Completed",
                     Type = "Deposit",
