@@ -95,6 +95,7 @@ namespace SWD392.Controllers
                 BankName = request.BankName,
                 AccountName = request.AccountName,
                 AccountNumber = request.AccountNumber,
+                Type = "Withdraw",
                 TransactionEnum = "Pending",  
                 ReasonWithdrawReject = string.Empty,
                 Amount = request.Amount
@@ -161,13 +162,14 @@ namespace SWD392.Controllers
                 transaction.TransactionEnum = "Rejected";
                 transaction.ReasonWithdrawReject = request.ReasonReject;
             }
-
+            transaction.Type = "Withdraw";
             await _context.SaveChangesAsync();
 
             return Ok(new
             {
                 Message = request.IsApproved ? "Giao dịch đã được chấp nhận và trừ tiền trong ví." : "Giao dịch đã bị từ chối.",
                 TransactionStatus = transaction.TransactionEnum,
+                Type = transaction.Type,
                 NewBalance = userWallet.AmountOfMoney
             });
         }

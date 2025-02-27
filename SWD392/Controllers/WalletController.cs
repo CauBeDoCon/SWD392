@@ -124,7 +124,21 @@ namespace SWD392.Controllers
                 }
 
                 user.Wallet.AmountOfMoney += vnp_Amount;
+                var depositTransaction = new Transaction
+                {
+                    WalletId = user.Wallet.WalletId,
+                    Account = user.Email,
+                    CreatedTransaction = DateTime.UtcNow,
+                    BankName = "VNPay",
+                    AccountName = user.FirstName,
+                    AccountNumber = "N/A",
+                    Amount = vnp_Amount,
+                    TransactionEnum = "Completed",
+                    Type = "Deposit",
+                    ReasonWithdrawReject = null
+                };
 
+                _context.Transactions.Add(depositTransaction);
                 await _context.SaveChangesAsync();
 
                 return Redirect("http://localhost:5173/deposite");

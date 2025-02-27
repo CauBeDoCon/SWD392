@@ -26,7 +26,8 @@ namespace SWD392.DB
 
         public string TransactionEnum { get; set; }
 
-        // Navigation Property
+        public string Type { get; set; } = "Withdraw";
+
         [ForeignKey("WalletId")]
         public Wallet Wallet { get; set; }
     }
