@@ -33,5 +33,9 @@ namespace SWD392.DB
         public Cart Cart { get; set; }
 
         public ICollection<OrderDetail> OrderDetails { get; set; } = new List<OrderDetail>();
+
+        public ICollection<Return> Returns { get; set; } = new List<Return>();
+
+        public Shipping Shipping { get; set; }
     }
 }

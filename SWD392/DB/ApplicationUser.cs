@@ -19,5 +19,20 @@ namespace SWD392.DB
 
         [ForeignKey("WalletId")]
         public Wallet Wallet { get; set; }
+
+        public ICollection<Blog> Blogs{ get; set; } = new List<Blog>();
+
+        public ICollection<Notification> Notifications { get; set; } = new List<Notification>();
+
+        public ICollection<Comment> Comments { get; set; } = new List<Comment>();
+
+        public ICollection<Review> Reviews { get; set; } = new List<Review>();
+
+        public ICollection<ResultQuiz> ResultQuizzes { get; set; } = new List<ResultQuiz>();
+
+        public ICollection<Booking> Bookings { get; set; } = new List<Booking>();
+
+        public ICollection<TimeFrame> TimeFrames { get; set; } = new List<TimeFrame>();
+
     }
 }

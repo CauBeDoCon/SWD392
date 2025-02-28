@@ -51,6 +51,34 @@ namespace SkincarePharmacyNetCore8.Helpers
             CreateMap<ProductDetail, ProductDetailModel>().ReverseMap();
 
             CreateMap<CartProduct, CartProductModel>().ReverseMap();
+
+            CreateMap<Blog, BlogModel>().ReverseMap();
+
+            CreateMap<Notification, NotificationModel>().ReverseMap();
+
+            CreateMap<Comment, CommentModel>().ReverseMap();
+
+            CreateMap<Review, ReviewModel>().ReverseMap();
+
+            CreateMap<Shipping, ShippingModel>().ReverseMap();
+
+            CreateMap<ShippingMethod, ShippingMethodModel>().ReverseMap();
+
+            CreateMap<Return, ReturnModel>().ReverseMap();
+
+            CreateMap<ResultQuiz, ResultQuizModel>().ReverseMap();
+
+            CreateMap<Routine, RoutineModel>().ReverseMap();
+
+            CreateMap<RecommendProduct, RecommendProductModel>().ReverseMap();
+
+            CreateMap<Booking, BookingModel>().ReverseMap();
+
+            CreateMap<BookingHistory, BookingHistoryModel>().ReverseMap();
+
+            CreateMap<BookingResult, BookingResultModel>().ReverseMap();
+
+            CreateMap<TimeFrame, TimeFrameModel>().ReverseMap();
         }
     }
 }

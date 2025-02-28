@@ -95,6 +95,34 @@ builder.Services.AddScoped<ICartProductRepository, CartProductRepository>();
 
 builder.Services.AddScoped<ICartRepository, CartRepository>();
 
+builder.Services.AddScoped<ICommentRepository, CommentRepository>();
+
+builder.Services.AddScoped<IReviewRepository, ReviewRepository>();
+
+builder.Services.AddScoped<IBlogRepository, BlogRepository>();
+
+builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
+
+builder.Services.AddScoped<IShippingRepository, ShippingRepository>();
+
+builder.Services.AddScoped<IShippingMethodRepository, ShippingMethodRepository>();
+
+builder.Services.AddScoped<IResultQuizRepository, ResultQuizRepository>();
+
+builder.Services.AddScoped<IRoutineRepository, RoutineRepository>();
+
+builder.Services.AddScoped<IRecommendProductRepository, RecommendProductRepository>();
+
+builder.Services.AddScoped<IReturnRepository, ReturnRepository>();
+
+builder.Services.AddScoped<IBookingRepository, BookingRepository>();
+
+builder.Services.AddScoped<IBookingResultRepository, BookingResultRepository>();
+
+builder.Services.AddScoped<IBookingHistoryRepository, BookingHistoryRepository>();
+
+builder.Services.AddScoped<ITimeFrameRepository, TimeFrameRepository>();
+
 
 builder.Services.AddAuthentication(options =>
 {
@@ -138,9 +166,8 @@ if (app.Environment.IsDevelopment())
 
 app.UseCors("AllowFrontend"); // Kích hoạt CORS
 app.UseHttpsRedirection();
-app.UseAuthentication(); // Đảm bảo middleware Authentication chạy trước Authorization
+app.UseAuthentication();
 app.UseHttpsRedirection();
-
 app.UseAuthorization();
 app.MapControllers();
 

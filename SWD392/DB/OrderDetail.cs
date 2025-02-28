@@ -23,5 +23,7 @@ namespace SWD392.DB
         // Navigation Properties
         [ForeignKey("OrderId")]
         public Order Order { get; set; }
+
+        public Review Review { get; set; }
     }
 }

@@ -28,6 +28,21 @@ namespace SWD392.DB
         public DbSet<Transaction>? Transactions { get; set; }
         public DbSet<CartProduct>? cartProducts { get; set; }
         public DbSet<Cart>? carts { get; set; }
+        public DbSet<Blog> Blogs { get; set; }
+        public DbSet<Notification> Notifications { get; set; }
+        public DbSet<Comment> Comments { get; set; }
+        public DbSet<Review> Reviews { get; set; }
+        public DbSet<Shipping> Shippings { get; set; }
+        public DbSet<ShippingMethod> ShippingMethods { get; set; }
+        public DbSet<Return> Returns { get; set; }
+        public DbSet<ResultQuiz> ResultQuizzes { get; set; }
+        public DbSet<Routine> Routines { get; set; }
+        public DbSet<RecommendProduct> RecommendProducts { get; set; }
+        public DbSet<Booking> Bookings { get; set; }
+        public DbSet<BookingHistory> BookingHistories { get; set; }
+        public DbSet<BookingResult> BookingResults { get; set; }
+        public DbSet<TimeFrame> TimeFrames { get; set; }
+
 
         #endregion
 
@@ -119,6 +134,130 @@ namespace SWD392.DB
                 .HasIndex(c => c.CartId)
                 .IsUnique();
 
+            modelBuilder.Entity<Blog>()
+                .HasOne(i => i.User)
+                .WithMany(s => s.Blogs)
+                .HasForeignKey(i => i.UserId);
+
+            modelBuilder.Entity<Notification>()
+                .HasOne(i => i.User)
+                .WithMany(s => s.Notifications)
+                .HasForeignKey(i => i.UserId);
+
+            modelBuilder.Entity<Comment>()
+                .HasOne(i => i.User)
+                .WithMany(s => s.Comments)
+                .HasForeignKey(i => i.UserId);
+
+            modelBuilder.Entity<Review>()
+                .HasOne(i => i.User)
+                .WithMany(s => s.Reviews)
+                .HasForeignKey(i => i.UserId);
+
+            modelBuilder.Entity<Review>()
+                .HasOne(r => r.Comment)
+                .WithOne(c => c.Review)
+                .HasForeignKey<Comment>(c => c.ReviewId);
+
+            modelBuilder.Entity<Comment>()
+                .HasIndex(c => c.ReviewId)
+                .IsUnique();
+
+            modelBuilder.Entity<OrderDetail>()
+                .HasOne(r => r.Review)
+                .WithOne(c => c.OrderDetail)
+                .HasForeignKey<Review>(c => c.OrderDetailId);
+
+            modelBuilder.Entity<Review>()
+                .HasIndex(c => c.OrderDetailId)
+                .IsUnique();
+
+            modelBuilder.Entity<ShippingMethod>()
+                .HasOne(r => r.Shipping)
+                .WithOne(c => c.ShippingMethod)
+                .HasForeignKey<Shipping>(c => c.ShippingMethodId);
+
+            modelBuilder.Entity<Shipping>()
+                .HasIndex(c => c.ShippingMethodId)
+                .IsUnique();
+
+            modelBuilder.Entity<Order>()
+                .HasOne(r => r.Shipping)
+                .WithOne(c => c.Order)
+                .HasForeignKey<Shipping>(c => c.OrderId);
+
+            modelBuilder.Entity<Shipping>()
+                .HasIndex(c => c.OrderId)
+                .IsUnique();
+
+            modelBuilder.Entity<Shipping>()
+                .HasOne(r => r.Return)
+                .WithOne(c => c.Shipping)
+                .HasForeignKey<Return>(c => c.ShippingId);
+
+            modelBuilder.Entity<Return>()
+                .HasIndex(c => c.ShippingId)
+                .IsUnique();
+
+            modelBuilder.Entity<Return>()
+                .HasOne(i => i.Order)
+                .WithMany(s => s.Returns)
+                .HasForeignKey(i => i.OrderId);
+
+            modelBuilder.Entity<Return>()
+                .HasOne(i => i.Product)
+                .WithMany(s => s.Returns)
+                .HasForeignKey(i => i.ProductId);
+
+            modelBuilder.Entity<ResultQuiz>()
+                .HasOne(i => i.User)
+                .WithMany(s => s.ResultQuizzes)
+                .HasForeignKey(i => i.UserId);
+
+            modelBuilder.Entity<Routine>()
+                .HasOne(i => i.ResultQuiz)
+                .WithMany(s => s.Routines)
+                .HasForeignKey(i => i.ResultQuizId);
+
+            modelBuilder.Entity<RecommendProduct>()
+                .HasOne(i => i.Routine)
+                .WithMany(s => s.RecommendProducts)
+                .HasForeignKey(i => i.RoutineId);
+
+            modelBuilder.Entity<RecommendProduct>()
+                .HasOne(i => i.Product)
+                .WithMany(s => s.RecommendProducts)
+                .HasForeignKey(i => i.ProductId);
+
+            modelBuilder.Entity<BookingHistory>()
+                .HasOne(i => i.Booking)
+                .WithMany(s => s.BookingHistories)
+                .HasForeignKey(i => i.BookingId);
+
+            modelBuilder.Entity<Booking>()
+                .HasOne(r => r.BookingResult)
+                .WithOne(c => c.Booking)
+                .HasForeignKey<BookingResult>(c => c.BookingId);
+
+            modelBuilder.Entity<BookingResult>()
+                .HasIndex(c => c.BookingId)
+                .IsUnique();
+
+            modelBuilder.Entity<Booking>()
+                .HasOne(i => i.User)
+                .WithMany(s => s.Bookings)
+                .HasForeignKey(i => i.UserId);
+
+            modelBuilder.Entity<TimeFrame>()
+                .HasOne(i => i.User)
+                .WithMany(s => s.TimeFrames)
+                .HasForeignKey(i => i.UserId);
+
+            modelBuilder.Entity<Booking>()
+                .HasOne(i => i.TimeFrame)
+                .WithMany(s => s.Bookings)
+                .HasForeignKey(i => i.TimeFrameId)
+                .OnDelete(DeleteBehavior.Restrict);
         }
     }
 }
