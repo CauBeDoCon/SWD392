@@ -144,18 +144,34 @@ namespace SWD392.Controllers
         {
             return Ok(await accountRepo.GetAllAccountsAsync());
         }
-       
+        [HttpGet("GetAllCustomers")]
+        [Authorize(Roles = "Admin,Manager")] 
+        public async Task<IActionResult> GetAllCustomers()
+        {
+            var customers = await accountRepo.GetAllCustomersAsync();
+
+            var customerList = customers.Select(u => new CustomerDTO
+            {
+                Id = u.Id,
+                FullName = $"{u.FirstName} {u.LastName}",
+                Email = u.Email,
+                PhoneNumber = u.PhoneNumber,
+                Address = u.Address,
+                WalletId = u.WalletId,
+                CartId = u.CartId
+            }).ToList();
+
+            return Ok(customerList);
+        }
+
         [HttpGet("GetCurrentAccount")]
         public async Task<IActionResult> GetCurrentAccount()
         {
-            // Trích xuất userId từ JWT token (từ ClaimTypes.NameIdentifier)
              var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             if (string.IsNullOrEmpty(userId))
             {
                 return Unauthorized();
             }
-            
-            // Gọi service để lấy thông tin tài khoản hiện tại theo userId
             var account = await accountRepo.GetAccountByIdAsync(userId);
             if (account == null)
             {
