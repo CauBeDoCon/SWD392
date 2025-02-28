@@ -130,14 +130,27 @@ namespace SWD392.Controllers
         [HttpPost("SignIn")]
         public async Task<IActionResult> SignIn([FromBody] SignInModel signInModel)
         {
+            var user = await accountRepo.GetUserByUsernameAsync(signInModel.Username); 
+
+            if (user == null)
+            {
+                return Unauthorized(new { Message = "Tài khoản hoặc mật khẩu không đúng!" });
+            }
+
+        
+            if (user.Status == "Banned")
+            {
+                return Unauthorized(new { Message = "Tài khoản của bạn đã bị cấm rồi nghen. Lêu lêu !!!" });
+            }
+
             var result = await accountRepo.SignInAsync(signInModel);
 
             if (result == null)
             {
-                return Unauthorized(new { Message = "Email hoặc mật khẩu không đúng!" });
+                return Unauthorized(new { Message = "Tài khoản hoặc mật khẩu không đúng!" });
             }
 
-            return Ok( result);
+            return Ok(result);
         }
         [HttpGet("GetAllAccount")]
         public async Task<IActionResult> GetAllAccounts()
@@ -225,6 +238,32 @@ namespace SWD392.Controllers
         public async Task<IActionResult> SignUpStaff([FromBody] SignUpDTO signUpDto)
         {
             return await SignUp(signUpDto, AppRole.Staff);
+        }
+
+        [HttpPut("ToggleUserStatus/{userId}")]
+        [Authorize(Roles = "Admin,Manager")]
+        public async Task<IActionResult> ToggleUserStatus(string userId)
+        {
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user == null)
+            {
+                return NotFound(new { Message = "Không tìm thấy người dùng." });
+            }
+
+            
+            user.Status = user.Status == "Active" ? "Banned" : "Active";
+
+            var result = await _userManager.UpdateAsync(user);
+            if (!result.Succeeded)
+            {
+                return StatusCode(500, new { Message = "Cập nhật trạng thái thất bại." });
+            }
+
+            return Ok(new
+            {
+                Message = $"Người dùng {user.Email} đã được chuyển sang trạng thái {user.Status}.",
+                NewStatus = user.Status
+            });
         }
     }
 }

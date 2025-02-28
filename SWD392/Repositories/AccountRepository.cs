@@ -210,5 +210,11 @@ namespace SWD392.Repositories
             var customers = await userManager.GetUsersInRoleAsync(AppRole.Customer);
             return customers.ToList();
         }
+
+        public async Task<ApplicationUser?> GetUserByUsernameAsync(string username)
+        {
+            return await userManager.FindByNameAsync(username); 
+        }
+
     }
 }

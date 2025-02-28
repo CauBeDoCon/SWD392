@@ -9,7 +9,7 @@ namespace SWD392.Repositories
     {
         public Task<IdentityResult> SignUpAsync(SignUpModel model);
         public Task<object?> SignInAsync(SignInModel model);
-
+        Task<ApplicationUser?> GetUserByUsernameAsync(string username);
         public Task<List<ApplicationUser>> GetAllAccountsAsync();
         public Task<List<ApplicationUser>> GetAllCustomersAsync();
         public Task<ApplicationUser> GetAccountByIdAsync(string id);

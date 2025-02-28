@@ -9,5 +9,7 @@
         public string Address { get; set; }
         public int? WalletId { get; set; }
         public int? CartId { get; set; }
+
+        public string Status { get; set; }
     }
 }
