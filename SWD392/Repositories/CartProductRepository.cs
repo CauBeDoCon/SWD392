@@ -12,6 +12,7 @@ namespace SWD392.Repositories
     {
         private readonly ApplicationDbContext _context;
         private readonly IMapper _mapper;
+        
 
         public CartProductRepository(ApplicationDbContext context, IMapper mapper)
         {
@@ -60,7 +61,7 @@ namespace SWD392.Repositories
                 PageSize = pageSize
             };
         }
-
+        
         public async Task<CartProductModel> GetCartProductsAsync(int id)
         {
             var cartProduct = await _context.cartProducts.FindAsync(id);

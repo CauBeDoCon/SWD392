@@ -28,7 +28,8 @@ namespace SWD392.DB
         public DbSet<Transaction>? Transactions { get; set; }
         public DbSet<CartProduct>? cartProducts { get; set; }
         public DbSet<Cart>? carts { get; set; }
-
+        public DbSet<DiscountCategory>? discountCategories { get; set; }
+        public DbSet<Discount>? discounts { get; set; }
         #endregion
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)

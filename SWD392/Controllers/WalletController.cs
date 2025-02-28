@@ -9,6 +9,7 @@ using SWD392.Services;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using SWD392.Services;
+using SWD392.Repositories;
 namespace SWD392.Controllers
 {
     [Route("api/[controller]")]
@@ -18,10 +19,12 @@ namespace SWD392.Controllers
     {
         private readonly ApplicationDbContext _context;
         private readonly IVnPayService _vnPayService;
-        public WalletController(ApplicationDbContext context, IVnPayService vnPayService)
+        private readonly IWalletRepository _walletRepository;
+        public WalletController(ApplicationDbContext context, IVnPayService vnPayService,IWalletRepository walletRepository)
         {
             _context = context;
             _vnPayService = vnPayService;
+            _walletRepository = walletRepository;
         }
 
     
@@ -30,25 +33,18 @@ namespace SWD392.Controllers
         {
         
             var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            if (string.IsNullOrEmpty(userId))
-            {
-                return Unauthorized("Invalid token or user not authenticated.");
-            }
+        if (string.IsNullOrEmpty(userId))
+        {
+            return Unauthorized("Invalid token or user not authenticated.");
+        }
 
-            var user = await _context.Users
-                .Include(u => u.Wallet)
-                .FirstOrDefaultAsync(u => u.Id == userId);
+        var walletBalance = await _walletRepository.GetWalletBalanceAsync(userId);
+        if (walletBalance == null)
+        {
+            return NotFound("User or Wallet not found.");
+        }
 
-            if (user == null || user.Wallet == null)
-            {
-                return NotFound("User or Wallet not found.");
-            }
-
-            return new WalletDTO
-            {
-                WalletId = user.Wallet.WalletId,
-                AmountofMoney = (int)user.Wallet.AmountOfMoney
-            };
+        return Ok(walletBalance);
         }
 
         [Authorize]

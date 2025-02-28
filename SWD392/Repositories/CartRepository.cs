@@ -44,4 +44,11 @@ public class CartRepository : ICartRepository
 
         return result;
     }
+    public async Task<decimal> TotalPriceInCartProduct(int cartId)
+    {
+        var cartProducts = await GetCartProductsAsync(cartId);
+        return Convert.ToDecimal(cartProducts.Sum(cp => cp.Product.Price * cp.Quantity));
+    }
+
+
 }

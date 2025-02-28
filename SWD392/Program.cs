@@ -67,6 +67,14 @@ builder.Services.AddDbContext<ApplicationDbContext>(options => { options.UseSqlS
 
 builder.Services.AddAutoMapper(typeof(Program));
 
+builder.Services.AddScoped<IWalletRepository , WalletRepository >();
+
+builder.Services.AddScoped<IDiscountCategoryRepository, DiscountCategoryRepository>();
+
+builder.Services.AddScoped<IOrderDetailRepository, OrderDetailRepository>();
+
+builder.Services.AddScoped<IDiscountRepository, DiscountRepository>();
+
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
 
 builder.Services.AddScoped<IAccountRepository, AccountRepository>();
@@ -94,6 +102,8 @@ builder.Services.AddScoped<IProductDetailRepository, ProductDetailRepository>();
 builder.Services.AddScoped<ICartProductRepository, CartProductRepository>();
 
 builder.Services.AddScoped<ICartRepository, CartRepository>();
+
+builder.Services.AddScoped<IOrderRepository, OrderRepository>();
 
 
 builder.Services.AddAuthentication(options =>

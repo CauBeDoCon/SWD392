@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using SWD392.DB;
 
@@ -11,9 +12,11 @@ using SWD392.DB;
 namespace SWD392.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250227054846_Init10")]
+    partial class Init10
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -360,61 +363,6 @@ namespace SWD392.Migrations
                     b.ToTable("Category");
                 });
 
-            modelBuilder.Entity("SWD392.DB.Discount", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Code")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("DiscountCategoryId")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("EndDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<decimal>("Percentage")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<DateTime>("StartDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int>("max_usage")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("DiscountCategoryId");
-
-                    b.ToTable("discounts");
-                });
-
-            modelBuilder.Entity("SWD392.DB.DiscountCategory", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("discountCategories");
-                });
-
             modelBuilder.Entity("SWD392.DB.Image", b =>
                 {
                     b.Property<int>("Id")
@@ -490,8 +438,9 @@ namespace SWD392.Migrations
                     b.Property<DateTime>("OrderDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<int>("Status")
-                        .HasColumnType("int");
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<decimal>("TotalAmount")
                         .HasColumnType("decimal(18,2)");
@@ -503,8 +452,6 @@ namespace SWD392.Migrations
                     b.HasKey("OrderId");
 
                     b.HasIndex("CartId");
-
-                    b.HasIndex("DiscountId");
 
                     b.HasIndex("UserId");
 
@@ -861,17 +808,6 @@ namespace SWD392.Migrations
                     b.Navigation("Solution");
                 });
 
-            modelBuilder.Entity("SWD392.DB.Discount", b =>
-                {
-                    b.HasOne("SWD392.DB.DiscountCategory", "discountCategory")
-                        .WithMany("Discounts")
-                        .HasForeignKey("DiscountCategoryId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("discountCategory");
-                });
-
             modelBuilder.Entity("SWD392.DB.Image", b =>
                 {
                     b.HasOne("SWD392.DB.Product", "Product")
@@ -891,10 +827,6 @@ namespace SWD392.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("SWD392.DB.Discount", "Discount")
-                        .WithMany()
-                        .HasForeignKey("DiscountId");
-
                     b.HasOne("SWD392.DB.ApplicationUser", "User")
                         .WithMany()
                         .HasForeignKey("UserId")
@@ -902,8 +834,6 @@ namespace SWD392.Migrations
                         .IsRequired();
 
                     b.Navigation("Cart");
-
-                    b.Navigation("Discount");
 
                     b.Navigation("User");
                 });
@@ -1020,11 +950,6 @@ namespace SWD392.Migrations
             modelBuilder.Entity("SWD392.DB.Category", b =>
                 {
                     b.Navigation("products");
-                });
-
-            modelBuilder.Entity("SWD392.DB.DiscountCategory", b =>
-                {
-                    b.Navigation("Discounts");
                 });
 
             modelBuilder.Entity("SWD392.DB.ManufacturedCountry", b =>

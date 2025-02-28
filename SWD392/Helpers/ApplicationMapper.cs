@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using SWD392.DB;
+using SWD392.DTOs;
 using SWD392.Models;
 
 namespace SkincarePharmacyNetCore8.Helpers
@@ -19,7 +20,7 @@ namespace SkincarePharmacyNetCore8.Helpers
         // .ForMember(dest => dest.ManufacturedCountry, opt => opt.MapFrom(src => src.ManufacturedCountry));
         
         //     CreateMap<Product, ProductModel>().ReverseMap(); // Để lấy dữ liệu từ DB về
-        CreateMap<ProductModel, Product>()
+            CreateMap<ProductModel, Product>()
             .ForMember(dest => dest.Unit, opt => opt.Ignore()) // Nếu cần, có thể cấu hình thêm
             .ForMember(dest => dest.Brand, opt => opt.Ignore())
             .ForMember(dest => dest.Packaging, opt => opt.Ignore())
@@ -29,7 +30,10 @@ namespace SkincarePharmacyNetCore8.Helpers
             .ForMember(dest => dest.ManufacturedCountry, opt => opt.Ignore())
             .ForMember(dest => dest.ProductDetail, opt => opt.Ignore());
 
-        CreateMap<Product, ProductModel>(); // Để lấy dữ liệu từ DB về
+            CreateMap<Product, ProductModel>(); // Để lấy dữ liệu từ DB về
+
+            CreateMap<Order , OrderResponse>().ReverseMap();
+            
             CreateMap<Image, ImageModel>().ReverseMap();
 
             CreateMap<Unit, UnitModel>().ReverseMap();
@@ -51,6 +55,11 @@ namespace SkincarePharmacyNetCore8.Helpers
             CreateMap<ProductDetail, ProductDetailModel>().ReverseMap();
 
             CreateMap<CartProduct, CartProductModel>().ReverseMap();
+
+            CreateMap<DiscountCategory, DiscountCategoryDto>().ReverseMap();
+
+            CreateMap<Discount, DiscountDto>().ReverseMap();
+            CreateMap<Wallet, WalletDTO>().ReverseMap();
         }
     }
 }
