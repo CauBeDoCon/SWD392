@@ -21,5 +21,7 @@ namespace SWD392.DB
         public Wallet Wallet { get; set; }
 
         public string Status { get; set; } = "Active";
+
+        public ICollection<Blog> Blogs { get; set; } = new List<Blog>();
     }
 }

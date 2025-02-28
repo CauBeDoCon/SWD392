@@ -60,6 +60,8 @@ namespace SkincarePharmacyNetCore8.Helpers
 
             CreateMap<Discount, DiscountDto>().ReverseMap();
             CreateMap<Wallet, WalletDTO>().ReverseMap();
+
+            CreateMap<Blog, BlogModel>().ReverseMap();
         }
     }
 }
