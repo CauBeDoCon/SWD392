@@ -204,5 +204,17 @@ namespace SWD392.Repositories
             // Cập nhật tài khoản
             return await userManager.UpdateAsync(account);
         }
+
+        public async Task<List<ApplicationUser>> GetAllCustomersAsync()
+        {
+            var customers = await userManager.GetUsersInRoleAsync(AppRole.Customer);
+            return customers.ToList();
+        }
+
+        public async Task<ApplicationUser?> GetUserByUsernameAsync(string username)
+        {
+            return await userManager.FindByNameAsync(username); 
+        }
+
     }
 }

@@ -19,5 +19,7 @@ namespace SWD392.DB
 
         [ForeignKey("WalletId")]
         public Wallet Wallet { get; set; }
+
+        public string Status { get; set; } = "Active";
     }
 }
