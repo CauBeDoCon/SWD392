@@ -15,5 +15,7 @@ namespace SWD392.DTOs
         public string Status { get; set; }
         public Discount Discount { get; set; }
         public int CartId { get; set; }
+        public string Message { get; set; }
+        
     }
 }

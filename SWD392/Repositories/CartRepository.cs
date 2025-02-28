@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using SWD392.DB;
 using SWD392.Repositories;
+using SWD392.Enums;
 
 public class CartRepository : ICartRepository
 {
@@ -22,7 +23,7 @@ public class CartRepository : ICartRepository
             {
                 Id = cp.Id,
                 Quantity = cp.Quantity,
-                Status = cp.Status,
+                Status = CartStatus.pending.ToString(),
                 CartId = cp.CartId,
                 // Lồng Product
                 Product = new ProductCartDTO

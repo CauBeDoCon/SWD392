@@ -89,65 +89,58 @@ namespace SWD392.Controllers
 
                 if (string.IsNullOrEmpty(vnp_UserId))
                 {
-                    Console.WriteLine("❌ VNPay không gửi UserId.");
                     return BadRequest(new { Message = "VNPay không gửi UserId hợp lệ." });
                 }
 
-                // ✅ Lấy số tiền từ VNPay (VNPay gửi tiền x100, cần chia 100)
                 var vnp_AmountString = Request.Query["vnp_Amount"];
                 if (string.IsNullOrEmpty(vnp_AmountString))
                 {
-                    Console.WriteLine("❌ VNPay không gửi số tiền hợp lệ.");
                     return BadRequest(new { Message = "VNPay không gửi số tiền hợp lệ." });
                 }
 
                 decimal vnp_Amount = Convert.ToDecimal(vnp_AmountString) / 100;
-                Console.WriteLine($"✅ Số tiền sau khi xử lý: {vnp_Amount}");
 
                 if (vnp_Amount <= 0)
                 {
-                    Console.WriteLine("❌ Số tiền không hợp lệ.");
                     return BadRequest(new { Message = "Số tiền giao dịch không hợp lệ." });
                 }
 
-                // 🔹 Tìm User trong database
                 var user = await _context.Users
                     .Include(u => u.Wallet)
                     .FirstOrDefaultAsync(u => u.Id == vnp_UserId);
 
                 if (user == null)
                 {
-                    Console.WriteLine($"❌ Không tìm thấy User với UserId: {vnp_UserId}");
                     return NotFound(new { Message = "Không tìm thấy người dùng." });
                 }
 
                 if (user.Wallet == null)
                 {
-                    Console.WriteLine($"❌ User {user.Id} không có ví nào được liên kết.");
                     return NotFound(new { Message = "Người dùng chưa có ví." });
                 }
 
-                // ✅ Cập nhật số dư Wallet
-                Console.WriteLine($"💰 Trước khi cập nhật: {user.Wallet.AmountOfMoney}");
                 user.Wallet.AmountOfMoney += vnp_Amount;
-                Console.WriteLine($"💰 Sau khi cập nhật: {user.Wallet.AmountOfMoney}");
-
-                // ✅ Lưu vào database
-                await _context.SaveChangesAsync();
-                Console.WriteLine("✅ Đã lưu thay đổi vào database!");
-
-                return Ok(new
+                var depositTransaction = new Transaction
                 {
-                    Message = "Giao dịch thành công!",
-                    TransactionId = response.TransactionId,
-                    UserId = vnp_UserId,
-                    Amount = vnp_Amount, 
-                    NewBalance = user.Wallet.AmountOfMoney 
-                });
+                    WalletId = user.Wallet.WalletId,
+                    Account = user.Email,
+                    CreatedTransaction = DateTime.UtcNow,
+                    BankName = "VNPay",
+                    AccountName = user.FirstName,
+                    AccountNumber = "VNPay",
+                    Amount = vnp_Amount,
+                    TransactionEnum = "Completed",
+                    Type = "Deposit",
+                    ReasonWithdrawReject = null
+                };
+
+                _context.Transactions.Add(depositTransaction);
+                await _context.SaveChangesAsync();
+
+                return Redirect("http://localhost:5173/deposite");
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"❌ Lỗi VNPayReturn: {ex.Message}");
                 return StatusCode(500, new { Message = "Đã xảy ra lỗi khi xử lý giao dịch." });
             }
         }

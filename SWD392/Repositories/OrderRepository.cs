@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
@@ -59,9 +59,25 @@ namespace SWD392.Repositories
             var wallet = await _walletRepository.GetWalletBalanceAsync(userId);
             if (wallet.AmountofMoney < newOrder.TotalAmount)
             {
-                return null;
+                return new OrderResponse
+                {
+                    orderID = 0,
+                    applicationUserID = newOrder.UserId,
+                    OrderDate = DateTime.Now,
+                    TotalAmount = 0,
+                    Status = "failed",
+                    Discount = null,
+                    CartId = newOrder.CartId,
+                    Message = "Số dư không đủ để thanh toán!"
+                };
+                throw new Exception("Số dư trong ví không đủ để thực hiện giao dịch.");
             }
-            
+            foreach (var cartProduct in cart.CartProducts)
+            {
+                var product = cartProduct.Product;
+                product.Quantity -= cartProduct.Quantity;
+                _context.Entry(product).Property(p => p.Quantity).IsModified = true;
+            }       
             _context.Orders.Add(newOrder);
             await _context.SaveChangesAsync();
 
@@ -96,7 +112,8 @@ namespace SWD392.Repositories
                 TotalAmount = newOrder.TotalAmount,
                 Status = newOrder.Status.ToString(),
                 Discount = newOrder.Discount,
-                CartId = newOrder.CartId
+                CartId = newOrder.CartId,
+                Message = "Đặt hàng thành công!"
             };
         }
 

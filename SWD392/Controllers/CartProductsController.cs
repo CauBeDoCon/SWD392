@@ -1,7 +1,9 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using SWD392.DTOs;
+using SWD392.Enums;
 using SWD392.Models;
 using SWD392.Repositories;
 
@@ -12,10 +14,12 @@ namespace SWD392.Controllers
     public class CartProductsController : ControllerBase
     {
         private readonly ICartProductRepository _cartProductRepo;
+        private readonly IAccountRepository _accountRepository;
 
-        public CartProductsController(ICartProductRepository repo)
+        public CartProductsController(ICartProductRepository repo,IAccountRepository accountRepository )
         {
             _cartProductRepo = repo;
+            _accountRepository = accountRepository;
         }
 
         [HttpGet]
@@ -50,6 +54,9 @@ namespace SWD392.Controllers
         [Authorize]
         public async Task<IActionResult> AddNewCartProduct([FromBody] UpdateCartProductDto dto)
         {
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var user = await _accountRepository.GetAccountByIdAsync(userId);
+            var cartid = user?.CartId ?? 0;
             if (dto == null)
             {
                 return BadRequest("Dữ liệu không hợp lệ.");
@@ -58,8 +65,8 @@ namespace SWD392.Controllers
             var model = new CartProductModel
             {
                 Quantity = dto.Quantity,
-                Status = dto.Status,
-                CartId = dto.CartId,
+                Status = CartStatus.pending,
+                CartId = cartid,
                 ProductId = dto.ProductId
             };
 
@@ -72,6 +79,9 @@ namespace SWD392.Controllers
         [Authorize]
         public async Task<IActionResult> UpdateCartProduct(int id, [FromBody] UpdateCartProductDto dto)
         {
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var user = await _accountRepository.GetAccountByIdAsync(userId);
+            var cartid = user?.CartId ?? 0;
             if (dto == null)
             {
                 return BadRequest(new { message = "Dữ liệu không hợp lệ." });
@@ -81,8 +91,8 @@ namespace SWD392.Controllers
             {
                 var existingCartProduct = await _cartProductRepo.GetCartProductsAsync(id);
                 existingCartProduct.Quantity = dto.Quantity;
-                existingCartProduct.Status = dto.Status;
-                existingCartProduct.CartId = dto.CartId;
+                existingCartProduct.Status = CartStatus.pending;
+                existingCartProduct.CartId = cartid;
                 existingCartProduct.ProductId = dto.ProductId;
 
                 await _cartProductRepo.UpdateCartProductAsync(id, existingCartProduct);

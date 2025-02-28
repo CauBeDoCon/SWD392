@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using SWD392.Enums;
 
 namespace SWD392.DB
 {
@@ -11,7 +12,7 @@ namespace SWD392.DB
 
         public int Quantity { get; set; }
 
-        public string Status { get; set; }
+        public CartStatus Status { get; set; }
 
         public int ProductId { get; set; }
         [ForeignKey("ProductId")]

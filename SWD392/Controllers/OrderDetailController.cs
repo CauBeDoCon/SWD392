@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using SWD392.DB;
 using SWD392.DTOs;
+using SWD392.Repositories;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -12,63 +13,44 @@ namespace SWD392.Controllers
     [ApiController]
     public class OrderDetailController : ControllerBase
     {
-        private readonly ApplicationDbContext _context;
+        private readonly IOrderDetailRepository _orderDetailRepository;
 
-        public OrderDetailController(ApplicationDbContext context)
+        public OrderDetailController(IOrderDetailRepository orderDetailRepository)
         {
-            _context = context;
+            _orderDetailRepository = orderDetailRepository;
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<OrderDetailDTO>>> GetOrderDetails()
+        public async Task<ActionResult<IEnumerable<OrderDetailDTO>>> GetOrderDetailsAll()
         {
-            return await _context.OrderDetails
-                .Select(od => new OrderDetailDTO
-                {
-                    Id = od.Id,
-                    OrderId = od.OrderId,
-                    ProductId = od.ProductId,
-                    Quantity = od.Quantity,
-                    Subtotal = od.Subtotal
-                })
-                .ToListAsync();
+            var orderDetails = await _orderDetailRepository.GetOrderDetailsAsync();
+            return Ok(orderDetails);
         }
 
-        [HttpGet("{id}")]
-        public async Task<ActionResult<OrderDetailDTO>> GetOrderDetail(int id)
+        
+        [HttpGet("GetOrderDetailsByOrderID/{id}")]
+        public async Task<ActionResult<IEnumerable<OrderDetailDTO>>> GetOrderDetailsByOrderID(int id )
         {
-            var orderDetail = await _context.OrderDetails.FindAsync(id);
-
-            if (orderDetail == null)
+            var orderDetails = await _orderDetailRepository.GetOrderDetailByOrderIdAsync(id);
+            return Ok(orderDetails);
+        }
+        [HttpGet("{id}")]
+        public async Task<ActionResult<List<OrderDetailDTO>>> GetOrderDetailByIdAsync(int id)
+        {
+            var orderDetails = await _orderDetailRepository.GetOrderDetailByIdAsync(id);
+            if (orderDetails == null )
             {
                 return NotFound();
             }
-
-            return new OrderDetailDTO
-            {
-                Id = orderDetail.Id,
-                OrderId = orderDetail.OrderId,
-                ProductId = orderDetail.ProductId,
-                Quantity = orderDetail.Quantity,
-                Subtotal = orderDetail.Subtotal
-            };
+            return Ok(orderDetails);
         }
 
         [HttpPost]
         public async Task<ActionResult<OrderDetailDTO>> CreateOrderDetail(OrderDetailDTO orderDetailDto)
         {
-            var orderDetail = new OrderDetail
-            {
-                OrderId = orderDetailDto.OrderId,
-                ProductId = orderDetailDto.ProductId,
-                Quantity = orderDetailDto.Quantity,
-                Subtotal = orderDetailDto.Subtotal
-            };
-
-            _context.OrderDetails.Add(orderDetail);
-            await _context.SaveChangesAsync();
-
-            return CreatedAtAction(nameof(GetOrderDetail), new { id = orderDetail.Id }, orderDetailDto);
+            var orderDetail = await _orderDetailRepository.CreateOrderDetailAsync(orderDetailDto);
+            return CreatedAtAction(nameof(GetOrderDetailsByOrderID), new { id = orderDetail.Id }, orderDetailDto);
         }
     }
+
 }

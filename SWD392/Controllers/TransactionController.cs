@@ -35,7 +35,9 @@ namespace SWD392.Controllers
                     AccountName = t.AccountName,
                     AccountNumber = t.AccountNumber,
                     ReasonWithdrawReject = t.ReasonWithdrawReject,
-                    TransactionEnum = t.TransactionEnum
+                    TransactionEnum = t.TransactionEnum,
+                    Amount=t.Amount,
+                    Type= t.Type
                 })
                 .ToListAsync();
         }
@@ -60,7 +62,9 @@ namespace SWD392.Controllers
                 AccountName = transaction.AccountName,
                 AccountNumber = transaction.AccountNumber,
                 ReasonWithdrawReject = transaction.ReasonWithdrawReject,
-                TransactionEnum = transaction.TransactionEnum
+                TransactionEnum = transaction.TransactionEnum,
+                Amount = transaction.Amount,
+                Type = transaction.Type
             };
         }
 
@@ -95,6 +99,7 @@ namespace SWD392.Controllers
                 BankName = request.BankName,
                 AccountName = request.AccountName,
                 AccountNumber = request.AccountNumber,
+                Type = "Withdraw",
                 TransactionEnum = "Pending",  
                 ReasonWithdrawReject = string.Empty,
                 Amount = request.Amount
@@ -113,7 +118,10 @@ namespace SWD392.Controllers
                 AccountName = transaction.AccountName,
                 AccountNumber = transaction.AccountNumber,
                 TransactionEnum = transaction.TransactionEnum,
-                ReasonWithdrawReject = transaction.ReasonWithdrawReject
+                ReasonWithdrawReject = transaction.ReasonWithdrawReject,
+                Amount = transaction.Amount,
+                Type = transaction.Type
+
             });
         }
 
@@ -161,13 +169,14 @@ namespace SWD392.Controllers
                 transaction.TransactionEnum = "Rejected";
                 transaction.ReasonWithdrawReject = request.ReasonReject;
             }
-
+            transaction.Type = "Withdraw";
             await _context.SaveChangesAsync();
 
             return Ok(new
             {
                 Message = request.IsApproved ? "Giao dịch đã được chấp nhận và trừ tiền trong ví." : "Giao dịch đã bị từ chối.",
                 TransactionStatus = transaction.TransactionEnum,
+                Type = transaction.Type,
                 NewBalance = userWallet.AmountOfMoney
             });
         }
@@ -204,7 +213,9 @@ namespace SWD392.Controllers
                     AccountName = t.AccountName,
                     AccountNumber = t.AccountNumber,
                     ReasonWithdrawReject = t.ReasonWithdrawReject,
-                    TransactionEnum = t.TransactionEnum
+                    TransactionEnum = t.TransactionEnum,
+                    Amount = t.Amount,
+                    Type = t.Type
                 })
                 .ToListAsync();
 
@@ -227,7 +238,9 @@ namespace SWD392.Controllers
                     AccountName = t.AccountName,
                     AccountNumber = t.AccountNumber,
                     ReasonWithdrawReject = t.ReasonWithdrawReject,
-                    TransactionEnum = t.TransactionEnum
+                    TransactionEnum = t.TransactionEnum,
+                    Amount = t.Amount,
+                    Type = t.Type
                 })
                 .ToListAsync();
 

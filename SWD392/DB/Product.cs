@@ -24,6 +24,8 @@ namespace SWD392.DB
         [ForeignKey("UnitId")]
         public Unit Unit { get; set; }
 
+        public ICollection<OrderDetail> orderDetails { get; set; } = new List<OrderDetail>();
+
         public ICollection<Image> Images { get; set; } = new List<Image>();
 
         public ICollection<CartProduct> CartProducts { get; set; } = new List<CartProduct>();
