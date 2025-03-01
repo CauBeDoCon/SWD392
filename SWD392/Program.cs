@@ -105,6 +105,8 @@ builder.Services.AddScoped<ICartRepository, CartRepository>();
 
 builder.Services.AddScoped<IOrderRepository, OrderRepository>();
 
+builder.Services.AddScoped<IBlogRepository, BlogRepository>();
+
 
 builder.Services.AddAuthentication(options =>
 {

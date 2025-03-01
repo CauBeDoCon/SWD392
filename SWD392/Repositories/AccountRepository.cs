@@ -116,6 +116,7 @@ namespace SWD392.Repositories
                     user.PhoneNumber,
                     user.FirstName,     
                     user.LastName,
+                    user.CartId,
                     Roles = roles, // Trả về danh sách roles
                     Cart = await _cartRepository.GetCartProductsAsync(user.CartId ?? 0),
                 }
@@ -206,5 +207,17 @@ namespace SWD392.Repositories
             // Cập nhật tài khoản
             return await userManager.UpdateAsync(account);
         }
+
+        public async Task<List<ApplicationUser>> GetAllCustomersAsync()
+        {
+            var customers = await userManager.GetUsersInRoleAsync(AppRole.Customer);
+            return customers.ToList();
+        }
+
+        public async Task<ApplicationUser?> GetUserByUsernameAsync(string username)
+        {
+            return await userManager.FindByNameAsync(username); 
+        }
+
     }
 }

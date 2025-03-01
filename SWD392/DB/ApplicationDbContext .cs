@@ -30,6 +30,7 @@ namespace SWD392.DB
         public DbSet<Cart>? carts { get; set; }
         public DbSet<DiscountCategory>? discountCategories { get; set; }
         public DbSet<Discount>? discounts { get; set; }
+        public DbSet<Blog> Blogs { get; set; }
         #endregion
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -119,6 +120,11 @@ namespace SWD392.DB
             modelBuilder.Entity<ApplicationUser>()
                 .HasIndex(c => c.CartId)
                 .IsUnique();
+
+            modelBuilder.Entity<Blog>()
+                .HasOne(i => i.User)
+                .WithMany(s => s.Blogs)
+                .HasForeignKey(i => i.UserId);
 
         }
     }
