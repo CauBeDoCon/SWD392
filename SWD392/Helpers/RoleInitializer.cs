@@ -4,7 +4,7 @@ using SWD392.DB;
 
 namespace SWD392.Helpers
 {
-    public static class RoleInitializer
+    public static class RoleInitializer11
     {
         public static async Task InitializeRoles(IServiceProvider serviceProvider)
         {

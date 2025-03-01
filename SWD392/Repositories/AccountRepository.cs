@@ -19,8 +19,9 @@ namespace SWD392.Repositories
 
         private readonly ApplicationDbContext _context;
         private readonly RoleManager<IdentityRole> roleManager;
+        private readonly ICartRepository _cartRepository;
 
-        public AccountRepository(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager, IConfiguration configuration,RoleManager<IdentityRole> roleManager, ApplicationDbContext context) 
+        public AccountRepository(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager, IConfiguration configuration,RoleManager<IdentityRole> roleManager, ApplicationDbContext context , ICartRepository cartRepository) 
         { 
             
             _context = context;
@@ -28,6 +29,7 @@ namespace SWD392.Repositories
             this.signInManager = signInManager;
             this.configuration = configuration;
             this.roleManager = roleManager;
+            _cartRepository = cartRepository;
         }
         //public async Task<string?> SignInAsync(SignInModel model)
         //{
@@ -112,10 +114,10 @@ namespace SWD392.Repositories
                     user.Address,
                     user.Birthday,
                     user.PhoneNumber,
-                    user.FirstName,
+                    user.FirstName,     
                     user.LastName,
-                    Roles = roles // Trả về danh sách roles
-
+                    Roles = roles, // Trả về danh sách roles
+                    Cart = await _cartRepository.GetCartProductsAsync(user.CartId ?? 0),
                 }
             };
         }
