@@ -91,7 +91,7 @@ namespace SWD392.Repositories
                 authClaims.Add(new Claim(ClaimTypes.Role, role.ToString()));
             }
 
-            await userManager.AddToRoleAsync(user, "Customer");
+            //await userManager.AddToRoleAsync(user, "Customer");
 
             var authenKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["JWT:Secret"]));
 
