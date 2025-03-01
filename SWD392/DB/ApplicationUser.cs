@@ -23,5 +23,9 @@ namespace SWD392.DB
         public string Status { get; set; } = "Active";
 
         public ICollection<Blog> Blogs { get; set; } = new List<Blog>();
+
+        public ICollection<Comment> Comments { get; set; } = new List<Comment>();
+
+        public ICollection<Review> Reviews { get; set; } = new List<Review>();
     }
 }
