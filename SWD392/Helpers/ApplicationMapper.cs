@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using SWD392.DB;
 using SWD392.DTOs;
+using SWD392.Model;
 using SWD392.Models;
 
 namespace SkincarePharmacyNetCore8.Helpers
@@ -62,6 +63,10 @@ namespace SkincarePharmacyNetCore8.Helpers
             CreateMap<Wallet, WalletDTO>().ReverseMap();
 
             CreateMap<Blog, BlogModel>().ReverseMap();
+
+            CreateMap<Review, ReviewModel>().ReverseMap();
+
+            CreateMap<Comment, CommentModel>().ReverseMap();
         }
     }
 }

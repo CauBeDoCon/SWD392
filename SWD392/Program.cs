@@ -107,6 +107,10 @@ builder.Services.AddScoped<IOrderRepository, OrderRepository>();
 
 builder.Services.AddScoped<IBlogRepository, BlogRepository>();
 
+builder.Services.AddScoped<IReviewRepository, ReviewRepository>();
+
+builder.Services.AddScoped<ICommentRepository, CommentRepository>();
+
 
 builder.Services.AddAuthentication(options =>
 {

@@ -31,6 +31,8 @@ namespace SWD392.DB
         public DbSet<DiscountCategory>? discountCategories { get; set; }
         public DbSet<Discount>? discounts { get; set; }
         public DbSet<Blog> Blogs { get; set; }
+        public DbSet<Comment> Comments { get; set; }
+        public DbSet<Review> Reviews { get; set; }
         #endregion
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -125,6 +127,38 @@ namespace SWD392.DB
                 .HasOne(i => i.User)
                 .WithMany(s => s.Blogs)
                 .HasForeignKey(i => i.UserId);
+
+            modelBuilder.Entity<Comment>()
+                .HasOne(i => i.User)
+                .WithMany(s => s.Comments)
+                .HasForeignKey(i => i.UserId);
+
+            modelBuilder.Entity<Review>()
+                .HasOne(i => i.User)
+                .WithMany(s => s.Reviews)
+                .HasForeignKey(i => i.UserId);
+
+            modelBuilder.Entity<Review>()
+                .HasOne(r => r.Comment)
+                .WithOne(c => c.Review)
+                .HasForeignKey<Comment>(c => c.ReviewId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Comment>()
+                .HasIndex(c => c.ReviewId)
+                .IsUnique();
+
+
+            modelBuilder.Entity<OrderDetail>()
+                .HasOne(r => r.Review)
+                .WithOne(c => c.OrderDetail)
+                .HasForeignKey<Review>(c => c.OrderDetailId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Review>()
+                .HasIndex(c => c.OrderDetailId)
+                .IsUnique();
+
 
         }
     }

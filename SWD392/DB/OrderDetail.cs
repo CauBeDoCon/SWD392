@@ -23,7 +23,7 @@ namespace SWD392.DB
         public decimal Subtotal { get; set; }
 
         // Navigation Properties
-        
-        
+        public Review Review { get; set; }
+
     }
 }
