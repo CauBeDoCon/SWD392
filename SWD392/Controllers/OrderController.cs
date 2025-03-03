@@ -38,27 +38,31 @@ namespace SWD392.Controllers
             return order;
         }
 
+        [HttpGet ("GetAllOrderByCustomerId/{id}")]
+        public async Task<ActionResult<IEnumerable<OrderDTO>>> GetAllOrderByCustomerId(String id)
+        {
+            return Ok(await _orderRepository.GetAllOrderByCustomerId(id));
+        }
+        [HttpGet]
+        public async Task<ActionResult<IEnumerable<OrderDTO>>> GetOrders()
+        {
+            return Ok(await _orderRepository.GetOrdersAsync());
+        }
 
-    [HttpGet]
-    public async Task<ActionResult<IEnumerable<OrderDTO>>> GetOrders()
-    {
-        return Ok(await _orderRepository.GetOrdersAsync());
-    }
+        [HttpPut("{id}")]
+        public async Task<IActionResult> UpdateOrder(int id, OrderResponse orderDto)
+        {
+            var result = await _orderRepository.UpdateOrderAsync(id, orderDto);
+            if (!result) return NotFound();
+            return NoContent();
+        }
 
-    [HttpPut("{id}")]
-    public async Task<IActionResult> UpdateOrder(int id, OrderResponse orderDto)
-    {
-        var result = await _orderRepository.UpdateOrderAsync(id, orderDto);
-        if (!result) return NotFound();
-        return NoContent();
-    }
-
-    [HttpDelete("{id}")]
-    public async Task<IActionResult> DeleteOrder(int id)
-    {
-        var result = await _orderRepository.DeleteOrderAsync(id);
-        if (!result) return NotFound();
-        return NoContent();
-    }
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteOrder(int id)
+        {
+            var result = await _orderRepository.DeleteOrderAsync(id);
+            if (!result) return NotFound();
+            return NoContent();
+        }
     }
 }

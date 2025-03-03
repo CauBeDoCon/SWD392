@@ -69,9 +69,14 @@ namespace SWD392.Controllers
                 CartId = cartid,
                 ProductId = dto.ProductId
             };
-
-            var newCartProductId = await _cartProductRepo.AddCartProductAsync(model);
-            var cartProduct = await _cartProductRepo.GetCartProductsAsync(newCartProductId);
+            var exists = await _cartProductRepo.CheckProductExistInCart(cartid, dto.ProductId, model);
+            var existsid = exists.Id;
+            if (exists == null)
+            {
+                return BadRequest("Không thể thêm sản phẩm vào giỏ hàng.");
+            }
+            //var newCartProductId = await _cartProductRepo.AddCartProductAsync(model);
+            var cartProduct = await _cartProductRepo.GetCartProductsAsync(existsid);
             return cartProduct == null ? NotFound() : Ok(cartProduct);
         }
 

@@ -13,16 +13,11 @@ public class CartController : ControllerBase
         _cartRepository = cartRepository;
     }
 
-    [HttpGet("{cartId}")]
-    public async Task<IActionResult> GetCartProducts(int cartId)
-    {
-        var cartProducts = await _cartRepository.GetCartProductsAsync(cartId);
-
-        if (cartProducts == null || !cartProducts.Any())
+        [HttpGet("{cartId}")]
+        public async Task<IActionResult> GetCartProducts(int cartId)
         {
-            return NotFound(new { message = "Cart is empty!" });
-        }
+            var cartProducts = await _cartRepository.GetCartProductsAsync(cartId);
 
-        return Ok(cartProducts);
-    }
+            return Ok(cartProducts);
+        }
 }
