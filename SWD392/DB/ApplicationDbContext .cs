@@ -31,6 +31,8 @@ namespace SWD392.DB
         public DbSet<DiscountCategory>? discountCategories { get; set; }
         public DbSet<Discount>? discounts { get; set; }
         public DbSet<Blog> Blogs { get; set; }
+        public DbSet<Booking> Bookings { get; set; }
+
         #endregion
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)

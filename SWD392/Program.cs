@@ -107,7 +107,7 @@ builder.Services.AddScoped<IOrderRepository, OrderRepository>();
 
 builder.Services.AddScoped<IBlogRepository, BlogRepository>();
 
-
+builder.Services.AddScoped<IBookingRepository, BookingRepository>();
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
