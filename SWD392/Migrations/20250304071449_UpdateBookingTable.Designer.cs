@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using SWD392.DB;
 
@@ -11,9 +12,11 @@ using SWD392.DB;
 namespace SWD392.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250304071449_UpdateBookingTable")]
+    partial class UpdateBookingTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -426,37 +429,6 @@ namespace SWD392.Migrations
                     b.ToTable("Category");
                 });
 
-            modelBuilder.Entity("SWD392.DB.Comment", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTime>("CommentDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Content")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("ReviewId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("UserId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ReviewId")
-                        .IsUnique();
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("Comment", (string)null);
-                });
-
             modelBuilder.Entity("SWD392.DB.Discount", b =>
                 {
                     b.Property<int>("Id")
@@ -764,40 +736,6 @@ namespace SWD392.Migrations
                     b.ToTable("ProductDetail");
                 });
 
-            modelBuilder.Entity("SWD392.DB.Review", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Content")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("OrderDetailId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("Rating")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("ReviewDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("UserId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("OrderDetailId")
-                        .IsUnique();
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("Review", (string)null);
-                });
-
             modelBuilder.Entity("SWD392.DB.Solution", b =>
                 {
                     b.Property<int>("Id")
@@ -1009,25 +947,6 @@ namespace SWD392.Migrations
                     b.Navigation("Solution");
                 });
 
-            modelBuilder.Entity("SWD392.DB.Comment", b =>
-                {
-                    b.HasOne("SWD392.DB.Review", "Review")
-                        .WithOne("Comment")
-                        .HasForeignKey("SWD392.DB.Comment", "ReviewId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("SWD392.DB.ApplicationUser", "User")
-                        .WithMany("Comments")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Review");
-
-                    b.Navigation("User");
-                });
-
             modelBuilder.Entity("SWD392.DB.Discount", b =>
                 {
                     b.HasOne("SWD392.DB.DiscountCategory", "discountCategory")
@@ -1161,25 +1080,6 @@ namespace SWD392.Migrations
                     b.Navigation("Unit");
                 });
 
-            modelBuilder.Entity("SWD392.DB.Review", b =>
-                {
-                    b.HasOne("SWD392.DB.OrderDetail", "OrderDetail")
-                        .WithOne("Review")
-                        .HasForeignKey("SWD392.DB.Review", "OrderDetailId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("SWD392.DB.ApplicationUser", "User")
-                        .WithMany("Reviews")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("OrderDetail");
-
-                    b.Navigation("User");
-                });
-
             modelBuilder.Entity("SWD392.DB.Transaction", b =>
                 {
                     b.HasOne("SWD392.DB.Wallet", "Wallet")
@@ -1194,10 +1094,6 @@ namespace SWD392.Migrations
             modelBuilder.Entity("SWD392.DB.ApplicationUser", b =>
                 {
                     b.Navigation("Blogs");
-
-                    b.Navigation("Comments");
-
-                    b.Navigation("Reviews");
                 });
 
             modelBuilder.Entity("SWD392.DB.Brand", b =>
@@ -1245,12 +1141,6 @@ namespace SWD392.Migrations
                     b.Navigation("OrderDetails");
                 });
 
-            modelBuilder.Entity("SWD392.DB.OrderDetail", b =>
-                {
-                    b.Navigation("Review")
-                        .IsRequired();
-                });
-
             modelBuilder.Entity("SWD392.DB.Packaging", b =>
                 {
                     b.Navigation("products");
@@ -1268,12 +1158,6 @@ namespace SWD392.Migrations
             modelBuilder.Entity("SWD392.DB.ProductDetail", b =>
                 {
                     b.Navigation("products");
-                });
-
-            modelBuilder.Entity("SWD392.DB.Review", b =>
-                {
-                    b.Navigation("Comment")
-                        .IsRequired();
                 });
 
             modelBuilder.Entity("SWD392.DB.Solution", b =>

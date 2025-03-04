@@ -31,6 +31,7 @@ namespace SWD392.DB
         public DbSet<DiscountCategory>? discountCategories { get; set; }
         public DbSet<Discount>? discounts { get; set; }
         public DbSet<Blog> Blogs { get; set; }
+        public DbSet<Booking> Bookings { get; set; }
         public DbSet<Comment> Comments { get; set; }
         public DbSet<Review> Reviews { get; set; }
         #endregion

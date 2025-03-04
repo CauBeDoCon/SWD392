@@ -21,11 +21,14 @@ namespace SWD392.Controllers
         private readonly IAccountRepository accountRepo;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly ApplicationDbContext _context;
-        public AccountsController(IAccountRepository repo, UserManager<ApplicationUser> userManage, ApplicationDbContext context) 
+        private readonly IBookingRepository _bookingRepository;
+
+        public AccountsController(IAccountRepository repo, UserManager<ApplicationUser> userManage, ApplicationDbContext context, IBookingRepository bookingRepository) 
         {
             accountRepo = repo;
             _userManager= userManage;
             _context = context;
+            _bookingRepository= bookingRepository;
         }
 
 
@@ -231,7 +234,20 @@ namespace SWD392.Controllers
         [HttpPost("SignUpDoctor")]
         public async Task<IActionResult> SignUpDoctor([FromBody] SignUpDTO signUpDto)
         {
-            return await SignUp(signUpDto, AppRole.Doctor);
+            var result = await SignUp(signUpDto, AppRole.Doctor);
+
+
+            if (result is OkObjectResult okResult)
+            {
+                var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == signUpDto.Email);
+                if (user != null)
+                {
+                    await _bookingRepository.CreateDoctorBookingsAsync(user.Id);
+                    Console.WriteLine($"✅ Đã tạo lịch khám cho bác sĩ {user.Email} (DoctorId: {user.Id})");
+                }
+            }
+
+            return result;
         }
 
         [HttpPost("SignUpStaff")]
@@ -265,5 +281,8 @@ namespace SWD392.Controllers
                 NewStatus = user.Status
             });
         }
+ 
     }
+
+
 }
