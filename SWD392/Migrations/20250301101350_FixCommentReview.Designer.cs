@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using SWD392.DB;
 
@@ -11,9 +12,11 @@ using SWD392.DB;
 namespace SWD392.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250301101350_FixCommentReview")]
+    partial class FixCommentReview
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -294,33 +297,6 @@ namespace SWD392.Migrations
                     b.ToTable("Blog");
                 });
 
-            modelBuilder.Entity("SWD392.DB.Booking", b =>
-                {
-                    b.Property<int>("BookingId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("BookingId"));
-
-                    b.Property<string>("CustomerUsername")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("DoctorId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("TimeSlot")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("BookingId");
-
-                    b.ToTable("Bookings");
-                });
-
             modelBuilder.Entity("SWD392.DB.Brand", b =>
                 {
                     b.Property<int>("Id")
@@ -454,7 +430,7 @@ namespace SWD392.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Comment", (string)null);
+                    b.ToTable("Comment");
                 });
 
             modelBuilder.Entity("SWD392.DB.Discount", b =>
@@ -795,7 +771,7 @@ namespace SWD392.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Review", (string)null);
+                    b.ToTable("Review");
                 });
 
             modelBuilder.Entity("SWD392.DB.Solution", b =>

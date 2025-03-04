@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using SWD392.DB;
 
@@ -11,9 +12,11 @@ using SWD392.DB;
 namespace SWD392.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250228181938_AddCommentReview")]
+    partial class AddCommentReview
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -294,33 +297,6 @@ namespace SWD392.Migrations
                     b.ToTable("Blog");
                 });
 
-            modelBuilder.Entity("SWD392.DB.Booking", b =>
-                {
-                    b.Property<int>("BookingId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("BookingId"));
-
-                    b.Property<string>("CustomerUsername")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("DoctorId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("TimeSlot")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("BookingId");
-
-                    b.ToTable("Bookings");
-                });
-
             modelBuilder.Entity("SWD392.DB.Brand", b =>
                 {
                     b.Property<int>("Id")
@@ -440,7 +416,7 @@ namespace SWD392.Migrations
                     b.Property<string>("Content")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("ReviewId")
+                    b.Property<int?>("ReviewId")
                         .HasColumnType("int");
 
                     b.Property<string>("UserId")
@@ -450,11 +426,12 @@ namespace SWD392.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("ReviewId")
-                        .IsUnique();
+                        .IsUnique()
+                        .HasFilter("[ReviewId] IS NOT NULL");
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Comment", (string)null);
+                    b.ToTable("Comment");
                 });
 
             modelBuilder.Entity("SWD392.DB.Discount", b =>
@@ -775,7 +752,7 @@ namespace SWD392.Migrations
                     b.Property<string>("Content")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("OrderDetailId")
+                    b.Property<int?>("OrderDetailId")
                         .HasColumnType("int");
 
                     b.Property<int>("Rating")
@@ -791,11 +768,12 @@ namespace SWD392.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("OrderDetailId")
-                        .IsUnique();
+                        .IsUnique()
+                        .HasFilter("[OrderDetailId] IS NOT NULL");
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Review", (string)null);
+                    b.ToTable("Review");
                 });
 
             modelBuilder.Entity("SWD392.DB.Solution", b =>
@@ -1013,9 +991,7 @@ namespace SWD392.Migrations
                 {
                     b.HasOne("SWD392.DB.Review", "Review")
                         .WithOne("Comment")
-                        .HasForeignKey("SWD392.DB.Comment", "ReviewId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .HasForeignKey("SWD392.DB.Comment", "ReviewId");
 
                     b.HasOne("SWD392.DB.ApplicationUser", "User")
                         .WithMany("Comments")
@@ -1165,9 +1141,7 @@ namespace SWD392.Migrations
                 {
                     b.HasOne("SWD392.DB.OrderDetail", "OrderDetail")
                         .WithOne("Review")
-                        .HasForeignKey("SWD392.DB.Review", "OrderDetailId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .HasForeignKey("SWD392.DB.Review", "OrderDetailId");
 
                     b.HasOne("SWD392.DB.ApplicationUser", "User")
                         .WithMany("Reviews")
