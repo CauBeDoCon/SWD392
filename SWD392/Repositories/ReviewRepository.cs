@@ -4,7 +4,10 @@ using Microsoft.EntityFrameworkCore;
 using SWD392.DB;
 using SWD392.DTOs;
 using SWD392.Models;
+using System.Collections.Generic;
+using System.Linq;
 using System.Security.Claims;
+using System.Threading.Tasks;
 
 namespace SWD392.Repositories
 {
@@ -21,37 +24,51 @@ namespace SWD392.Repositories
             _httpContextAccessor = httpContextAccessor;
         }
 
-        public async Task<ReviewModel> GetReviewById(int reviewId)
+        public async Task<ResponseMessage<ReviewModel>> GetReviewById(int reviewId)
         {
             var reviewEntity = await _context.Reviews
                 .Include(r => r.OrderDetail)
                 .FirstOrDefaultAsync(r => r.Id == reviewId);
 
             if (reviewEntity == null)
-                return null;
+                return new ResponseMessage<ReviewModel>(false, "Review không tồn tại.");
 
-            return _mapper.Map<ReviewModel>(reviewEntity);
+            var reviewModel = _mapper.Map<ReviewModel>(reviewEntity);
+            return new ResponseMessage<ReviewModel>(true, "Lấy review thành công.", reviewModel);
         }
 
-        public async Task<IEnumerable<ReviewModel>> GetReviewsByProduct(int productId)
+        public async Task<ResponseMessage<IEnumerable<ReviewModel>>> GetReviewsByProduct(int productId)
         {
             var reviews = await _context.Reviews
                 .Include(r => r.OrderDetail)
                 .Where(r => r.OrderDetail.ProductId == productId)
                 .ToListAsync();
 
-            return _mapper.Map<IEnumerable<ReviewModel>>(reviews);
+            if (!reviews.Any())
+                return new ResponseMessage<IEnumerable<ReviewModel>>(false, "Không có review nào cho sản phẩm này.");
+
+            var reviewModels = _mapper.Map<IEnumerable<ReviewModel>>(reviews);
+            return new ResponseMessage<IEnumerable<ReviewModel>>(true, "Lấy danh sách review thành công.", reviewModels);
         }
 
-        public async Task<int> CreateReviewAsync(ReviewDTO dto, string currentUserId)
+        public async Task<ResponseMessage<int>> CreateReviewAsync(int orderDetailId, ReviewDTO dto, string currentUserId)
         {
             var orderDetail = await _context.OrderDetails
                 .Include(od => od.Order)
-                .FirstOrDefaultAsync(od => od.Id == dto.OrderDetailId);
+                .FirstOrDefaultAsync(od => od.Id == orderDetailId);
 
             if (orderDetail == null || orderDetail.Order.UserId != currentUserId)
             {
-                throw new UnauthorizedAccessException("Bạn chưa mua sản phẩm này nên không thể review.");
+                return new ResponseMessage<int>(false, "Bạn chưa mua sản phẩm này nên không thể review.");
+            }
+
+            // 🔥 Kiểm tra xem review đã tồn tại chưa
+            var existingReview = await _context.Reviews
+                .FirstOrDefaultAsync(r => r.OrderDetailId == orderDetailId);
+
+            if (existingReview != null)
+            {
+                return new ResponseMessage<int>(false, "Bạn đã review sản phẩm này rồi.");
             }
 
             var newReview = new Review
@@ -59,49 +76,53 @@ namespace SWD392.Repositories
                 UserId = currentUserId,
                 Rating = dto.Rating,
                 Content = dto.Content,
-                OrderDetailId = dto.OrderDetailId,
+                OrderDetailId = orderDetailId,  // Dùng orderDetailId từ URL
                 ReviewDate = DateTime.UtcNow
             };
 
             _context.Reviews.Add(newReview);
             await _context.SaveChangesAsync();
-            return newReview.Id;
+
+            return new ResponseMessage<int>(true, "Thêm review thành công.", newReview.Id);
         }
 
-        public async Task UpdateReviewAsync(int reviewId, UpdateReviewDTO dto, string currentUserId)
+
+        public async Task<ResponseMessage<bool>> UpdateReviewAsync(int reviewId, UpdateReviewDTO dto, string currentUserId)
         {
             var existingReview = await _context.Reviews.FindAsync(reviewId);
             if (existingReview == null)
             {
-                throw new KeyNotFoundException("Review không tồn tại.");
+                return new ResponseMessage<bool>(false, "Review không tồn tại.");
             }
 
             if (existingReview.UserId != currentUserId)
             {
-                throw new UnauthorizedAccessException("Bạn không có quyền sửa review này.");
+                return new ResponseMessage<bool>(false, "Bạn không có quyền sửa review này.");
             }
 
             existingReview.Rating = dto.Rating;
             existingReview.Content = dto.Content;
 
             await _context.SaveChangesAsync();
+            return new ResponseMessage<bool>(true, "Cập nhật review thành công.", true);
         }
 
-        public async Task DeleteReviewAsync(int reviewId, string currentUserId)
+        public async Task<ResponseMessage<bool>> DeleteReviewAsync(int reviewId, string currentUserId)
         {
             var existingReview = await _context.Reviews.FindAsync(reviewId);
             if (existingReview == null)
             {
-                throw new KeyNotFoundException("Review không tồn tại.");
+                return new ResponseMessage<bool>(false, "Review không tồn tại.");
             }
 
             if (existingReview.UserId != currentUserId)
             {
-                throw new UnauthorizedAccessException("Bạn không có quyền xoá review này.");
+                return new ResponseMessage<bool>(false, "Bạn không có quyền xoá review này.");
             }
 
             _context.Reviews.Remove(existingReview);
             await _context.SaveChangesAsync();
+            return new ResponseMessage<bool>(true, "Xóa review thành công.", true);
         }
     }
 }
