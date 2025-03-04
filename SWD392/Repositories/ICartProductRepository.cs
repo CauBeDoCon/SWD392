@@ -12,5 +12,6 @@ namespace SWD392.Repositories
 
         public Task UpdateCartProductAsync(int id, CartProductModel model);
         public Task<string> DeleteCartProductAsync(int id);
+        public  Task<CartProductModel> CheckProductExistInCart(int cartid, int ProductId ,CartProductModel model);
     }
 }

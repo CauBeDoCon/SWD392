@@ -28,6 +28,7 @@ public class CartRepository : ICartRepository
                 // Lồng Product
                 Product = new ProductCartDTO
                 {
+                    Id = cp.ProductId,
                     Name = cp.Product.Name,
                     Description = cp.Product.Description,
                     Price = cp.Product.Price,

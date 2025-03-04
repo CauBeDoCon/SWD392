@@ -133,61 +133,32 @@ namespace SWD392.Controllers
         [HttpPost("SignIn")]
         public async Task<IActionResult> SignIn([FromBody] SignInModel signInModel)
         {
-            var user = await accountRepo.GetUserByUsernameAsync(signInModel.Username); 
-
-            if (user == null)
-            {
-                return Unauthorized(new { Message = "Tài khoản hoặc mật khẩu không đúng!" });
-            }
-
-        
-            if (user.Status == "Banned")
-            {
-                return Unauthorized(new { Message = "Tài khoản của bạn đã bị cấm rồi nghen. Lêu lêu !!!" });
-            }
-
             var result = await accountRepo.SignInAsync(signInModel);
 
             if (result == null)
             {
-                return Unauthorized(new { Message = "Tài khoản hoặc mật khẩu không đúng!" });
+                return Unauthorized(new { Message = "Email hoặc mật khẩu không đúng!" });
             }
 
-            return Ok(result);
+            return Ok( result);
         }
         [HttpGet("GetAllAccount")]
         public async Task<IActionResult> GetAllAccounts()
         {
             return Ok(await accountRepo.GetAllAccountsAsync());
         }
-        [HttpGet("GetAllCustomers")]
-        [Authorize(Roles = "Admin,Manager")] 
-        public async Task<IActionResult> GetAllCustomers()
-        {
-            var customers = await accountRepo.GetAllCustomersAsync();
-
-            var customerList = customers.Select(u => new CustomerDTO
-            {
-                Id = u.Id,
-                FullName = $"{u.FirstName} {u.LastName}",
-                Email = u.Email,
-                PhoneNumber = u.PhoneNumber,
-                Address = u.Address,
-                WalletId = u.WalletId,
-                CartId = u.CartId
-            }).ToList();
-
-            return Ok(customerList);
-        }
-
+       
         [HttpGet("GetCurrentAccount")]
         public async Task<IActionResult> GetCurrentAccount()
         {
+            // Trích xuất userId từ JWT token (từ ClaimTypes.NameIdentifier)
              var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             if (string.IsNullOrEmpty(userId))
             {
                 return Unauthorized();
             }
+            
+            // Gọi service để lấy thông tin tài khoản hiện tại theo userId
             var account = await accountRepo.GetAccountByIdAsync(userId);
             if (account == null)
             {

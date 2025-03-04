@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.DotNet.Scaffolding.Shared.Messaging;
 using Microsoft.EntityFrameworkCore;
 using SWD392.DB;
 using SWD392.DTOs.Pagination;
@@ -12,19 +13,29 @@ namespace SWD392.Repositories
     {
         private readonly ApplicationDbContext _context;
         private readonly IMapper _mapper;
-        
+        private readonly IProductRepository _productRepository;
 
-        public CartProductRepository(ApplicationDbContext context, IMapper mapper)
+
+        public CartProductRepository(ApplicationDbContext context, IMapper mapper, IProductRepository productRepository)
         {
             _context = context;
             _mapper = mapper;
+            _productRepository = productRepository;
         }
         public async Task<int> AddCartProductAsync(CartProductModel model)
         {
+            var productnumber = _context.products
+                .Where(p => p.Id == model.ProductId)
+                .Select(p => p.Quantity)
+                .FirstOrDefault();
+            if (productnumber- model.Quantity <0)
+            {   
+                throw new Exception("so luong hang ko du");
+            }
             var newCartProduct = _mapper.Map<CartProduct>(model);
             _context.cartProducts!.Add(newCartProduct);
             await _context.SaveChangesAsync();
-            return newCartProduct.Id;
+            return newCartProduct.Id ;
         }
 
         public async Task<string> DeleteCartProductAsync(int id)
@@ -61,7 +72,22 @@ namespace SWD392.Repositories
                 PageSize = pageSize
             };
         }
-        
+        public async Task<CartProductModel> CheckProductExistInCart(int cartid, int ProductId, CartProductModel model)
+        {
+            var checkProduct = await _context.cartProducts!.FirstOrDefaultAsync(cp => cp.CartId == cartid && cp.ProductId == ProductId);
+            if (checkProduct == null)
+            {
+                var newProductId = await AddCartProductAsync(model);
+                checkProduct = await _context.cartProducts!.FindAsync(newProductId);
+            }
+            else
+            {
+                checkProduct.Quantity += model.Quantity;
+                _context.Entry(checkProduct).Property(p => p.Quantity).IsModified = true;
+            }
+            await _context.SaveChangesAsync();
+            return checkProduct != null ? _mapper.Map<CartProductModel>(checkProduct) : null;
+        }
         public async Task<CartProductModel> GetCartProductsAsync(int id)
         {
             var cartProduct = await _context.cartProducts.FindAsync(id);

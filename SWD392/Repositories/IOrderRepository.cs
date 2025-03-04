@@ -12,6 +12,8 @@ namespace SWD392.Repositories
     Task<OrderResponse> CreateOrderAsync(OrderDTO orderDto, ClaimsPrincipal user);
     Task<OrderResponse?> GetOrderByIdAsync(int id);
     Task<IEnumerable<OrderResponse>> GetOrdersAsync();
+    Task<IEnumerable<OrderResponse>> GetAllOrderByCustomerId(string id);
+
     Task<bool> UpdateOrderAsync(int id, OrderResponse orderDto);
     Task<bool> DeleteOrderAsync(int id);
     }
