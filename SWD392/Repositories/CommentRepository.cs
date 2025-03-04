@@ -20,32 +20,37 @@ namespace SWD392.Repositories
             _mapper = mapper;
         }
 
-        public async Task<CommentModel> GetCommentByIdAsync(int commentId)
+        public async Task<ResponseMessage<CommentModel>> GetCommentByIdAsync(int commentId)
         {
             var commentEntity = await _context.Comments
                 .Include(c => c.Review)
                 .FirstOrDefaultAsync(c => c.Id == commentId);
+
             if (commentEntity == null)
-                return null;
-            return _mapper.Map<CommentModel>(commentEntity);
+                return new ResponseMessage<CommentModel>(false, "Không tìm thấy comment.");
+
+            return new ResponseMessage<CommentModel>(true, "Lấy comment thành công.", _mapper.Map<CommentModel>(commentEntity));
         }
 
-        public async Task<CommentModel> GetCommentByReviewIdAsync(int reviewId)
+        public async Task<ResponseMessage<CommentModel>> GetCommentByReviewIdAsync(int reviewId)
         {
             var commentEntity = await _context.Comments
                 .Include(c => c.Review)
                 .FirstOrDefaultAsync(c => c.ReviewId == reviewId);
+
             if (commentEntity == null)
-                return null;
-            return _mapper.Map<CommentModel>(commentEntity);
+                return new ResponseMessage<CommentModel>(false, "Không có comment nào cho review này.");
+
+            return new ResponseMessage<CommentModel>(true, "Lấy comment thành công.", _mapper.Map<CommentModel>(commentEntity));
         }
 
-        public async Task<int> CreateCommentAsync(CommentDTO dto, string currentUserId)
+        public async Task<ResponseMessage<int>> CreateCommentAsync(CommentDTO dto, string currentUserId)
         {
             var existingComment = await _context.Comments
                 .FirstOrDefaultAsync(c => c.ReviewId == dto.ReviewId);
+
             if (existingComment != null)
-                throw new Exception("Review đã có comment.");
+                return new ResponseMessage<int>(false, "Review đã có comment.");
 
             var commentEntity = new Comment
             {
@@ -57,33 +62,39 @@ namespace SWD392.Repositories
 
             _context.Comments.Add(commentEntity);
             await _context.SaveChangesAsync();
-            return commentEntity.Id;
+
+            return new ResponseMessage<int>(true, "Tạo comment thành công.", commentEntity.Id);
         }
 
-        public async Task UpdateCommentAsync(int commentId, UpdateCommentDTO dto, string currentUserId)
+        public async Task<ResponseMessage<bool>> UpdateCommentAsync(int commentId, UpdateCommentDTO dto, string currentUserId)
         {
             var commentEntity = await _context.Comments.FirstOrDefaultAsync(c => c.Id == commentId);
             if (commentEntity == null)
-                throw new KeyNotFoundException("Không tìm thấy comment.");
+                return new ResponseMessage<bool>(false, "Không tìm thấy comment.");
+
             if (commentEntity.UserId != currentUserId)
-                throw new UnauthorizedAccessException("Bạn không có quyền cập nhật comment này.");
+                return new ResponseMessage<bool>(false, "Bạn không có quyền cập nhật comment này.");
 
             commentEntity.Content = dto.Content;
             commentEntity.CommentDate = DateTime.UtcNow;
 
             await _context.SaveChangesAsync();
+            return new ResponseMessage<bool>(true, "Cập nhật comment thành công.", true);
         }
 
-        public async Task DeleteCommentAsync(int commentId, string currentUserId)
+        public async Task<ResponseMessage<bool>> DeleteCommentAsync(int commentId, string currentUserId)
         {
             var commentEntity = await _context.Comments.FirstOrDefaultAsync(c => c.Id == commentId);
             if (commentEntity == null)
-                throw new KeyNotFoundException("Không tìm thấy comment.");
+                return new ResponseMessage<bool>(false, "Không tìm thấy comment.");
+
             if (commentEntity.UserId != currentUserId)
-                throw new UnauthorizedAccessException("Bạn không có quyền xóa comment này.");
+                return new ResponseMessage<bool>(false, "Bạn không có quyền xóa comment này.");
 
             _context.Comments.Remove(commentEntity);
             await _context.SaveChangesAsync();
+
+            return new ResponseMessage<bool>(true, "Xóa comment thành công.", true);
         }
     }
 }

@@ -7,12 +7,11 @@ namespace SWD392.Repositories
 {
     public interface ICommentRepository
     {
-        Task<CommentModel> GetCommentByIdAsync(int commentId);
-
-        Task<CommentModel> GetCommentByReviewIdAsync(int reviewId);
-
-        Task<int> CreateCommentAsync(CommentDTO dto, string currentUserId);
-        Task UpdateCommentAsync(int commentId, UpdateCommentDTO dto, string currentUserId);
-        Task DeleteCommentAsync(int commentId, string currentUserId);
+        Task<ResponseMessage<CommentModel>> GetCommentByIdAsync(int commentId);
+        Task<ResponseMessage<CommentModel>> GetCommentByReviewIdAsync(int reviewId);
+        Task<ResponseMessage<int>> CreateCommentAsync(CommentDTO dto, string currentUserId);
+        Task<ResponseMessage<bool>> UpdateCommentAsync(int commentId, UpdateCommentDTO dto, string currentUserId);
+        Task<ResponseMessage<bool>> DeleteCommentAsync(int commentId, string currentUserId);
     }
+
 }

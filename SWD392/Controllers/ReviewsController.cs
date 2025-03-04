@@ -20,55 +20,38 @@ namespace SWD392.Controllers
         [HttpGet("{id}")]
         public async Task<IActionResult> GetReviewById(int id)
         {
-            try
-            {
-                var review = await _reviewRepository.GetReviewById(id);
-                if (review == null)
-                    return NotFound(new { message = "Review không tồn tại." });
-
-                return Ok(review);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new { message = "Lỗi server.", error = ex.Message });
-            }
+            var response = await _reviewRepository.GetReviewById(id);
+            if (!response.Success)
+                return NotFound(new { message = response.Message });
+            return Ok(response);
         }
 
-        [Authorize(Roles = "Admin,Manager")]
+        [Authorize]
         [HttpGet("product/{productId}")]
         public async Task<IActionResult> GetReviewsByProduct(int productId)
         {
-            try
-            {
-                var reviews = await _reviewRepository.GetReviewsByProduct(productId);
-                return Ok(reviews);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new { message = "Lỗi server.", error = ex.Message });
-            }
+            var response = await _reviewRepository.GetReviewsByProduct(productId);
+            if (!response.Success)
+                return NotFound(new { message = response.Message });
+            return Ok(response);
         }
 
-        [Authorize(Roles = "Customer")]
-        [HttpPost]
-        public async Task<IActionResult> CreateReview([FromBody] ReviewDTO dto)
+        [Authorize]
+        [HttpPost("postreviewbyorderdetail/{orderDetailId}")]
+        public async Task<IActionResult> CreateReview(int orderDetailId, [FromBody] ReviewDTO dto)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            try
-            {
-                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-                if (userId == null)
-                    return Unauthorized(new { message = "Không tìm thấy user." });
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (userId == null)
+                return Unauthorized(new { message = "Không tìm thấy user." });
 
-                var reviewId = await _reviewRepository.CreateReviewAsync(dto, userId);
-                return CreatedAtAction(nameof(GetReviewById), new { id = reviewId }, new { Id = reviewId });
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new { message = "Lỗi server.", error = ex.Message });
-            }
+            var response = await _reviewRepository.CreateReviewAsync(orderDetailId, dto, userId);
+            if (!response.Success)
+                return BadRequest(new { message = response.Message });
+
+            return CreatedAtAction(nameof(GetReviewById), new { id = response.Data }, new { Id = response.Data });
         }
 
         [Authorize(Roles = "Customer")]
@@ -78,38 +61,30 @@ namespace SWD392.Controllers
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            try
-            {
-                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-                if (userId == null)
-                    return Unauthorized(new { message = "Không tìm thấy user." });
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (userId == null)
+                return Unauthorized(new { message = "Không tìm thấy user." });
 
-                await _reviewRepository.UpdateReviewAsync(id, dto, userId);
-                return NoContent();
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new { message = "Lỗi server.", error = ex.Message });
-            }
+            var response = await _reviewRepository.UpdateReviewAsync(id, dto, userId);
+            if (!response.Success)
+                return BadRequest(new { message = response.Message });
+
+            return NoContent();
         }
 
         [Authorize(Roles = "Customer")]
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteReview(int id)
         {
-            try
-            {
-                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-                if (userId == null)
-                    return Unauthorized(new { message = "Không tìm thấy user." });
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (userId == null)
+                return Unauthorized(new { message = "Không tìm thấy user." });
 
-                await _reviewRepository.DeleteReviewAsync(id, userId);
-                return NoContent();
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new { message = "Lỗi server.", error = ex.Message });
-            }
+            var response = await _reviewRepository.DeleteReviewAsync(id, userId);
+            if (!response.Success)
+                return BadRequest(new { message = response.Message });
+
+            return NoContent();
         }
     }
 }

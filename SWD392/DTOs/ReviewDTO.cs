@@ -9,8 +9,5 @@ namespace SWD392.DTOs
         public int Rating { get; set; }
 
         public string? Content { get; set; }
-
-        [Required]
-        public int OrderDetailId { get; set; }
     }
 }
