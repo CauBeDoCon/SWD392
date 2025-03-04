@@ -9,7 +9,8 @@ namespace SWD392.Models
         public string? Content { get; set; }
         public DateTime ReviewDate { get; set; }
         public int OrderDetailId { get; set; }
-        [JsonIgnore]
         public string UserId { get; set; }
+        public string UserName { get; set; }
+        public string Avatar { get; set; }
     }
 }

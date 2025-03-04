@@ -28,14 +28,29 @@ namespace SWD392.Repositories
         {
             var reviewEntity = await _context.Reviews
                 .Include(r => r.OrderDetail)
+                .Include(r => r.User) // Load thông tin User
                 .FirstOrDefaultAsync(r => r.Id == reviewId);
 
             if (reviewEntity == null)
                 return new ResponseMessage<ReviewModel>(false, "Review không tồn tại.");
 
-            var reviewModel = _mapper.Map<ReviewModel>(reviewEntity);
+            var reviewModel = new ReviewModel
+            {
+                Id = reviewEntity.Id,
+                Rating = reviewEntity.Rating,
+                Content = reviewEntity.Content,
+                ReviewDate = reviewEntity.ReviewDate,
+                OrderDetailId = reviewEntity.OrderDetailId,
+                UserId = reviewEntity.UserId,
+
+                // Lấy thông tin User
+                UserName = reviewEntity.User.UserName,
+                Avatar = reviewEntity.User.Avatar
+            };
+
             return new ResponseMessage<ReviewModel>(true, "Lấy review thành công.", reviewModel);
         }
+
 
         public async Task<ResponseMessage<IEnumerable<ReviewModel>>> GetReviewsByProduct(int productId)
         {
