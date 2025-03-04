@@ -18,7 +18,7 @@ namespace SWD392.Controllers
             _bookingRepository = bookingRepository;
         }
 
-        // ✅ 1. Xem lịch làm việc
+     
         [HttpGet("GetDoctorSchedule")]
         [Authorize(Roles = "Doctor")]
         public async Task<IActionResult> GetDoctorSchedule()
@@ -33,7 +33,7 @@ namespace SWD392.Controllers
             return Ok(schedule);
         }
 
-        // ✅ 2. Cập nhật kết quả khám (đánh dấu completed)
+  
         [HttpPut("CompleteAppointment/{bookingId}")]
         [Authorize(Roles = "Doctor")]
         public async Task<IActionResult> CompleteAppointment(int bookingId, [FromBody] AppointmentCompletionDTO request)

@@ -18,7 +18,7 @@ namespace SWD392.Controllers
             _bookingRepository = bookingRepository;
         }
 
-        // ✅ 1. Xem lịch trống của bác sĩ
+   
         [HttpGet("GetAvailableBookings/{doctorId}")]
         public async Task<IActionResult> GetAvailableBookings(string doctorId)
         {
@@ -26,7 +26,7 @@ namespace SWD392.Controllers
             return Ok(slots);
         }
 
-        // ✅ 2. Đặt lịch hẹn (trạng thái "Pending")
+      
         [HttpPost("RequestAppointment")]
         [Authorize(Roles = "Customer")]
         public async Task<IActionResult> RequestAppointment([FromBody] BookingRequestDTO request)
@@ -47,7 +47,7 @@ namespace SWD392.Controllers
             return Ok(new { Message = "Đặt lịch thành công! Chờ xác nhận từ Staff.", BookingId = request.BookingId });
         }
 
-        // ✅ 3. Xem lịch hẹn của khách hàng
+      
         [HttpGet("GetCustomerAppointments")]
         [Authorize(Roles = "Customer")]
         public async Task<IActionResult> GetCustomerAppointments()
@@ -62,7 +62,7 @@ namespace SWD392.Controllers
             return Ok(appointments);
         }
 
-        // ✅ 4. Hủy lịch hẹn (chỉ trước 24h)
+      
         [HttpPut("CancelAppointment/{bookingId}")]
         [Authorize(Roles = "Customer")]
         public async Task<IActionResult> CancelAppointment(int bookingId)
