@@ -18,7 +18,7 @@ namespace SWD392.Controllers
             _bookingRepository = bookingRepository;
         }
 
-  
+        // ✅ 1. Xem lịch trống của bác sĩ
         [HttpGet("GetAvailableBookings/{doctorId}")]
         public async Task<IActionResult> GetAvailableBookings(string doctorId)
         {
@@ -26,10 +26,10 @@ namespace SWD392.Controllers
             return Ok(slots);
         }
 
-      
-        [HttpPost("BookAppointment")]
+        // ✅ 2. Đặt lịch hẹn (trạng thái "Pending")
+        [HttpPost("RequestAppointment")]
         [Authorize(Roles = "Customer")]
-        public async Task<IActionResult> BookAppointment([FromBody] BookingRequestDTO request)
+        public async Task<IActionResult> RequestAppointment([FromBody] BookingRequestDTO request)
         {
             var customerUsername = User.Identity.Name;
             if (string.IsNullOrEmpty(customerUsername))
@@ -37,29 +37,43 @@ namespace SWD392.Controllers
                 return Unauthorized(new { Message = "Không xác định được tài khoản khách hàng!" });
             }
 
-            bool success = await _bookingRepository.BookAppointmentAsync(request, customerUsername);
+            bool success = await _bookingRepository.RequestAppointmentAsync(request, customerUsername);
 
             if (!success)
             {
                 return BadRequest(new { Message = "Lịch này đã được đặt hoặc không tồn tại!" });
             }
 
-            return Ok(new { Message = "Đặt lịch thành công!", BookingId = request.BookingId });
+            return Ok(new { Message = "Đặt lịch thành công! Chờ xác nhận từ Staff.", BookingId = request.BookingId });
         }
 
-       
-        [HttpGet("GetDoctorBookings")]
-        [Authorize(Roles = "Doctor")]
-        public async Task<IActionResult> GetDoctorBookings()
+        // ✅ 3. Xem lịch hẹn của khách hàng
+        [HttpGet("GetCustomerAppointments")]
+        [Authorize(Roles = "Customer")]
+        public async Task<IActionResult> GetCustomerAppointments()
         {
-            var doctorId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            if (string.IsNullOrEmpty(doctorId))
+            var customerUsername = User.Identity.Name;
+            if (string.IsNullOrEmpty(customerUsername))
             {
-                return Unauthorized("Không xác định được ID của bác sĩ.");
+                return Unauthorized("Không xác định được tài khoản khách hàng.");
             }
 
-            var bookings = await _bookingRepository.GetDoctorBookingsAsync(doctorId);
-            return Ok(bookings);
+            var appointments = await _bookingRepository.GetCustomerAppointmentsAsync(customerUsername);
+            return Ok(appointments);
+        }
+
+        // ✅ 4. Hủy lịch hẹn (chỉ trước 24h)
+        [HttpPut("CancelAppointment/{bookingId}")]
+        [Authorize(Roles = "Customer")]
+        public async Task<IActionResult> CancelAppointment(int bookingId)
+        {
+            var success = await _bookingRepository.CancelAppointmentAsync(bookingId, User.Identity.Name);
+            if (!success)
+            {
+                return BadRequest(new { Message = "Không thể hủy lịch hẹn, vui lòng liên hệ Staff." });
+            }
+
+            return Ok(new { Message = "Hủy lịch thành công." });
         }
     }
 }

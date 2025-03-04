@@ -160,6 +160,12 @@ namespace SWD392.DB
                 .HasIndex(c => c.OrderDetailId)
                 .IsUnique();
 
+            modelBuilder.Entity<Booking>()
+                .HasOne<ApplicationUser>()
+                .WithMany()
+                .HasForeignKey(b => b.DoctorId)
+                .OnDelete(DeleteBehavior.Cascade);
+
 
         }
     }
