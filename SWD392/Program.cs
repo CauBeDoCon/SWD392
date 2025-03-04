@@ -143,7 +143,7 @@ var app = builder.Build();
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
-    await RoleInitializer.InitializeRoles(services);
+    //await RoleInitializer.InitializeRoles(services); //tu dong dang ki role :customer
 }
 
 

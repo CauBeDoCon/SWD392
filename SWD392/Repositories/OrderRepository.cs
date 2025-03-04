@@ -179,6 +179,23 @@ namespace SWD392.Repositories
             await _context.SaveChangesAsync();
             return true;
         }
+
+        public async Task<IEnumerable<OrderResponse>> GetAllOrderByCustomerId(string id)
+        {
+            return await _context.Orders.
+                Where(o=>o.UserId== id).
+                Select(o => new OrderResponse
+                {
+                    orderID = o.OrderId,
+                    applicationUserID = o.UserId,
+                    OrderDate = o.OrderDate,
+                    TotalAmount = o.TotalAmount,
+                    Status = o.Status.ToString(),
+                    Discount = o.Discount,
+                    CartId = o.CartId
+                })
+                .ToListAsync();
+        }
     }
 
 }
