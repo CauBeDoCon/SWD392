@@ -137,7 +137,28 @@ namespace SWD392.Controllers
                 _context.Transactions.Add(depositTransaction);
                 await _context.SaveChangesAsync();
 
-                return Redirect("http://localhost:5173/deposite");
+                var responseCode = Request.Query["vnp_ResponseCode"];
+
+                if (responseCode == "00")
+                {
+                    var vnpAmount = Request.Query["vnp_Amount"];
+                    var vnpBankCode = Request.Query["vnp_BankCode"];
+                    var vnpBankTranNo = Request.Query["vnp_BankTranNo"];
+                    var vnpTransactionNo = Request.Query["vnp_TransactionNo"];
+                    var vnpPayDate = Request.Query["vnp_PayDate"];
+
+                    var redirectUrl = $"http://localhost:5173/deposite" +
+                                      $"?Status=Success" +
+                                      $"&vnp_ResponseCode={responseCode}" + 
+                                      $"&vnp_Amount={vnpAmount}" +
+                                      $"&vnp_BankCode={vnpBankCode}" +
+                                      $"&vnp_BankTranNo={vnpBankTranNo}" +
+                                      $"&vnp_TransactionNo={vnpTransactionNo}" +
+                                      $"&vnp_PayDate={vnpPayDate}";
+
+                    return Redirect(redirectUrl);
+                }
+                return BadRequest(new {Message =" Giao dịch không thành công "});
             }
             catch (Exception ex)
             {
