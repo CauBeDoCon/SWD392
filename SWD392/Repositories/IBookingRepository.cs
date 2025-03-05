@@ -19,6 +19,7 @@ namespace SWD392.Repositories
         Task<List<DoctorDTO>> GetAllDoctorsAsync();
 
         Task<List<BookingDTO>> GetPendingAppointmentsAsync();
+        Task<ResultBookingDTO> GetResultBookingAsync(int bookingId, string customerId);
 
         Task<bool> UpdateBookingDetailsAsync(int bookingId, string doctorId, UpdateBookingDTO request);
 

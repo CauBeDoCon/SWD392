@@ -247,6 +247,24 @@ namespace SWD392.Repositories
             return true;
         }
 
+        public async Task<ResultBookingDTO> GetResultBookingAsync(int bookingId, string customerId)
+        {
+            var booking = await _context.Bookings
+                .Where(b => b.BookingId == bookingId && b.CustomerId == customerId && b.Status == "Confirmed")
+                .Select(b => new ResultBookingDTO
+                {
+                    Prescription = b.Prescription,
+                    Note = b.Note,
+                    TimeSlot = b.TimeSlot
+                })
+                .FirstOrDefaultAsync();
+
+            return booking;
+        }
+
+
+
+
 
     }
 }
