@@ -208,10 +208,10 @@ namespace SWD392.Repositories
             return await userManager.UpdateAsync(account);
         }
 
-        public async Task<List<ApplicationUser>> GetAllCustomersAsync()
+        public async Task<List<ApplicationUser>> GetUsersByRoleAsync(string role)
         {
-            var customers = await userManager.GetUsersInRoleAsync(AppRole.Customer);
-            return customers.ToList();
+            var users = await userManager.GetUsersInRoleAsync(role);
+            return users.Cast<ApplicationUser>().ToList();
         }
 
         public async Task<ApplicationUser?> GetUserByUsernameAsync(string username)
