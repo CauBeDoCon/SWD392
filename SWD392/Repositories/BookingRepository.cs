@@ -32,7 +32,7 @@ namespace SWD392.Repositories
         }
 
        
-        public async Task<bool> RequestAppointmentAsync(BookingRequestDTO request, string customerUsername)
+        public async Task<bool> RequestAppointmentAsync(BookingRequestDTO request, string CustomerId)
         {
             var booking = await _context.Bookings
                 .FirstOrDefaultAsync(b => b.BookingId == request.BookingId && b.Status == "Available");
@@ -42,7 +42,7 @@ namespace SWD392.Repositories
                 return false;
             }
 
-            booking.CustomerUsername = customerUsername;
+            booking.CustomerId = CustomerId;
             booking.Status = "Pending"; 
 
             await _context.SaveChangesAsync();
@@ -50,26 +50,26 @@ namespace SWD392.Repositories
         }
 
     
-        public async Task<List<BookingDTO>> GetCustomerAppointmentsAsync(string customerUsername)
+        public async Task<List<BookingDTO>> GetCustomerAppointmentsAsync(string CustomerId)
         {
             return await _context.Bookings
-                .Where(b => b.CustomerUsername == customerUsername)
+                .Where(b => b.CustomerId == CustomerId)
                 .OrderBy(b => b.TimeSlot)
                 .Select(b => new BookingDTO
                 {
                     BookingId = b.BookingId,
                     TimeSlot = b.TimeSlot,
                     Status = b.Status,
-                    CustomerUsername = b.CustomerUsername
+                    CustomerId = b.CustomerId
                 })
                 .ToListAsync();
         }
 
 
-        public async Task<bool> CancelAppointmentAsync(int bookingId, string customerUsername)
+        public async Task<bool> CancelAppointmentAsync(int bookingId, string CustomerId)
         {
             var booking = await _context.Bookings
-                .FirstOrDefaultAsync(b => b.BookingId == bookingId && b.CustomerUsername == customerUsername);
+                .FirstOrDefaultAsync(b => b.BookingId == bookingId && b.CustomerId == CustomerId);
 
             if (booking == null)
             {
@@ -100,7 +100,7 @@ namespace SWD392.Repositories
                     BookingId = b.BookingId,
                     TimeSlot = b.TimeSlot,
                     Status = b.Status,
-                    CustomerUsername = b.CustomerUsername
+                    CustomerId = b.CustomerId
                 })
                 .ToListAsync();
         }
@@ -151,7 +151,7 @@ namespace SWD392.Repositories
                 return false; 
             }
             booking.Status = "Available";
-            booking.CustomerUsername = null;
+            booking.CustomerId = null;
             await _context.SaveChangesAsync();
             return true;
         }
@@ -200,7 +200,7 @@ namespace SWD392.Repositories
                     BookingId = b.BookingId,
                     TimeSlot = b.TimeSlot,
                     Status = b.Status,
-                    CustomerUsername = b.CustomerUsername
+                    CustomerId = b.CustomerId
                 })
                 .ToListAsync();
         }

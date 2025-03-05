@@ -12,7 +12,7 @@ namespace SWD392.DB
         [Required]
         public string DoctorId { get; set; } 
 
-        public string? CustomerUsername { get; set; } 
+        public string? CustomerId { get; set; } 
 
         [Required]
         public DateTime TimeSlot { get; set; }
