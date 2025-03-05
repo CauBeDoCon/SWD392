@@ -64,7 +64,9 @@ namespace SWD392.Repositories
                           TimeSlot = booking.TimeSlot,
                           Status = booking.Status,
                           CustomerId = booking.CustomerId,
-                          DoctorAvatar = user.Avatar 
+                          DoctorAvatar = user.Avatar,
+                          DoctorFirstName = user.FirstName, 
+                          DoctorLastName = user.LastName
                       })
                 .ToListAsync();
         }

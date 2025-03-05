@@ -8,5 +8,9 @@
         public string? CustomerId { get; set; }
 
         public string? DoctorAvatar { get; set; }
+
+        public string? DoctorFirstName { get; set; } 
+        public string? DoctorLastName { get; set; }
+
     }
 }
