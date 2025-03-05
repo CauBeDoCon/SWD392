@@ -34,6 +34,9 @@ namespace SWD392.DB
         public DbSet<Booking> Bookings { get; set; }
         public DbSet<Comment> Comments { get; set; }
         public DbSet<Review> Reviews { get; set; }
+        public DbSet<RoutineStep>? routineSteps { get; set; }
+        public DbSet<ResultQuiz>? ResultQuizzes { get; set; }
+        public DbSet<Routine>? Routines { get; set; } 
         #endregion
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -166,7 +169,11 @@ namespace SWD392.DB
                 .HasForeignKey(b => b.DoctorId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-
+            modelBuilder.Entity<RoutineStep>()
+                .HasOne(rs => rs.Product)
+                .WithMany(p => p.routineSteps)
+                .HasForeignKey(rs => rs.ProductId)
+                .OnDelete(DeleteBehavior.NoAction); // Chặn DELETE CASCADE ở đây
         }
     }
 }

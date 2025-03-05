@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using SWD392.DB;
 using SWD392.DTOs.Pagination;
+using SWD392.Enums;
 using SWD392.Models;
 
 namespace SWD392.Repositories
@@ -121,6 +122,11 @@ namespace SWD392.Repositories
 
             await _context.SaveChangesAsync();
         }
-
+        public async Task<Product> GetMostProductBasedOnSkinTypeAsync(SkinType skinType)
+        {
+            var result = await  _context.products.Where(p => p.skinType == skinType).OrderByDescending
+                        (p => p.Quantity).LastOrDefaultAsync();
+            return result;
+        }
     }
 }

@@ -112,6 +112,11 @@ builder.Services.AddScoped<IReviewRepository, ReviewRepository>();
 
 builder.Services.AddScoped<ICommentRepository, CommentRepository>();
 builder.Services.AddScoped<IDoctorRepository, DoctorRepository>();
+builder.Services.AddScoped<IResultQuizRepository, ResultQuizRepository>();
+
+builder.Services.AddScoped<IRoutineStepRepository, RoutineStepRepository>();
+
+builder.Services.AddScoped<IRoutineRepository, RoutineRepository>();
 
 builder.Services.AddAuthentication(options =>
 {
