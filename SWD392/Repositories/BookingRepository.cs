@@ -150,8 +150,8 @@ namespace SWD392.Repositories
             {
                 return false; 
             }
-
-            booking.Status = "Cancelled";
+            booking.Status = "Available";
+            booking.CustomerUsername = null;
             await _context.SaveChangesAsync();
             return true;
         }

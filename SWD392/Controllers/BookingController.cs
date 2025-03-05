@@ -62,18 +62,20 @@ namespace SWD392.Controllers
             return Ok(appointments);
         }
 
-      
+
         [HttpPut("CancelAppointment/{bookingId}")]
         [Authorize(Roles = "Customer")]
         public async Task<IActionResult> CancelAppointment(int bookingId)
         {
-            var success = await _bookingRepository.CancelAppointmentAsync(bookingId, User.Identity.Name);
+            var success = await _bookingRepository.CancelAppointmentAsync(bookingId);
             if (!success)
             {
-                return BadRequest(new { Message = "Không thể hủy lịch hẹn, vui lòng liên hệ Staff." });
+                return BadRequest(new { Message = "Không thể hủy lịch hẹn. Có thể lịch này đã bị hủy hoặc không tồn tại." });
             }
-
-            return Ok(new { Message = "Hủy lịch thành công." });
+            return Ok(new { Message = "Lịch hẹn đã được hủy và bạn có thể đặt lại !" });
         }
+
+
+
     }
 }
