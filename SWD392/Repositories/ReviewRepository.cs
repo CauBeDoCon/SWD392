@@ -56,15 +56,27 @@ namespace SWD392.Repositories
         {
             var reviews = await _context.Reviews
                 .Include(r => r.OrderDetail)
+                .Include(r => r.User) // Thêm Include để lấy thông tin User
                 .Where(r => r.OrderDetail.ProductId == productId)
+                .Select(r => new ReviewModel
+                {
+                    Id = r.Id,
+                    Rating = r.Rating,
+                    Content = r.Content,
+                    ReviewDate = r.ReviewDate,
+                    OrderDetailId = r.OrderDetailId,
+                    UserId = r.UserId,
+                    UserName = r.User.UserName, // Lấy UserName từ bảng User
+                    Avatar = r.User.Avatar // Lấy Avatar từ bảng User
+                })
                 .ToListAsync();
 
             if (!reviews.Any())
                 return new ResponseMessage<IEnumerable<ReviewModel>>(false, "Không có review nào cho sản phẩm này.");
 
-            var reviewModels = _mapper.Map<IEnumerable<ReviewModel>>(reviews);
-            return new ResponseMessage<IEnumerable<ReviewModel>>(true, "Lấy danh sách review thành công.", reviewModels);
+            return new ResponseMessage<IEnumerable<ReviewModel>>(true, "Lấy danh sách review thành công.", reviews);
         }
+
 
         public async Task<ResponseMessage<int>> CreateReviewAsync(int orderDetailId, ReviewDTO dto, string currentUserId)
         {
