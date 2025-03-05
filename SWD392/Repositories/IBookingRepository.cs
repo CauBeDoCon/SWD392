@@ -16,6 +16,7 @@ namespace SWD392.Repositories
         Task<bool> CancelAppointmentAsync(int bookingId);
 
         Task CreateDoctorBookingsAsync(string doctorId);
+        Task<List<DoctorDTO>> GetAllDoctorsAsync();
 
         Task<List<BookingDTO>> GetPendingAppointmentsAsync();
 
