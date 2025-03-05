@@ -49,21 +49,27 @@ namespace SWD392.Repositories
             return true;
         }
 
-    
+
         public async Task<List<BookingDTO>> GetCustomerAppointmentsAsync(string CustomerId)
         {
             return await _context.Bookings
                 .Where(b => b.CustomerId == CustomerId)
                 .OrderBy(b => b.TimeSlot)
-                .Select(b => new BookingDTO
-                {
-                    BookingId = b.BookingId,
-                    TimeSlot = b.TimeSlot,
-                    Status = b.Status,
-                    CustomerId = b.CustomerId
-                })
+                .Join(_context.Users,
+                      booking => booking.DoctorId, 
+                      user => user.Id,
+                      (booking, user) => new BookingDTO
+                      {
+                          BookingId = booking.BookingId,
+                          TimeSlot = booking.TimeSlot,
+                          Status = booking.Status,
+                          CustomerId = booking.CustomerId,
+                          DoctorAvatar = user.Avatar 
+                      })
                 .ToListAsync();
         }
+
+
 
 
         public async Task<bool> CancelAppointmentAsync(int bookingId, string CustomerId)
