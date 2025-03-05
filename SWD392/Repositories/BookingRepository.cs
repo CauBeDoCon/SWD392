@@ -204,6 +204,30 @@ namespace SWD392.Repositories
                 })
                 .ToListAsync();
         }
+        public async Task<List<DoctorDTO>> GetAllDoctorsAsync()
+        {
+            var doctors = await _context.Users
+                .Where(u => _context.UserRoles
+                    .Where(ur => _context.Roles
+                        .Where(r => r.Name == "Doctor")
+                        .Select(r => r.Id)
+                        .Contains(ur.RoleId))
+                    .Select(ur => ur.UserId)
+                    .Contains(u.Id)
+                )
+                .Select(u => new DoctorDTO
+                {
+                    Id=u.Id,
+                    FirstName = u.FirstName,
+                    LastName = u.LastName,
+                    Email = u.Email,
+                    PhoneNumber = u.PhoneNumber
+                })
+                .ToListAsync();
+
+            return doctors;
+        }
+
 
     }
 }

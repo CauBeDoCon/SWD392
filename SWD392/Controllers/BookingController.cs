@@ -18,7 +18,14 @@ namespace SWD392.Controllers
             _bookingRepository = bookingRepository;
         }
 
-   
+        [HttpGet("GetAllDoctors")]
+        public async Task<IActionResult> GetAllDoctors()
+        {
+            var doctors = await _bookingRepository.GetAllDoctorsAsync();
+            return Ok(doctors);
+        }
+
+
         [HttpGet("GetAvailableBookings/{doctorId}")]
         public async Task<IActionResult> GetAvailableBookings(string doctorId)
         {
