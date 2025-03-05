@@ -1,8 +1,8 @@
 ﻿namespace SWD392.DTOs
 {
-    public class AppointmentCompletionDTO
+    public class UpdateBookingDTO
     {
-        public string Notes { get; set; } 
+        public string? Note { get; set; }
         public string? Prescription { get; set; }
     }
 }

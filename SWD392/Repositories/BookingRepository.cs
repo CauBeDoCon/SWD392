@@ -93,7 +93,7 @@ namespace SWD392.Repositories
         public async Task<List<BookingDTO>> GetDoctorScheduleAsync(string doctorId)
         {
             return await _context.Bookings
-                .Where(b => b.DoctorId == doctorId)
+                .Where(b => b.DoctorId == doctorId && b.Status == "Confirmed")
                 .OrderBy(b => b.TimeSlot)
                 .Select(b => new BookingDTO
                 {
@@ -106,7 +106,7 @@ namespace SWD392.Repositories
         }
 
      
-        public async Task<bool> CompleteAppointmentAsync(int bookingId, string doctorId, AppointmentCompletionDTO request)
+        public async Task<bool> CompleteAppointmentAsync(int bookingId, string doctorId, UpdateBookingDTO request)
         {
             var booking = await _context.Bookings.FirstOrDefaultAsync(b => b.BookingId == bookingId && b.DoctorId == doctorId);
 
@@ -221,11 +221,30 @@ namespace SWD392.Repositories
                     FirstName = u.FirstName,
                     LastName = u.LastName,
                     Email = u.Email,
-                    PhoneNumber = u.PhoneNumber
+                    PhoneNumber = u.PhoneNumber,
+                    Avatar = u.Avatar
                 })
                 .ToListAsync();
 
             return doctors;
+        }
+
+
+        public async Task<bool> UpdateBookingDetailsAsync(int bookingId, string doctorId, UpdateBookingDTO request)
+        {
+            var booking = await _context.Bookings
+                .FirstOrDefaultAsync(b => b.BookingId == bookingId && b.DoctorId == doctorId);
+
+            if (booking == null || booking.Status != "Confirmed") 
+            {
+                return false;
+            }
+
+            booking.Note = request.Note;
+            booking.Prescription = request.Prescription;
+
+            await _context.SaveChangesAsync();
+            return true;
         }
 
 
