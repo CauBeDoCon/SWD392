@@ -12,5 +12,7 @@ namespace SWD392.Repositories
 
         public Task UpdateCategoryAsync(int id, CategoryModel model);
         public Task<string> DeleteCategoryAsync(int id);
+        public Task<int?> GetCategoryIdByNameAsync(string categoryName);
+
     }
 }
