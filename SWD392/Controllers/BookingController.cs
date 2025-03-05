@@ -82,6 +82,28 @@ namespace SWD392.Controllers
             return Ok(new { Message = "Lịch hẹn đã được hủy và bạn có thể đặt lại !" });
         }
 
+        [HttpGet("GetResultBooking/{bookingId}")]
+        [Authorize(Roles = "Customer")]
+        public async Task<IActionResult> GetResultBooking(int bookingId)
+        {
+            var customerId = User.Identity.Name;
+            if (string.IsNullOrEmpty(customerId))
+            {
+                return Unauthorized(new { Message = "Không xác định được tài khoản khách hàng!" });
+            }
+
+            var result = await _bookingRepository.GetResultBookingAsync(bookingId, customerId);
+
+            if (result == null)
+            {
+                return NotFound(new { Message = "Không tìm thấy kết quả cho lịch hẹn này!" });
+            }
+
+            return Ok(result);
+        }
+
+
+
 
 
     }
