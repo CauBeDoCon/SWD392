@@ -33,24 +33,22 @@ namespace SWD392.Controllers
             return Ok(schedule);
         }
 
-  
-        [HttpPut("CompleteAppointment/{bookingId}")]
-        [Authorize(Roles = "Doctor")]
-        public async Task<IActionResult> CompleteAppointment(int bookingId, [FromBody] AppointmentCompletionDTO request)
-        {
-            var doctorId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            if (string.IsNullOrEmpty(doctorId))
-            {
-                return Unauthorized("Không xác định được tài khoản bác sĩ.");
-            }
 
-            var success = await _bookingRepository.CompleteAppointmentAsync(bookingId, doctorId, request);
+        [HttpPut("UpdateBookingDetails/{bookingId}")]
+        [Authorize(Roles = "Doctor")]
+        public async Task<IActionResult> UpdateBookingDetails(int bookingId, [FromBody] UpdateBookingDTO request)
+        {
+            var doctorId = User.Identity.Name; 
+
+            bool success = await _bookingRepository.UpdateBookingDetailsAsync(bookingId, doctorId, request);
+
             if (!success)
             {
-                return BadRequest(new { Message = "Không thể cập nhật kết quả khám." });
+                return BadRequest(new { Message = "Không thể cập nhật thông tin. Kiểm tra quyền truy cập hoặc trạng thái booking!" });
             }
 
-            return Ok(new { Message = "Lịch khám đã hoàn thành." });
+            return Ok(new { Message = "Cập nhật thông tin thành công!" });
         }
+
     }
 }

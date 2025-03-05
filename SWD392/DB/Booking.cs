@@ -19,5 +19,9 @@ namespace SWD392.DB
 
         [Required]
         public string Status { get; set; } = "Available";
+
+        public string? Note { get; set; } 
+
+        public string? Prescription { get; set; }
     }
 }
