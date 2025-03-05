@@ -7,11 +7,18 @@ namespace SWD392.Repositories
     public interface IBookingRepository
     {
         Task<List<BookingDTO>> GetAvailableBookingsAsync(string doctorId);
-        Task<bool> BookAppointmentAsync(BookingRequestDTO request, string customerUsername);
-        Task<List<BookingDTO>> GetDoctorBookingsAsync(string doctorId);
+        Task<bool> RequestAppointmentAsync(BookingRequestDTO request, string customerUsername);
+        Task<List<BookingDTO>> GetCustomerAppointmentsAsync(string customerUsername);
+        Task<bool> CancelAppointmentAsync(int bookingId, string customerUsername);
+        Task<List<BookingDTO>> GetDoctorScheduleAsync(string doctorId);
+        Task<bool> CompleteAppointmentAsync(int bookingId, string doctorId, AppointmentCompletionDTO request);
+        Task<bool> ConfirmAppointmentAsync(int bookingId);
+        Task<bool> CancelAppointmentAsync(int bookingId);
 
-        Task CreateDoctorBookingsAsync(string doctorId); 
+        Task CreateDoctorBookingsAsync(string doctorId);
 
+        Task<List<BookingDTO>> GetPendingAppointmentsAsync();
 
     }
 }
+ 
