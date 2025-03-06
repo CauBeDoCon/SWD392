@@ -163,6 +163,26 @@ namespace SWD392.Repositories
             await _context.SaveChangesAsync();
             return true;
         }
+        public async Task<bool> CustomerCancelAppointmentAsync(int bookingId)
+        {
+            var booking = await _context.Bookings.FirstOrDefaultAsync(b =>
+                b.BookingId == bookingId && (b.Status == "Pending" || b.Status == "Confirmed"));
+
+            if (booking == null)
+            {
+                return false;
+            }
+
+            if (booking.Status == "Confirmed")
+            {
+                throw new InvalidOperationException("Lịch đã được xác nhận, bạn không thể tự hủy. Xin vui lòng liên hệ nhân viên hỗ trợ!");
+            }
+
+            booking.Status = "Available";
+            booking.CustomerId = null;
+            await _context.SaveChangesAsync();
+            return true;
+        }
 
 
         public async Task CreateDoctorBookingsAsync(string doctorId)
@@ -203,15 +223,22 @@ namespace SWD392.Repositories
             return await _context.Bookings
                 .Where(b => b.Status == "Pending")
                 .OrderBy(b => b.TimeSlot)
-                .Select(b => new BookingDTO
-                {
-                    BookingId = b.BookingId,
-                    TimeSlot = b.TimeSlot,
-                    Status = b.Status,
-                    CustomerId = b.CustomerId
-                })
+                .Join(_context.Users,
+                      booking => booking.DoctorId,
+                      user => user.Id,
+                      (booking, user) => new BookingDTO
+                      {
+                          BookingId = booking.BookingId,
+                          TimeSlot = booking.TimeSlot,
+                          Status = booking.Status,
+                          CustomerId = booking.CustomerId,
+                          DoctorAvatar = user.Avatar,
+                          DoctorFirstName = user.FirstName,
+                          DoctorLastName = user.LastName
+                      })
                 .ToListAsync();
         }
+
         public async Task<List<DoctorDTO>> GetAllDoctorsAsync()
         {
             var doctors = await _context.Users
@@ -270,6 +297,26 @@ namespace SWD392.Repositories
             return booking;
         }
 
+        public async Task<List<BookingDTO>> GetAllConfirmedAppointmentsAsync()
+        {
+            return await _context.Bookings
+                .Where(b => b.Status == "Confirmed")
+                .OrderBy(b => b.TimeSlot)
+                .Join(_context.Users,
+                      booking => booking.DoctorId,
+                      user => user.Id,
+                      (booking, user) => new BookingDTO
+                      {
+                          BookingId = booking.BookingId,
+                          TimeSlot = booking.TimeSlot,
+                          Status = booking.Status,
+                          CustomerId = booking.CustomerId,
+                          DoctorAvatar = user.Avatar,
+                          DoctorFirstName = user.FirstName,
+                          DoctorLastName = user.LastName
+                      })
+                .ToListAsync();
+        }
 
 
 
