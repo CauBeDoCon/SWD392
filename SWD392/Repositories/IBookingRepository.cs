@@ -24,7 +24,8 @@ namespace SWD392.Repositories
 
         Task<List<BookingDTO>> GetAllConfirmedAppointmentsAsync();
         Task CreateDoctorBookingsAsync(string doctorId, DateTime date);
-        Task<bool> HasScheduleForDateAsync(string id, DateTime nextWeekSameDay);
+        Task<bool> HasScheduleForDateAsync(string doctorId, DateTime date);
+
     }
 }
  

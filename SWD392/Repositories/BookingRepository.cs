@@ -223,6 +223,7 @@ namespace SWD392.Repositories
 
 
 
+
         public async Task<List<BookingDTO>> GetPendingAppointmentsAsync()
         {
             return await _context.Bookings
@@ -326,9 +327,11 @@ namespace SWD392.Repositories
 
         public async Task<bool> HasScheduleForDateAsync(string doctorId, DateTime date)
         {
-            return await _context.Bookings
-                .AnyAsync(b => b.DoctorId == doctorId && b.TimeSlot.Date == date.Date);
+            return await _context.Bookings.AnyAsync(b =>
+                b.DoctorId == doctorId &&
+                b.TimeSlot.Date == date.Date);
         }
+
 
 
 
