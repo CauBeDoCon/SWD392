@@ -8,5 +8,8 @@ namespace SWD392.Repositories
         Task<bool> AddDoctorAsync(SignUpDTO doctorDto);
         Task<bool> UpdateDoctorAsync(string doctorId, UpdateDoctorDTO request);
         Task<bool> DeleteDoctorAsync(string doctorId);
+
+        Task<List<DoctorDTO>> GetAllDoctorsAsync();
+
     }
 }

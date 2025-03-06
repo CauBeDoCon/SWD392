@@ -15,7 +15,6 @@ namespace SWD392.Repositories
         Task<bool> ConfirmAppointmentAsync(int bookingId);
         Task<bool> CancelAppointmentAsync(int bookingId);
         Task<bool> CustomerCancelAppointmentAsync(int bookingId);
-        Task CreateDoctorBookingsAsync(string doctorId);
         Task<List<DoctorDTO>> GetAllDoctorsAsync();
 
         Task<List<BookingDTO>> GetPendingAppointmentsAsync();
@@ -24,7 +23,8 @@ namespace SWD392.Repositories
         Task<bool> UpdateBookingDetailsAsync(int bookingId, string doctorId, UpdateBookingDTO request);
 
         Task<List<BookingDTO>> GetAllConfirmedAppointmentsAsync();
-
+        Task CreateDoctorBookingsAsync(string doctorId, DateTime date);
+        Task<bool> HasScheduleForDateAsync(string id, DateTime nextWeekSameDay);
     }
 }
  
