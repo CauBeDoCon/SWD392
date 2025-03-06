@@ -112,6 +112,7 @@ builder.Services.AddScoped<IReviewRepository, ReviewRepository>();
 
 builder.Services.AddScoped<ICommentRepository, CommentRepository>();
 builder.Services.AddScoped<IDoctorRepository, DoctorRepository>();
+builder.Services.AddHostedService<DoctorScheduleBackgroundService>();
 
 builder.Services.AddAuthentication(options =>
 {

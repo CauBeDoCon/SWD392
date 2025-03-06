@@ -16,7 +16,7 @@ namespace SWD392.Repositories
             _context = context;
         }
 
-      
+
         public async Task<List<BookingDTO>> GetAvailableBookingsAsync(string doctorId)
         {
             return await _context.Bookings
@@ -31,7 +31,7 @@ namespace SWD392.Repositories
                 .ToListAsync();
         }
 
-       
+
         public async Task<bool> RequestAppointmentAsync(BookingRequestDTO request, string CustomerId)
         {
             var booking = await _context.Bookings
@@ -113,7 +113,7 @@ namespace SWD392.Repositories
                 .ToListAsync();
         }
 
-     
+
         public async Task<bool> CompleteAppointmentAsync(int bookingId, string doctorId, UpdateBookingDTO request)
         {
             var booking = await _context.Bookings.FirstOrDefaultAsync(b => b.BookingId == bookingId && b.DoctorId == doctorId);
@@ -185,38 +185,52 @@ namespace SWD392.Repositories
         }
 
 
-        public async Task CreateDoctorBookingsAsync(string doctorId)
+        public async Task CreateDoctorBookingsAsync(string doctorId, int numberOfWeeks = 1)
         {
             DateTime today = DateTime.Today;
             List<DateTime> timeSlots = new List<DateTime>();
 
-            for (int day = 0; day < 6; day++) 
+            for (int week = 0; week < numberOfWeeks; week++)
             {
-                DateTime date = today.AddDays(day);
-                timeSlots.AddRange(new List<DateTime>
+                for (int day = 0; day < 6; day++)
                 {
-                    date.AddHours(8), date.AddHours(9),
-                    date.AddHours(10), date.AddHours(11),
-                    date.AddHours(13), date.AddHours(14),
-                    date.AddHours(15), date.AddHours(16)
-                });
+                    DateTime date = today.AddDays(week * 7 + day);
+                    timeSlots.AddRange(new List<DateTime>
+            {
+                date.AddHours(8), date.AddHours(9),
+                date.AddHours(10), date.AddHours(11),
+                date.AddHours(13), date.AddHours(14),
+                date.AddHours(15), date.AddHours(16)
+            });
+                }
             }
 
             List<Booking> bookings = new List<Booking>();
 
             foreach (var slot in timeSlots)
             {
-                bookings.Add(new Booking
+                bool exists = await _context.Bookings
+                    .AnyAsync(b => b.DoctorId == doctorId && b.TimeSlot == slot);
+
+                if (!exists)
                 {
-                    DoctorId = doctorId,
-                    TimeSlot = slot,
-                    Status = "Available"
-                });
+                    bookings.Add(new Booking
+                    {
+                        DoctorId = doctorId,
+                        TimeSlot = slot,
+                        Status = "Available"
+                    });
+                }
             }
 
-            _context.Bookings.AddRange(bookings);
-            await _context.SaveChangesAsync();
+            if (bookings.Count > 0)
+            {
+                _context.Bookings.AddRange(bookings);
+                await _context.SaveChangesAsync();
+            }
         }
+
+
 
         public async Task<List<BookingDTO>> GetPendingAppointmentsAsync()
         {
