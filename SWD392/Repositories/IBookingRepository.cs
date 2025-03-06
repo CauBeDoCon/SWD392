@@ -26,6 +26,7 @@ namespace SWD392.Repositories
         Task CreateDoctorBookingsAsync(string doctorId, int numberOfDays = 7);
 
         Task<bool> HasScheduleForDateAsync(string doctorId, DateTime date);
+        Task<bool> DeleteDoctorBookingsForDateAsync(string doctorId, DateTime date);
 
     }
 }

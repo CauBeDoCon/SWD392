@@ -340,6 +340,21 @@ namespace SWD392.Repositories
                 b.TimeSlot.Date == date.Date);
         }
 
+        public async Task<bool> DeleteDoctorBookingsForDateAsync(string doctorId, DateTime date)
+        {
+            var bookingsToDelete = await _context.Bookings
+                .Where(b => b.DoctorId == doctorId && b.TimeSlot.Date == date)
+                .ToListAsync();
+
+            if (bookingsToDelete.Any())
+            {
+                _context.Bookings.RemoveRange(bookingsToDelete);
+                await _context.SaveChangesAsync();
+                return true;
+            }
+
+            return false;
+        }
 
 
 

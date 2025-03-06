@@ -31,28 +31,38 @@ public class DoctorScheduleBackgroundService : BackgroundService
                     var doctorRepository = scope.ServiceProvider.GetRequiredService<IDoctorRepository>();
 
                     var doctors = await doctorRepository.GetAllDoctorsAsync();
-                    DateTime nextAvailableDate = DateTime.Today.AddDays(7); 
+                    DateTime today = DateTime.Today;
+                    DateTime nextAvailableDate = today.AddDays(7);
 
                     foreach (var doctor in doctors)
                     {
-                        bool hasSchedule = await bookingRepository.HasScheduleForDateAsync(doctor.Id, nextAvailableDate);
+                  
+                        bool hasOldSchedule = await bookingRepository.HasScheduleForDateAsync(doctor.Id, today);
+                        if (hasOldSchedule)
+                        {
+                            await bookingRepository.DeleteDoctorBookingsForDateAsync(doctor.Id, today);
+                            _logger.LogInformation($"🗑️ Đã xóa lịch khám ngày {today:yyyy-MM-dd} của bác sĩ {doctor.Id}.");
+                        }
 
-                        if (!hasSchedule)
+                       
+                        bool hasNewSchedule = await bookingRepository.HasScheduleForDateAsync(doctor.Id, nextAvailableDate);
+                        if (!hasNewSchedule)
                         {
                             await bookingRepository.CreateDoctorBookingsAsync(doctor.Id, 1); 
-                            _logger.LogInformation($"Đã tạo lịch cho bác sĩ {doctor.Id} vào ngày {nextAvailableDate:yyyy-MM-dd}.");
+                            _logger.LogInformation($"✅ Đã tạo lịch cho bác sĩ {doctor.Id} vào ngày {nextAvailableDate:yyyy-MM-dd}.");
                         }
                     }
                 }
             }
             catch (Exception ex)
             {
-                _logger.LogError($"Lỗi khi cập nhật lịch bác sĩ: {ex.Message}");
+                _logger.LogError($"❌ Lỗi khi cập nhật lịch bác sĩ: {ex.Message}");
             }
 
-            await DelayUntilMidnight(stoppingToken); 
+            await DelayUntilMidnight(stoppingToken);
         }
     }
+
     private async Task DelayUntilMidnight(CancellationToken stoppingToken)
     {
         var now = DateTime.Now;
