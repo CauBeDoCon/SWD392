@@ -23,7 +23,7 @@ public class DoctorScheduleBackgroundService : BackgroundService
         {
             try
             {
-                _logger.LogInformation("Đang kiểm tra và tạo lịch mới cho bác sĩ...");
+                _logger.LogInformation("Đang kiểm tra và cập nhật lịch cho bác sĩ...");
 
                 using (var scope = _serviceProvider.CreateScope())
                 {
@@ -31,20 +31,16 @@ public class DoctorScheduleBackgroundService : BackgroundService
                     var doctorRepository = scope.ServiceProvider.GetRequiredService<IDoctorRepository>();
 
                     var doctors = await doctorRepository.GetAllDoctorsAsync();
-                    DateTime nextWeekSameDay = DateTime.Today.AddDays(7); 
+                    DateTime nextAvailableDate = DateTime.Today.AddDays(7); 
 
                     foreach (var doctor in doctors)
                     {
-                        bool hasSchedule = await bookingRepository.HasScheduleForDateAsync(doctor.Id, nextWeekSameDay);
+                        bool hasSchedule = await bookingRepository.HasScheduleForDateAsync(doctor.Id, nextAvailableDate);
 
                         if (!hasSchedule)
                         {
-                            await bookingRepository.CreateDoctorBookingsAsync(doctor.Id, nextWeekSameDay);
-                            _logger.LogInformation($"Lịch làm việc đã được tạo cho bác sĩ {doctor.Id} vào ngày {nextWeekSameDay:yyyy-MM-dd}.");
-                        }
-                        else
-                        {
-                            _logger.LogInformation($"Lịch ngày {nextWeekSameDay:yyyy-MM-dd} của bác sĩ {doctor.Id} đã tồn tại, không cần tạo.");
+                            await bookingRepository.CreateDoctorBookingsAsync(doctor.Id, 1); 
+                            _logger.LogInformation($"Đã tạo lịch cho bác sĩ {doctor.Id} vào ngày {nextAvailableDate:yyyy-MM-dd}.");
                         }
                     }
                 }
@@ -54,9 +50,20 @@ public class DoctorScheduleBackgroundService : BackgroundService
                 _logger.LogError($"Lỗi khi cập nhật lịch bác sĩ: {ex.Message}");
             }
 
-            await Task.Delay(TimeSpan.FromDays(1), stoppingToken); 
+            await DelayUntilMidnight(stoppingToken); 
         }
     }
+    private async Task DelayUntilMidnight(CancellationToken stoppingToken)
+    {
+        var now = DateTime.Now;
+        var midnight = now.Date.AddDays(1);
+        var delay = midnight - now;
+
+        _logger.LogInformation($"Service sẽ chạy lại vào {midnight:yyyy-MM-dd HH:mm:ss}");
+
+        await Task.Delay(delay, stoppingToken);
+    }
+
 
 
 }

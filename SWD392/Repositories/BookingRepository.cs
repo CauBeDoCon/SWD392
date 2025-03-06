@@ -185,15 +185,22 @@ namespace SWD392.Repositories
         }
 
 
-        public async Task CreateDoctorBookingsAsync(string doctorId, DateTime date)
+        public async Task CreateDoctorBookingsAsync(string doctorId, int numberOfDays = 7)
         {
-            List<DateTime> timeSlots = new List<DateTime>
-    {
-        date.AddHours(8), date.AddHours(9),
-        date.AddHours(10), date.AddHours(11),
-        date.AddHours(13), date.AddHours(14),
-        date.AddHours(15), date.AddHours(16)
-    };
+            DateTime today = DateTime.Today;
+            List<DateTime> timeSlots = new List<DateTime>();
+
+            for (int day = 0; day < numberOfDays; day++)
+            {
+                DateTime date = today.AddDays(day);
+                timeSlots.AddRange(new List<DateTime>
+        {
+            date.AddHours(8), date.AddHours(9),
+            date.AddHours(10), date.AddHours(11),
+            date.AddHours(13), date.AddHours(14),
+            date.AddHours(15), date.AddHours(16)
+        });
+            }
 
             List<Booking> bookings = new List<Booking>();
 
@@ -219,6 +226,7 @@ namespace SWD392.Repositories
                 await _context.SaveChangesAsync();
             }
         }
+
 
 
 
