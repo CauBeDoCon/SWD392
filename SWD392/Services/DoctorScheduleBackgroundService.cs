@@ -31,12 +31,10 @@ public class DoctorScheduleBackgroundService : BackgroundService
                     var doctorRepository = scope.ServiceProvider.GetRequiredService<IDoctorRepository>();
 
                     var doctors = await doctorRepository.GetAllDoctorsAsync();
+                    DateTime nextWeekSameDay = DateTime.Today.AddDays(7); 
+
                     foreach (var doctor in doctors)
                     {
-                       
-                        DateTime nextWeekSameDay = DateTime.Today.AddDays(7);
-
-                
                         bool hasSchedule = await bookingRepository.HasScheduleForDateAsync(doctor.Id, nextWeekSameDay);
 
                         if (!hasSchedule)
@@ -56,8 +54,9 @@ public class DoctorScheduleBackgroundService : BackgroundService
                 _logger.LogError($"Lỗi khi cập nhật lịch bác sĩ: {ex.Message}");
             }
 
-            await Task.Delay(TimeSpan.FromDays(1), stoppingToken);
+            await Task.Delay(TimeSpan.FromDays(1), stoppingToken); 
         }
     }
+
 
 }
