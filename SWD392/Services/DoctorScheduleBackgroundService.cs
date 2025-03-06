@@ -33,10 +33,22 @@ public class DoctorScheduleBackgroundService : BackgroundService
                     var doctors = await doctorRepository.GetAllDoctorsAsync();
                     foreach (var doctor in doctors)
                     {
-                        await bookingRepository.CreateDoctorBookingsAsync(doctor.Id, 1);
-                    }
+                       
+                        DateTime nextWeekSameDay = DateTime.Today.AddDays(7);
 
-                    _logger.LogInformation("Lịch làm việc của bác sĩ đã được cập nhật!");
+                
+                        bool hasSchedule = await bookingRepository.HasScheduleForDateAsync(doctor.Id, nextWeekSameDay);
+
+                        if (!hasSchedule)
+                        {
+                            await bookingRepository.CreateDoctorBookingsAsync(doctor.Id, nextWeekSameDay);
+                            _logger.LogInformation($"Lịch làm việc đã được tạo cho bác sĩ {doctor.Id} vào ngày {nextWeekSameDay:yyyy-MM-dd}.");
+                        }
+                        else
+                        {
+                            _logger.LogInformation($"Lịch ngày {nextWeekSameDay:yyyy-MM-dd} của bác sĩ {doctor.Id} đã tồn tại, không cần tạo.");
+                        }
+                    }
                 }
             }
             catch (Exception ex)
@@ -44,7 +56,8 @@ public class DoctorScheduleBackgroundService : BackgroundService
                 _logger.LogError($"Lỗi khi cập nhật lịch bác sĩ: {ex.Message}");
             }
 
-            await Task.Delay(TimeSpan.FromDays(7), stoppingToken);
+            await Task.Delay(TimeSpan.FromDays(1), stoppingToken);
         }
     }
+
 }

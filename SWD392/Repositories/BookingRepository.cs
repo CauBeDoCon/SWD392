@@ -185,25 +185,15 @@ namespace SWD392.Repositories
         }
 
 
-        public async Task CreateDoctorBookingsAsync(string doctorId, int numberOfWeeks = 1)
+        public async Task CreateDoctorBookingsAsync(string doctorId, DateTime date)
         {
-            DateTime today = DateTime.Today;
-            List<DateTime> timeSlots = new List<DateTime>();
-
-            for (int week = 0; week < numberOfWeeks; week++)
-            {
-                for (int day = 0; day < 6; day++)
-                {
-                    DateTime date = today.AddDays(week * 7 + day);
-                    timeSlots.AddRange(new List<DateTime>
-            {
-                date.AddHours(8), date.AddHours(9),
-                date.AddHours(10), date.AddHours(11),
-                date.AddHours(13), date.AddHours(14),
-                date.AddHours(15), date.AddHours(16)
-            });
-                }
-            }
+            List<DateTime> timeSlots = new List<DateTime>
+    {
+        date.AddHours(8), date.AddHours(9),
+        date.AddHours(10), date.AddHours(11),
+        date.AddHours(13), date.AddHours(14),
+        date.AddHours(15), date.AddHours(16)
+    };
 
             List<Booking> bookings = new List<Booking>();
 
@@ -229,6 +219,7 @@ namespace SWD392.Repositories
                 await _context.SaveChangesAsync();
             }
         }
+
 
 
 
@@ -330,6 +321,13 @@ namespace SWD392.Repositories
                           DoctorLastName = user.LastName
                       })
                 .ToListAsync();
+        }
+
+
+        public async Task<bool> HasScheduleForDateAsync(string doctorId, DateTime date)
+        {
+            return await _context.Bookings
+                .AnyAsync(b => b.DoctorId == doctorId && b.TimeSlot.Date == date.Date);
         }
 
 
