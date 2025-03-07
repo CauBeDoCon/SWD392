@@ -31,7 +31,7 @@ public class DoctorScheduleBackgroundService : BackgroundService
                     var doctorRepository = scope.ServiceProvider.GetRequiredService<IDoctorRepository>();
 
                     var doctors = await doctorRepository.GetAllDoctorsAsync();
-                    DateTime today = DateTime.Today;
+                    DateTime today = DateTime.Today.AddDays(-1);
                     DateTime nextAvailableDate = today.AddDays(7);
 
                     foreach (var doctor in doctors)
