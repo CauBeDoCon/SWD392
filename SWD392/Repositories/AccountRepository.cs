@@ -79,6 +79,12 @@ namespace SWD392.Repositories
             {
                 return null;
             }
+
+            if (user.Status == "Banned")
+            {
+                return new { Error = "Tài khoản của bạn đã bị khóa." };
+            }
+
             var authClaims = new List<Claim>
             {
                  new Claim(ClaimTypes.NameIdentifier, user.Id), 
@@ -91,7 +97,6 @@ namespace SWD392.Repositories
                 authClaims.Add(new Claim(ClaimTypes.Role, role.ToString()));
             }
 
-            //await userManager.AddToRoleAsync(user, "Customer");
 
             var authenKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["JWT:Secret"]));
 
@@ -117,7 +122,7 @@ namespace SWD392.Repositories
                     user.FirstName,     
                     user.LastName,
                     user.CartId,
-                    Roles = roles, // Trả về danh sách roles
+                    Roles = roles, 
                     Cart = await _cartRepository.GetCartProductsAsync(user.CartId ?? 0),
                 }
             };
