@@ -291,7 +291,7 @@ namespace SWD392.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Blog");
+                    b.ToTable("Blog", (string)null);
                 });
 
             modelBuilder.Entity("SWD392.DB.Booking", b =>
@@ -326,7 +326,7 @@ namespace SWD392.Migrations
 
                     b.HasIndex("DoctorId");
 
-                    b.ToTable("Bookings");
+                    b.ToTable("Bookings", (string)null);
                 });
 
             modelBuilder.Entity("SWD392.DB.Brand", b =>
@@ -344,7 +344,7 @@ namespace SWD392.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Brand");
+                    b.ToTable("Brand", (string)null);
                 });
 
             modelBuilder.Entity("SWD392.DB.BrandOrigin", b =>
@@ -362,7 +362,7 @@ namespace SWD392.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("BrandOrigin");
+                    b.ToTable("BrandOrigin", (string)null);
                 });
 
             modelBuilder.Entity("SWD392.DB.Cart", b =>
@@ -375,7 +375,7 @@ namespace SWD392.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Cart");
+                    b.ToTable("Cart", (string)null);
                 });
 
             modelBuilder.Entity("SWD392.DB.CartProduct", b =>
@@ -404,7 +404,7 @@ namespace SWD392.Migrations
 
                     b.HasIndex("ProductId");
 
-                    b.ToTable("CartProduct");
+                    b.ToTable("CartProduct", (string)null);
                 });
 
             modelBuilder.Entity("SWD392.DB.Category", b =>
@@ -431,7 +431,7 @@ namespace SWD392.Migrations
 
                     b.HasIndex("SolutionId");
 
-                    b.ToTable("Category");
+                    b.ToTable("Category", (string)null);
                 });
 
             modelBuilder.Entity("SWD392.DB.Comment", b =>
@@ -462,7 +462,7 @@ namespace SWD392.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Comment");
+                    b.ToTable("Comment", (string)null);
                 });
 
             modelBuilder.Entity("SWD392.DB.Discount", b =>
@@ -500,7 +500,7 @@ namespace SWD392.Migrations
 
                     b.HasIndex("DiscountCategoryId");
 
-                    b.ToTable("discounts");
+                    b.ToTable("discounts", (string)null);
                 });
 
             modelBuilder.Entity("SWD392.DB.DiscountCategory", b =>
@@ -517,7 +517,7 @@ namespace SWD392.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("discountCategories");
+                    b.ToTable("discountCategories", (string)null);
                 });
 
             modelBuilder.Entity("SWD392.DB.Image", b =>
@@ -539,7 +539,7 @@ namespace SWD392.Migrations
 
                     b.HasIndex("ProductId");
 
-                    b.ToTable("Image");
+                    b.ToTable("Image", (string)null);
                 });
 
             modelBuilder.Entity("SWD392.DB.ManufacturedCountry", b =>
@@ -557,7 +557,7 @@ namespace SWD392.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("ManufacturedCountry");
+                    b.ToTable("ManufacturedCountry", (string)null);
                 });
 
             modelBuilder.Entity("SWD392.DB.Manufacturer", b =>
@@ -575,7 +575,7 @@ namespace SWD392.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Manufacturer");
+                    b.ToTable("Manufacturer", (string)null);
                 });
 
             modelBuilder.Entity("SWD392.DB.Order", b =>
@@ -613,7 +613,7 @@ namespace SWD392.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Order");
+                    b.ToTable("Order", (string)null);
                 });
 
             modelBuilder.Entity("SWD392.DB.OrderDetail", b =>
@@ -642,7 +642,7 @@ namespace SWD392.Migrations
 
                     b.HasIndex("ProductId");
 
-                    b.ToTable("OrderDetails");
+                    b.ToTable("OrderDetails", (string)null);
                 });
 
             modelBuilder.Entity("SWD392.DB.Packaging", b =>
@@ -660,7 +660,7 @@ namespace SWD392.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Packaging");
+                    b.ToTable("Packaging", (string)null);
                 });
 
             modelBuilder.Entity("SWD392.DB.Product", b =>
@@ -728,7 +728,7 @@ namespace SWD392.Migrations
 
                     b.HasIndex("UnitId");
 
-                    b.ToTable("Product");
+                    b.ToTable("Product", (string)null);
                 });
 
             modelBuilder.Entity("SWD392.DB.ProductDetail", b =>
@@ -769,7 +769,7 @@ namespace SWD392.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("ProductDetail");
+                    b.ToTable("ProductDetail", (string)null);
                 });
 
             modelBuilder.Entity("SWD392.DB.Review", b =>
@@ -803,7 +803,7 @@ namespace SWD392.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Review");
+                    b.ToTable("Review", (string)null);
                 });
 
             modelBuilder.Entity("SWD392.DB.Solution", b =>
@@ -821,7 +821,7 @@ namespace SWD392.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Solution");
+                    b.ToTable("Solution", (string)null);
                 });
 
             modelBuilder.Entity("SWD392.DB.Transaction", b =>
@@ -872,7 +872,7 @@ namespace SWD392.Migrations
 
                     b.HasIndex("WalletId");
 
-                    b.ToTable("Transaction");
+                    b.ToTable("Transaction", (string)null);
                 });
 
             modelBuilder.Entity("SWD392.DB.Unit", b =>
@@ -890,7 +890,7 @@ namespace SWD392.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Unit");
+                    b.ToTable("Unit", (string)null);
                 });
 
             modelBuilder.Entity("SWD392.DB.Wallet", b =>
@@ -906,7 +906,7 @@ namespace SWD392.Migrations
 
                     b.HasKey("WalletId");
 
-                    b.ToTable("Wallet");
+                    b.ToTable("Wallet", (string)null);
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
