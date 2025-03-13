@@ -387,6 +387,7 @@ namespace SWD392.Repositories
             };
         }
 
+
         public async Task<BookingFrequencyDTO> GetConfirmedBookingFrequencyByWeekAsync(DateTime startDate, DateTime endDate)
         {
             var result = _context.Bookings
