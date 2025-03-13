@@ -28,6 +28,13 @@ namespace SWD392.Repositories
         Task<bool> HasScheduleForDateAsync(string doctorId, DateTime date);
         Task<bool> DeleteDoctorBookingsForDateAsync(string doctorId, DateTime date);
 
+        Task<int> GetPendingBookingCountAsync();
+        Task<int> GetConfirmedBookingCountAsync();
+        Task<BookingFrequencyDTO> GetConfirmedBookingFrequencyByDayAsync(DateTime startDate, DateTime endDate);
+        Task<BookingFrequencyDTO> GetConfirmedBookingFrequencyByWeekAsync(DateTime startDate, DateTime endDate);
+        Task<BookingFrequencyDTO> GetConfirmedBookingFrequencyByMonthAsync(int year);
+
+
     }
 }
  
