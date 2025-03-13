@@ -2,6 +2,7 @@
 using SWD392.DB;
 using SWD392.DTOs;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -356,7 +357,83 @@ namespace SWD392.Repositories
             return false;
         }
 
+        public async Task<int> GetPendingBookingCountAsync()
+        {
+            return await _context.Bookings.CountAsync(b => b.Status == "Pending");
+        }
 
+        public async Task<int> GetConfirmedBookingCountAsync()
+        {
+            return await _context.Bookings.CountAsync(b => b.Status == "Confirmed");
+        }
+
+        public async Task<BookingFrequencyDTO> GetConfirmedBookingFrequencyByDayAsync(DateTime startDate, DateTime endDate)
+        {
+            var data = await _context.Bookings
+                .Where(b => b.TimeSlot.Date >= startDate.Date && b.TimeSlot.Date <= endDate.Date && b.Status == "Confirmed")
+                .GroupBy(b => b.TimeSlot.Date)
+                .Select(g => new
+                {
+                    Date = g.Key,
+                    Count = g.Count()
+                })
+                .OrderBy(g => g.Date)
+                .ToListAsync();
+
+            return new BookingFrequencyDTO
+            {
+                Labels = data.Select(d => d.Date.ToString("yyyy-MM-dd")).ToList(),
+                Data = data.Select(d => d.Count).ToList()
+            };
+        }
+
+        public async Task<BookingFrequencyDTO> GetConfirmedBookingFrequencyByWeekAsync(DateTime startDate, DateTime endDate)
+        {
+            var result = _context.Bookings
+                .Where(b => b.TimeSlot.Date >= startDate.Date && b.TimeSlot.Date <= endDate.Date && b.Status == "Confirmed")
+                .AsEnumerable() 
+                .GroupBy(b => new
+                {
+                    Year = b.TimeSlot.Year,
+                    Week = CultureInfo.InvariantCulture.Calendar.GetWeekOfYear(
+                        b.TimeSlot, CalendarWeekRule.FirstFourDayWeek, DayOfWeek.Monday)
+                })
+                .Select(g => new
+                {
+                    Week = g.Key.Week,
+                    Year = g.Key.Year,
+                    Count = g.Count()
+                })
+                .OrderBy(g => g.Year).ThenBy(g => g.Week)
+                .ToList(); 
+
+            return new BookingFrequencyDTO
+            {
+                Labels = result.Select(d => $"Week {d.Week} - {d.Year}").ToList(),
+                Data = result.Select(d => d.Count).ToList()
+            };
+        }
+
+
+        public async Task<BookingFrequencyDTO> GetConfirmedBookingFrequencyByMonthAsync(int year)
+        {
+            var data = await _context.Bookings
+                .Where(b => b.TimeSlot.Year == year && b.Status == "Confirmed")
+                .GroupBy(b => b.TimeSlot.Month)
+                .Select(g => new
+                {
+                    Month = g.Key,
+                    Count = g.Count()
+                })
+                .OrderBy(g => g.Month)
+                .ToListAsync();
+
+            return new BookingFrequencyDTO
+            {
+                Labels = data.Select(d => $"Tháng {d.Month}").ToList(),
+                Data = data.Select(d => d.Count).ToList()
+            };
+        }
 
 
     }
