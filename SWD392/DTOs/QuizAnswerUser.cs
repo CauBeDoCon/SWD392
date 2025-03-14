@@ -22,6 +22,6 @@ namespace SWD392.DTOs
         [Required]
         public ResultQuizAnswer Quiz6 { get; set; }
         [Required]
-        public ResultQuizAnswer QuizAnces { get; set; }
+        public ResultQuizAnswer Quiz7 { get; set; }
     }
 }

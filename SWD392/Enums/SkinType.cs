@@ -5,7 +5,8 @@ namespace SWD392.Enums
         DaThuong,
         DaDau,
         DaKho,
-        DaHonHop,
+        DaHonHop,     
+        KhongXacDinh,
         Default
     }
 }

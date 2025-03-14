@@ -17,11 +17,13 @@ namespace SWD392.DB
         [Required]
         public DateTime OrderDate { get; set; }
 
+        public DateTime? CancelledDate { get; set; }
+
         [Column(TypeName = "decimal(18,2)")]
         public decimal TotalAmount { get; set; }
 
         public OrderStatus Status { get; set; }
-
+        public bool IsRefunded { get; set; } 
         public int? DiscountId { get; set; }
         [ForeignKey("DiscountId")]
         public Discount Discount { get; set; } // Thêm navigation property

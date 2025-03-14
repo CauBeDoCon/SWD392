@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
 
 namespace SWD392.DB
 {
@@ -11,6 +12,7 @@ namespace SWD392.DB
         [MaxLength(50)]
         public string Name { get; set; }
         public string Image { get; set; }
+        [JsonIgnore]
         public ICollection<Product> products { get; set; } = new List<Product>();
         public int SolutionId { get; set; }
         [ForeignKey("SolutionId")]

@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using SWD392.DB;
+using SWD392.DTOs;
 using SWD392.DTOs.Pagination;
 using SWD392.Enums;
 using SWD392.Models;
@@ -122,11 +123,33 @@ namespace SWD392.Repositories
 
             await _context.SaveChangesAsync();
         }
-        public async Task<Product> GetMostProductBasedOnSkinTypeAsync(SkinType skinType)
+        public async Task<Product> GetMostProductBasedOnSkinTypeAsync(SkinType skinType, int? categoryId)
         {
-            var result = await  _context.products.Where(p => p.skinType == skinType).OrderByDescending
+            var result = await  _context.products.AsNoTracking().Where(p => p.skinType == skinType && p.CategoryId == categoryId).OrderByDescending
                         (p => p.Quantity).LastOrDefaultAsync();
             return result;
         }
+        public async Task<List<ProductwithImageDto>> GetProductsWithImagesByResultQuizId(int resultQuizId)
+        {
+            var products = await _context.Routines
+                .Where(r => r.ResultQuizId == resultQuizId)
+                .SelectMany(r => r.routineSteps)
+                .Select(rs => rs.Product)
+                .Distinct()
+                .Select(p => new ProductwithImageDto
+                {
+                    Id = p.Id,
+                    Name = p.Name,
+                    Description=p.Description,
+                    Images = p.Images.Select(i => new UpdateImageDto
+                    {
+                        ProductId = i.ProductId,
+                        ImageUrl = i.ImageUrl
+                    }).ToList()
+                })
+                .ToListAsync();
+            return products;
+        }
+
     }
 }

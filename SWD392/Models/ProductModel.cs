@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using SWD392.DB;
+using SWD392.Enums;
 
 namespace SWD392.Models
 {
@@ -17,6 +18,7 @@ namespace SWD392.Models
 
         [Range(0, 1000)]
         public int Quantity { get; set; }
+        public SkinType skinType { get; set; } 
 
         public required UnitModel Unit { get; set; }
 

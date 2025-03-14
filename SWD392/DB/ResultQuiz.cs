@@ -25,7 +25,7 @@ namespace SWD392.DB
     [Required]
     public ResultQuizAnswer Quiz6 { get; set; }
     [Required]
-    public ResultQuizAnswer QuizAnces { get; set; }
+    public ResultQuizAnswer Quiz7 { get; set; }
     
     public string UserId { get; set; }
     

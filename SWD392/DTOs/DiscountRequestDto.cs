@@ -5,9 +5,8 @@ using System.Threading.Tasks;
 
 namespace SWD392.DTOs
 {
-    public class DiscountDto
-    {
-        public int id { get; set; }
+    public class DiscountRequestDto
+    {        
         public string Code { get; set; }
         public decimal Percentage { get; set; }
         public DateTime StartDate { get; set; }

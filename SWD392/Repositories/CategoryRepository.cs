@@ -91,7 +91,7 @@ namespace SWD392.Repositories
         }
         public async Task<int?> GetCategoryIdByNameAsync(string categoryName)
         {
-            var category = await _context.categories.FirstOrDefaultAsync(c => c.Name == categoryName);
+            var category = await _context.categories.AsNoTracking().FirstOrDefaultAsync(c => c.Name == categoryName);
             return category?.Id;
         }
     }

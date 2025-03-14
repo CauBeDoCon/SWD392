@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
+using Microsoft.EntityFrameworkCore;
 using SWD392.DB;
 using SWD392.DTOs;
 using SWD392.Enums;
@@ -60,12 +61,12 @@ namespace SWD392.Repositories
                 ResultQuizAnswer.B => SkinType.DaDau,
                 ResultQuizAnswer.C => SkinType.DaKho,
                 ResultQuizAnswer.D => SkinType.DaHonHop,
-                _ => SkinType.Default
+                _ => SkinType.KhongXacDinh
             };
-            var anceStatus = resultQuiz.QuizAnces == ResultQuizAnswer.A ? AnceStatus.Yes : AnceStatus.No;
+            var anceStatus = resultQuiz.Quiz7 == ResultQuizAnswer.A ? AnceStatus.Yes : AnceStatus.No;
             var result = new ResultQuiz{
                 UserId = userId,
-                SkinStatus = skinStatus,
+                SkinStatus = (mostChosenAnswer1.Key != secondChosenAnswer.Key ? skinStatus : SkinType.KhongXacDinh),
                 AnceStatus = anceStatus,
                 CreateDate = DateTime.Now,
                 Quiz1 =    resultQuiz.Quiz1,
@@ -74,14 +75,16 @@ namespace SWD392.Repositories
                 Quiz4 =    resultQuiz.Quiz4,
                 Quiz5 =    resultQuiz.Quiz5,
                 Quiz6 =    resultQuiz.Quiz6,
-                QuizAnces = resultQuiz.QuizAnces,
+                Quiz7 =    resultQuiz.Quiz7,
                 Result = (int)mostChosenAnswer,
             };
-            
-            //var newResultQuiz = _mapper.Map<ResultQuiz>(result);
             var result1 = await _context.ResultQuizzes.AddAsync(result);  // Add the new result to the database
-            await _context.SaveChangesAsync();
-            await _routineRepository.AddRoutineAsync(result1.Entity.ResultQuizId, result.SkinStatus);
+                await _context.SaveChangesAsync();
+            //var newResultQuiz = _mapper.Map<ResultQuiz>(result);
+            if(result.SkinStatus != SkinType.KhongXacDinh){
+                
+                await _routineRepository.AddRoutineAsync(result1.Entity.ResultQuizId, result.SkinStatus);           
+            }
             
             if (mostChosenAnswer1.Value == secondChosenAnswer.Value)
             {
@@ -98,5 +101,10 @@ namespace SWD392.Repositories
             };
         }
 
+        public async Task<int> GetLastestResultQuizId(string userId)
+        {
+            var result = await _context.ResultQuizzes.OrderByDescending(rq=>rq.CreateDate).Where(rq =>rq.UserId==userId).FirstOrDefaultAsync();
+            return result?.ResultQuizId ??0;
+        }
     }
 }

@@ -1,9 +1,12 @@
-﻿namespace SWD392.DTOs
+﻿using SWD392.Enums;
+
+namespace SWD392.DTOs
 {
     public class UpdateProductDto
     {
         public string Name { get; set; }
         public string Description { get; set; }
+        public SkinType skinType { get; set; }  
         public double Price { get; set; }
         public int Quantity { get; set; }
         public int UnitId { get; set; }

@@ -50,6 +50,7 @@ namespace SWD392.Controllers
                 Description = dto.Description,
                 Price = dto.Price,
                 Quantity = dto.Quantity,
+                skinType = dto.skinType,
                 Unit = new UnitModel { Id = dto.UnitId },
                 Brand = new BrandModel { Id = dto.BrandId },
                 Packaging = new PackagingModel { Id = dto.PackagingId },
@@ -84,6 +85,7 @@ namespace SWD392.Controllers
             existingProduct.Description = dto.Description;
             existingProduct.Price = dto.Price;
             existingProduct.Quantity = dto.Quantity;
+            existingProduct.skinType = dto.skinType;
             existingProduct.Unit = new UnitModel { Id = dto.UnitId };
             existingProduct.Brand = new BrandModel { Id = dto.BrandId };
             existingProduct.Packaging = new PackagingModel { Id = dto.PackagingId };
@@ -103,6 +105,12 @@ namespace SWD392.Controllers
         {
             var message = await _productRepo.DeleteProductAsync(id);
             return Ok(new { message });
+        }
+        [HttpGet("GetProductsByResultQuizId/{resultQuizId}")]
+        public async Task<IActionResult> GetProductsByResultQuizId(int resultQuizId)
+        {
+            var products = await _productRepo.GetProductsWithImagesByResultQuizId(resultQuizId);
+            return Ok(products);
         }
     }
 }

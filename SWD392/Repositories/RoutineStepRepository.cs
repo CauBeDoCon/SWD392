@@ -112,7 +112,8 @@ namespace SWD392.Repositories
                 {
                     // Tìm CategoryId
                     var categoryId = await _categoryRepository.GetCategoryIdByNameAsync(stepName);
-                    if (categoryId == null)
+                    var product = await _productRepository.GetMostProductBasedOnSkinTypeAsync(skinType, categoryId.Value);
+                    if (product == null || categoryId == null)
                     {
                         // Nếu chưa có Category, tùy logic, có thể tự tạo hoặc bỏ qua
                         continue;
@@ -124,7 +125,7 @@ namespace SWD392.Repositories
                         RoutineId = routine.Id,
                         Step = stepIndex,
                         CategoryId = categoryId.Value,
-                        ProductId = _productRepository.GetMostProductBasedOnSkinTypeAsync(skinType).Id
+                        ProductId = product.Id
                     };
 
                     routineStepsToAdd.Add(routineStep);
@@ -138,6 +139,9 @@ namespace SWD392.Repositories
                 await _context.routineSteps.AddRangeAsync(routineStepsToAdd);
                 await _context.SaveChangesAsync();
             }
+        }
+        public async  Task<List<RoutineStep>> GetRouteStepsByUserIDAsync(string userid, int resultQuizId){
+            return await _context.routineSteps.Include(rs=>rs.Category).Include(rs=>rs.Product).Include(rs => rs.Routine).ThenInclude(rs =>rs.ResultQuiz).Where(rs => rs.Routine.ResultQuiz.UserId == userid && rs.Routine.ResultQuizId==resultQuizId).ToListAsync();
         }
 
     }

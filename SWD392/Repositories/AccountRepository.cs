@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using SWD392.DB;
 using SWD392.DTOs;
+using SWD392.Enums;
 using SWD392.Helpers;
 using SWD392.Models;
 using System.IdentityModel.Tokens.Jwt;
@@ -20,8 +21,9 @@ namespace SWD392.Repositories
         private readonly ApplicationDbContext _context;
         private readonly RoleManager<IdentityRole> roleManager;
         private readonly ICartRepository _cartRepository;
+        private readonly IResultQuizRepository _resultQuizRepository;
 
-        public AccountRepository(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager, IConfiguration configuration,RoleManager<IdentityRole> roleManager, ApplicationDbContext context , ICartRepository cartRepository) 
+        public AccountRepository(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager, IConfiguration configuration,RoleManager<IdentityRole> roleManager, ApplicationDbContext context , ICartRepository cartRepository, IResultQuizRepository resultQuizRepository) 
         { 
             
             _context = context;
@@ -30,6 +32,7 @@ namespace SWD392.Repositories
             this.configuration = configuration;
             this.roleManager = roleManager;
             _cartRepository = cartRepository;
+            _resultQuizRepository = resultQuizRepository;
         }
         //public async Task<string?> SignInAsync(SignInModel model)
         //{
@@ -119,6 +122,7 @@ namespace SWD392.Repositories
                     user.CartId,
                     Roles = roles, // Trả về danh sách roles
                     Cart = await _cartRepository.GetCartProductsAsync(user.CartId ?? 0),
+                    ResultQuizID = await _resultQuizRepository.GetLastestResultQuizId(user.Id),
                 }
             };
         }

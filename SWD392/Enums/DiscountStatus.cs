@@ -3,10 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace SWD392.DTOs
+namespace SWD392.Enums
 {
-    public class DiscountCategoryDto
+    public enum DiscountStatus
     {
-        public string Name { get; set; }
+        valided, 
+        expired
     }
 }

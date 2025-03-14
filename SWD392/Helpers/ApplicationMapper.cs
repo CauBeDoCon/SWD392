@@ -68,6 +68,10 @@ namespace SkincarePharmacyNetCore8.Helpers
             CreateMap<Review, ReviewModel>().ReverseMap();
 
             CreateMap<Comment, CommentModel>().ReverseMap();
+            
+            CreateMap<Order, OrderCheckDto>().ReverseMap();
+            
+            CreateMap<Discount, DiscountRequestDto>().ReverseMap();
         }
     }
 }

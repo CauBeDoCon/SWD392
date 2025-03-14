@@ -34,5 +34,12 @@ namespace SWD392.Controllers
             var newResultQuizId = await _iResultQuizRepo.CreateResultQuiz(quizAnswerUser,userId);
             return Ok( newResultQuizId );
         }
+        [HttpGet("GetLastestResultQuizId")]
+        public async Task<IActionResult> GetLastestResultQuizId()
+        {
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var resultQuizId = await _iResultQuizRepo.GetLastestResultQuizId(userId);
+            return Ok(resultQuizId);
+        }
     }
 }

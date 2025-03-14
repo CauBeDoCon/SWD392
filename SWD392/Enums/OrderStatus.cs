@@ -9,7 +9,10 @@ namespace SWD392.enums
 {
     pending,
     failed,
+    canceled,
+    Confirmcanceled,
     successful,
+    
 }
 
 }

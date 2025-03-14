@@ -3,9 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
+using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using SWD392.DB;
 using SWD392.DTOs;
+using SWD392.DTOs.Pagination;
 using SWD392.enums;
 
 namespace SWD392.Repositories
@@ -15,14 +17,36 @@ namespace SWD392.Repositories
         private readonly ApplicationDbContext _context;
         private readonly IWalletRepository _walletRepository;
         private readonly ICartRepository _cartRepository;
+        private readonly IMapper _mapper;
+        private readonly ILogger<OrderRepository> _logger;
 
-        public OrderRepository(ApplicationDbContext context, IWalletRepository walletRepository, ICartRepository cartRepository)
+        public OrderRepository(  ILogger<OrderRepository> logger,IMapper mapper,ApplicationDbContext context, IWalletRepository walletRepository, ICartRepository cartRepository)
         {
             _context = context;
             _walletRepository = walletRepository;
             _cartRepository = cartRepository;
+            _mapper = mapper;
+            _logger = logger;
         }
 
+        public async Task<PagedResult<OrderCheckDto>> GetAllOrdersPage(int pageNumber, int pageSize){
+            int totalCount = await _context.manufacturedCountries!.CountAsync();
+
+            var OrderCheckDto = await _context.Orders!
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+
+            var mappedData = _mapper.Map<List<OrderCheckDto>>(OrderCheckDto);
+
+            return new PagedResult<OrderCheckDto>
+            {
+                Items = mappedData,
+                TotalCount = totalCount,
+                PageNumber = pageNumber,
+                PageSize = pageSize
+            };
+        } 
         public async Task<OrderResponse> CreateOrderAsync(OrderDTO orderDto, ClaimsPrincipal user)
         {
             var userId = user.FindFirst(ClaimTypes.NameIdentifier)?.Value;
@@ -38,24 +62,36 @@ namespace SWD392.Repositories
 
             var totalAmount = await _cartRepository.TotalPriceInCartProduct(Convert.ToInt32(cart.Id));
             var discount = await _context.discounts.FindAsync(orderDto.DiscountId);
-
-            if (discount != null)
-            {
-                discount.max_usage -= 1;
-                _context.Entry(discount).Property(p => p.max_usage).IsModified = true;
-                totalAmount -= totalAmount * discount.Percentage / 100;
-            }
-
-            var newOrder = new Order
+             var newOrder = new Order
             {
                 UserId = userId,
                 OrderDate = DateTime.Now,
                 TotalAmount = totalAmount,
                 Status = OrderStatus.pending,
+                IsRefunded = false,
                 DiscountId = orderDto.DiscountId,
                 CartId = cart.Id,
             };
-
+            if (discount != null && discount.max_usage > 0)
+            {
+                discount.max_usage -= 1;
+                _context.Entry(discount).Property(p => p.max_usage).IsModified = true;
+                totalAmount -= totalAmount * discount.Percentage / 100;
+            }
+            else {
+                return new OrderResponse
+                {
+                    orderID = 0,
+                    applicationUserID = newOrder.UserId,
+                    OrderDate = DateTime.Now,
+                    TotalAmount = 0,
+                    IsRefunded = newOrder.IsRefunded,
+                    Status = "failed",
+                    DiscountId = 0,
+                    CartId = newOrder.CartId,
+                    Message = "Ma giam gia da het !"
+                };
+            }
             var wallet = await _walletRepository.GetWalletBalanceAsync(userId);
             if (wallet.AmountofMoney < newOrder.TotalAmount)
             {
@@ -65,8 +101,9 @@ namespace SWD392.Repositories
                     applicationUserID = newOrder.UserId,
                     OrderDate = DateTime.Now,
                     TotalAmount = 0,
+                    IsRefunded = newOrder.IsRefunded,
                     Status = "failed",
-                    Discount = null,
+                    DiscountId = 0,
                     CartId = newOrder.CartId,
                     Message = "Số dư không đủ để thanh toán!"
                 };
@@ -109,9 +146,10 @@ namespace SWD392.Repositories
                 orderID = newOrder.OrderId,
                 applicationUserID = newOrder.UserId,
                 OrderDate = newOrder.OrderDate,
+                IsRefunded = newOrder.IsRefunded,
                 TotalAmount = newOrder.TotalAmount,
                 Status = newOrder.Status.ToString(),
-                Discount = newOrder.Discount,
+                DiscountId = newOrder.DiscountId.Value,
                 CartId = newOrder.CartId,
                 Message = "Đặt hàng thành công!"
             };
@@ -133,7 +171,7 @@ namespace SWD392.Repositories
                 OrderDate = order.OrderDate,
                 TotalAmount = order.TotalAmount,
                 Status = order.Status.ToString(),
-                Discount = order.Discount,
+                DiscountId = order.DiscountId.Value,
                 CartId = order.CartId
             };
         }
@@ -148,7 +186,7 @@ namespace SWD392.Repositories
                     OrderDate = o.OrderDate,
                     TotalAmount = o.TotalAmount,
                     Status = o.Status.ToString(),
-                    Discount = o.Discount,
+                    DiscountId = o.DiscountId.Value,
                     CartId = o.CartId
                 })
                 .ToListAsync();
@@ -158,12 +196,12 @@ namespace SWD392.Repositories
         {
             var order = await _context.Orders.FindAsync(id);
             if (order == null) return false;
-
+            order.IsRefunded = orderDto.IsRefunded;
             order.UserId =Convert.ToString(orderDto.applicationUserID) ;
             order.OrderDate = orderDto.OrderDate;
             order.TotalAmount = orderDto.TotalAmount;
             order.Status = Enum.Parse<OrderStatus>(orderDto.Status);
-            order.Discount = orderDto.Discount;
+            order.DiscountId = orderDto.DiscountId;
             order.CartId = orderDto.CartId;
 
             await _context.SaveChangesAsync();
@@ -191,11 +229,145 @@ namespace SWD392.Repositories
                     OrderDate = o.OrderDate,
                     TotalAmount = o.TotalAmount,
                     Status = o.Status.ToString(),
-                    Discount = o.Discount,
+                    DiscountId = o.DiscountId.Value,
                     CartId = o.CartId
                 })
                 .ToListAsync();
         }
+        public async Task<int> CancelStatusOrder(int id){
+            var order = await _context.Orders.Where(o =>o.OrderId==id).FirstOrDefaultAsync();
+            if(order!=null){
+                order.Status = OrderStatus.canceled;
+                order.CancelledDate = DateTime.Now;
+                await _context.SaveChangesAsync();
+                return order.OrderId;
+            }
+            return 0; // or throw an exception
+        }
+
+    
+        public async Task<List<OrderCheckDto>> GetAllOrders()
+        {
+            var Orders = await _context.Orders.ToListAsync();
+            var mapper = _mapper.Map<List<OrderCheckDto>>(Orders);
+            return mapper;
+        }
+        
+        public async Task<OrderProcessResult> ConfirmCancelStatusOrder(int id){
+            var order = await _context.Orders.Include(o => o.OrderDetails).FirstOrDefaultAsync(o => o.OrderId == id);
+            if (order == null)
+            {
+                return new OrderProcessResult
+                {
+                    Success = false,
+                    Message = "Không tìm thấy đơn hàng!",
+                    OrderId = null
+                };
+            }
+
+            // Bước 1: Nếu đơn hàng đang ở trạng thái canceled -> xác nhận hủy
+            if (order.Status == OrderStatus.canceled)
+            {
+                order.Status = OrderStatus.Confirmcanceled;
+                await _context.SaveChangesAsync();
+            }
+
+            // Bước 2: Kiểm tra và xử lý hoàn tiền nếu đã Confirmcanceled
+            if (order.Status == OrderStatus.Confirmcanceled && order.CancelledDate != null && !order.IsRefunded)
+            {
+                var hoursSinceCanceled = DateTime.Now.Subtract(order.CancelledDate.Value).TotalHours;
+                var wallet = await _context.Wallets.FirstOrDefaultAsync(w => w.User.Id == order.UserId);
+                if (wallet == null)
+                {
+                    return new OrderProcessResult
+                    {
+                        Success = false,
+                        Message = "Không tìm thấy ví người dùng!",
+                        OrderId = order.OrderId
+                    };
+                }
+
+                decimal refundAmount = 0;
+                if (hoursSinceCanceled < 24)
+                {
+                    refundAmount = order.TotalAmount;
+                }
+                else if (hoursSinceCanceled >= 24 && hoursSinceCanceled <= 48)
+                {
+                    refundAmount = order.TotalAmount * 0.8m;
+                }
+                else
+                {
+                    return new OrderProcessResult
+                    {
+                        Success = false,
+                        Message = "Không thể hoàn tiền do đã quá 48h.",
+                        OrderId = order.OrderId
+                    };
+                }
+
+                // Cập nhật ví
+                wallet.AmountOfMoney += (int)refundAmount;
+                // ✅ Cộng lại quantity cho từng sản phẩm
+                foreach (var orderDetail in order.OrderDetails)
+                {
+                    var product = await _context.products.FirstOrDefaultAsync(p => p.Id == orderDetail.ProductId);
+                    if (product != null)
+                    {
+                        product.Quantity += orderDetail.Quantity;
+                        _logger.LogInformation($"Cộng lại {orderDetail.Quantity} sản phẩm {product.Name} về kho.");
+                    }
+                }
+
+                var discount = await _context.discounts.FirstOrDefaultAsync(d => d.Id == order.DiscountId.Value);
+                if (discount != null)
+                {
+                    discount.max_usage += 1;
+                    _logger.LogInformation($"Tăng số lần sử dụng của mã giảm giá {discount.Code} lên {discount.max_usage}.");
+                }
+                // Đánh dấu đã hoàn tiền
+                order.IsRefunded = true;
+                // Cập nhật database
+                await _context.SaveChangesAsync();
+
+                return new OrderProcessResult
+                {
+                    Success = true,
+                    Message = $"Đã hoàn tiền {refundAmount} VNĐ cho đơn hàng {order.OrderId}.",
+                    OrderId = order.OrderId
+                };
+            }
+
+            return new OrderProcessResult
+            {
+                Success = false,
+                Message = "Đơn hàng không hợp lệ để hoàn tiền hoặc đã hoàn trước đó.",
+                OrderId = order.OrderId
+            };
+        }
+        public async Task<int> ConfirmOrderStatusOrder(int id){
+            var order = await _context.Orders.Where(o =>o.OrderId==id&&o.Status==OrderStatus.pending).FirstOrDefaultAsync();
+            if(order!=null){
+                order.Status = OrderStatus.successful;
+                await _context.SaveChangesAsync();
+                return order.OrderId;
+            }
+            return 0; // or throw an exception
+        }
+        public async Task<List<OrderCheckDto>> GetAllOrdersByCancelStatus()
+        {
+            var Orders = await _context.Orders.Where(o=>o.Status==OrderStatus.canceled).ToListAsync();
+            var mapper = _mapper.Map<List<OrderCheckDto>>(Orders);
+            return mapper;
+        }
+        public async Task<List<OrderCheckDto>> GetAllOrdersByPendingStatus()
+        {
+            var Orders = await _context.Orders.Where(o=>o.Status==OrderStatus.pending).ToListAsync();
+            var mapper = _mapper.Map<List<OrderCheckDto>>(Orders);
+            return mapper;
+        }
+       
+       
     }
 
 }

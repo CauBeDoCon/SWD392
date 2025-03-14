@@ -269,10 +269,5 @@ namespace SWD392.Repositories
 
             return booking;
         }
-
-
-
-
-
     }
 }

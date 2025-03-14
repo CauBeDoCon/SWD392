@@ -15,5 +15,7 @@ namespace SWD392.Repositories
         public  Task<List<RoutineStep>> GetRoutineStepByRouteIDAndBasic(int id);
         public  Task<List<RoutineStep>> GetRoutineStepByRouteIDAndAdvanced(int id);
         public  Task CreateRoutineStepsAsync(List<Routine> routines,SkinType skinType);
+
+        public  Task<List<RoutineStep>> GetRouteStepsByUserIDAsync(string userid,int resultQuizId);
     }
 }

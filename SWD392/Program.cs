@@ -161,7 +161,7 @@ if (app.Environment.IsDevelopment())
 app.UseCors("AllowFrontend"); // Kích hoạt CORS
 app.UseHttpsRedirection();
 app.UseAuthentication(); // Đảm bảo middleware Authentication chạy trước Authorization
-app.UseHttpsRedirection();
+
 
 app.UseAuthorization();
 app.MapControllers();
