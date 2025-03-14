@@ -117,6 +117,7 @@ builder.Services.AddScoped<IResultQuizRepository, ResultQuizRepository>();
 builder.Services.AddScoped<IRoutineStepRepository, RoutineStepRepository>();
 
 builder.Services.AddScoped<IRoutineRepository, RoutineRepository>();
+builder.Services.AddHostedService<DoctorScheduleBackgroundService>();
 
 builder.Services.AddAuthentication(options =>
 {

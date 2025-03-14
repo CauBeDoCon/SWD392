@@ -2,6 +2,7 @@
 using SWD392.DB;
 using SWD392.DTOs;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -16,7 +17,7 @@ namespace SWD392.Repositories
             _context = context;
         }
 
-      
+
         public async Task<List<BookingDTO>> GetAvailableBookingsAsync(string doctorId)
         {
             return await _context.Bookings
@@ -31,7 +32,7 @@ namespace SWD392.Repositories
                 .ToListAsync();
         }
 
-       
+
         public async Task<bool> RequestAppointmentAsync(BookingRequestDTO request, string CustomerId)
         {
             var booking = await _context.Bookings
@@ -113,7 +114,7 @@ namespace SWD392.Repositories
                 .ToListAsync();
         }
 
-     
+
         public async Task<bool> CompleteAppointmentAsync(int bookingId, string doctorId, UpdateBookingDTO request)
         {
             var booking = await _context.Bookings.FirstOrDefaultAsync(b => b.BookingId == bookingId && b.DoctorId == doctorId);
@@ -163,55 +164,96 @@ namespace SWD392.Repositories
             await _context.SaveChangesAsync();
             return true;
         }
+        public async Task<bool> CustomerCancelAppointmentAsync(int bookingId)
+        {
+            var booking = await _context.Bookings.FirstOrDefaultAsync(b =>
+                b.BookingId == bookingId && (b.Status == "Pending" || b.Status == "Confirmed"));
+
+            if (booking == null)
+            {
+                return false;
+            }
+
+            if (booking.Status == "Confirmed")
+            {
+                throw new InvalidOperationException("Lịch đã được xác nhận, bạn không thể tự hủy. Xin vui lòng liên hệ nhân viên hỗ trợ!");
+            }
+
+            booking.Status = "Available";
+            booking.CustomerId = null;
+            await _context.SaveChangesAsync();
+            return true;
+        }
 
 
-        public async Task CreateDoctorBookingsAsync(string doctorId)
+        public async Task CreateDoctorBookingsAsync(string doctorId, int numberOfDays = 7)
         {
             DateTime today = DateTime.Today;
             List<DateTime> timeSlots = new List<DateTime>();
 
-            for (int day = 0; day < 6; day++) 
+            for (int day = 0; day < numberOfDays; day++)
             {
                 DateTime date = today.AddDays(day);
                 timeSlots.AddRange(new List<DateTime>
-                {
-                    date.AddHours(8), date.AddHours(9),
-                    date.AddHours(10), date.AddHours(11),
-                    date.AddHours(13), date.AddHours(14),
-                    date.AddHours(15), date.AddHours(16)
-                });
+        {
+            date.AddHours(8), date.AddHours(9),
+            date.AddHours(10), date.AddHours(11),
+            date.AddHours(13), date.AddHours(14),
+            date.AddHours(15), date.AddHours(16)
+        });
             }
 
             List<Booking> bookings = new List<Booking>();
 
             foreach (var slot in timeSlots)
             {
-                bookings.Add(new Booking
+                bool exists = await _context.Bookings
+                    .AnyAsync(b => b.DoctorId == doctorId && b.TimeSlot == slot);
+
+                if (!exists)
                 {
-                    DoctorId = doctorId,
-                    TimeSlot = slot,
-                    Status = "Available"
-                });
+                    bookings.Add(new Booking
+                    {
+                        DoctorId = doctorId,
+                        TimeSlot = slot,
+                        Status = "Available"
+                    });
+                }
             }
 
-            _context.Bookings.AddRange(bookings);
-            await _context.SaveChangesAsync();
+            if (bookings.Count > 0)
+            {
+                _context.Bookings.AddRange(bookings);
+                await _context.SaveChangesAsync();
+            }
         }
+
+
+
+
+
 
         public async Task<List<BookingDTO>> GetPendingAppointmentsAsync()
         {
             return await _context.Bookings
                 .Where(b => b.Status == "Pending")
                 .OrderBy(b => b.TimeSlot)
-                .Select(b => new BookingDTO
-                {
-                    BookingId = b.BookingId,
-                    TimeSlot = b.TimeSlot,
-                    Status = b.Status,
-                    CustomerId = b.CustomerId
-                })
+                .Join(_context.Users,
+                      booking => booking.DoctorId,
+                      user => user.Id,
+                      (booking, user) => new BookingDTO
+                      {
+                          BookingId = booking.BookingId,
+                          TimeSlot = booking.TimeSlot,
+                          Status = booking.Status,
+                          CustomerId = booking.CustomerId,
+                          DoctorAvatar = user.Avatar,
+                          DoctorFirstName = user.FirstName,
+                          DoctorLastName = user.LastName
+                      })
                 .ToListAsync();
         }
+
         public async Task<List<DoctorDTO>> GetAllDoctorsAsync()
         {
             var doctors = await _context.Users
@@ -269,5 +311,131 @@ namespace SWD392.Repositories
 
             return booking;
         }
+
+        public async Task<List<BookingDTO>> GetAllConfirmedAppointmentsAsync()
+        {
+            return await _context.Bookings
+                .Where(b => b.Status == "Confirmed")
+                .OrderBy(b => b.TimeSlot)
+                .Join(_context.Users,
+                      booking => booking.DoctorId,
+                      user => user.Id,
+                      (booking, user) => new BookingDTO
+                      {
+                          BookingId = booking.BookingId,
+                          TimeSlot = booking.TimeSlot,
+                          Status = booking.Status,
+                          CustomerId = booking.CustomerId,
+                          DoctorAvatar = user.Avatar,
+                          DoctorFirstName = user.FirstName,
+                          DoctorLastName = user.LastName
+                      })
+                .ToListAsync();
+        }
+
+
+        public async Task<bool> HasScheduleForDateAsync(string doctorId, DateTime date)
+        {
+            return await _context.Bookings.AnyAsync(b =>
+                b.DoctorId == doctorId &&
+                b.TimeSlot.Date == date.Date);
+        }
+
+        public async Task<bool> DeleteDoctorBookingsForDateAsync(string doctorId, DateTime date)
+        {
+            var bookingsToDelete = await _context.Bookings
+                .Where(b => b.DoctorId == doctorId && b.TimeSlot.Date == date)
+                .ToListAsync();
+
+            if (bookingsToDelete.Any())
+            {
+                _context.Bookings.RemoveRange(bookingsToDelete);
+                await _context.SaveChangesAsync();
+                return true;
+            }
+
+            return false;
+        }
+
+        public async Task<int> GetPendingBookingCountAsync()
+        {
+            return await _context.Bookings.CountAsync(b => b.Status == "Pending");
+        }
+
+        public async Task<int> GetConfirmedBookingCountAsync()
+        {
+            return await _context.Bookings.CountAsync(b => b.Status == "Confirmed");
+        }
+
+        public async Task<BookingFrequencyDTO> GetConfirmedBookingFrequencyByDayAsync(DateTime startDate, DateTime endDate)
+        {
+            var data = await _context.Bookings
+                .Where(b => b.TimeSlot.Date >= startDate.Date && b.TimeSlot.Date <= endDate.Date && b.Status == "Confirmed")
+                .GroupBy(b => b.TimeSlot.Date)
+                .Select(g => new
+                {
+                    Date = g.Key,
+                    Count = g.Count()
+                })
+                .OrderBy(g => g.Date)
+                .ToListAsync();
+
+            return new BookingFrequencyDTO
+            {
+                Labels = data.Select(d => d.Date.ToString("yyyy-MM-dd")).ToList(),
+                Data = data.Select(d => d.Count).ToList()
+            };
+        }
+
+
+        public async Task<BookingFrequencyDTO> GetConfirmedBookingFrequencyByWeekAsync(DateTime startDate, DateTime endDate)
+        {
+            var result = _context.Bookings
+                .Where(b => b.TimeSlot.Date >= startDate.Date && b.TimeSlot.Date <= endDate.Date && b.Status == "Confirmed")
+                .AsEnumerable() 
+                .GroupBy(b => new
+                {
+                    Year = b.TimeSlot.Year,
+                    Week = CultureInfo.InvariantCulture.Calendar.GetWeekOfYear(
+                        b.TimeSlot, CalendarWeekRule.FirstFourDayWeek, DayOfWeek.Monday)
+                })
+                .Select(g => new
+                {
+                    Week = g.Key.Week,
+                    Year = g.Key.Year,
+                    Count = g.Count()
+                })
+                .OrderBy(g => g.Year).ThenBy(g => g.Week)
+                .ToList(); 
+
+            return new BookingFrequencyDTO
+            {
+                Labels = result.Select(d => $"Week {d.Week} - {d.Year}").ToList(),
+                Data = result.Select(d => d.Count).ToList()
+            };
+        }
+
+
+        public async Task<BookingFrequencyDTO> GetConfirmedBookingFrequencyByMonthAsync(int year)
+        {
+            var data = await _context.Bookings
+                .Where(b => b.TimeSlot.Year == year && b.Status == "Confirmed")
+                .GroupBy(b => b.TimeSlot.Month)
+                .Select(g => new
+                {
+                    Month = g.Key,
+                    Count = g.Count()
+                })
+                .OrderBy(g => g.Month)
+                .ToListAsync();
+
+            return new BookingFrequencyDTO
+            {
+                Labels = data.Select(d => $"Tháng {d.Month}").ToList(),
+                Data = data.Select(d => d.Count).ToList()
+            };
+        }
+
+
     }
 }

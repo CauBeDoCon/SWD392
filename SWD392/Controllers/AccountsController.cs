@@ -213,9 +213,10 @@ namespace SWD392.Controllers
                 var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == signUpDto.Email);
                 if (user != null)
                 {
-                    await _bookingRepository.CreateDoctorBookingsAsync(user.Id);
-                    Console.WriteLine($"✅ Đã tạo lịch khám cho bác sĩ {user.Email} (DoctorId: {user.Id})");
+                    await _bookingRepository.CreateDoctorBookingsAsync(user.Id, 7);
+                    Console.WriteLine($"✅ Đã tạo lịch khám cho bác sĩ {user.Email} (DoctorId: {user.Id}) trong 7 ngày.");
                 }
+
             }
 
             return result;

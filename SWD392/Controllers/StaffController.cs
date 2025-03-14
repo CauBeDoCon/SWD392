@@ -27,6 +27,13 @@ namespace SWD392.Controllers
             var pendingBookings = await _bookingRepository.GetPendingAppointmentsAsync();
             return Ok(pendingBookings);
         }
+        [HttpGet("GetAllConfirmedAppointments")]
+        [Authorize(Roles = "Staff")]
+        public async Task<IActionResult> GetAllConfirmedAppointments()
+        {
+            var confirmedBookings = await _bookingRepository.GetAllConfirmedAppointmentsAsync();
+            return Ok(confirmedBookings);
+        }
 
 
         [HttpPut("ConfirmAppointment/{bookingId}")]
