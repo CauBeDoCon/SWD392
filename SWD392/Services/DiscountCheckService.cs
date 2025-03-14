@@ -38,8 +38,8 @@ namespace SWD392.Services
                 }catch(Exception e){
                     _logger.LogError($"Error occurred while checking discount: {e.Message}");
                 }
-            }
-            await DelayUntilMidnight(stoppingToken);
+                await DelayUntilMidnight(stoppingToken);
+            }           
         }
          private async Task DelayUntilMidnight(CancellationToken stoppingToken)
             {
