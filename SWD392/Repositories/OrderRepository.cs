@@ -366,8 +366,112 @@ namespace SWD392.Repositories
             var mapper = _mapper.Map<List<OrderCheckDto>>(Orders);
             return mapper;
         }
-       
-       
-    }
+        public async Task<decimal> getProfitByMonth(int month, int year)
+        {
+            var orders = await _context.Orders.Where(o => o.OrderDate.Month == month && o.OrderDate.Year == year).ToListAsync();
+            decimal profit = 0;
+            foreach (var order in orders)
+            {
+                profit += order.TotalAmount;
+            }
+            return profit;
+        }
+        public async Task<List<Order>> getAllHistoryOrderByMonthAndYear( int month, int year)
+        {
+            var orders = await _context.Orders.Where(o=> o.OrderDate.Month == month && o.OrderDate.Year == year).ToListAsync();
+            return orders;
+        }
+        public async Task<List<ProfitResponseDTO>> getProfit() {
+        
+            List<ProfitResponseDTO> list = new List<ProfitResponseDTO>();
+            decimal revenuePortal=0;
+            List<Order> systemProfits = new List<Order>(); // Khai báo ngoài try/catch
+            var monthnow = DateTime.Now;
+            var monthValue = monthnow.Month;
+            var year = monthnow.Year;
+            var month1 = monthValue - 7;// check co phai 7 month trong nam ko
+            var monthLack = 0;
+            List<Order> orders = new List<Order>();
+            if (month1 < 0) {
+                monthLack = month1 * (-1);
+                // nam truoc
+                for (int i = 12 - monthLack+1; i <= 12; i++) {
+                    int month = i;
+                    List<OrderCheckDto> listOrderCheckDtoMapByDTOS = new List<OrderCheckDto>();
+                    try {
+                        revenuePortal = await getProfitByMonth(month, year - 1);
+                        systemProfits = await getAllHistoryOrderByMonthAndYear(month, year - 1);
+                    } catch (Exception e) { 
+                        revenuePortal = 0;
+                        systemProfits = new List<Order>();
+                    }
+                    List<OrderCheckDto> orderDtos = new List<OrderCheckDto>();
+                    foreach (var systemProfit in systemProfits) 
+                    {
+                        OrderCheckDto dto = new OrderCheckDto
+                            {
+                                orderID = systemProfit.OrderId,
+                                applicationUserID = systemProfit.UserId,
+                                OrderDate = systemProfit.OrderDate,
+                                CanceledDate = systemProfit.CancelledDate,
+                                TotalAmount = systemProfit.TotalAmount,
+                                IsRefunded = systemProfit.IsRefunded,
+                                Status = systemProfit.Status.ToString(),
+                                DiscountId = systemProfit.DiscountId ?? 0,
+                                CartId = systemProfit.CartId
+                            };
+                         orderDtos.Add(dto);
+                    }
+                        
+                    
+                    ProfitResponseDTO responseDTO = new ProfitResponseDTO
+                        {
+                            month = month,
+                            revenuePortal = revenuePortal,
+                            orderCheckDtos = orderDtos
+                        };
+                    list.Add(responseDTO);
+                }
+            }
+        
+            // nam hien tai
+            for (int i = monthValue - 7 + monthLack+1; i <= monthValue; i++) {  
+                int month = i;
+                List<OrderCheckDto> listSystemProfitMapByDTOS = new List<OrderCheckDto>();
+                try {
+                    revenuePortal = await getProfitByMonth(month, year);
+                    systemProfits = await getAllHistoryOrderByMonthAndYear(month, year);
+                } catch (Exception e) {
+                    revenuePortal = 0;
+                    systemProfits = new List<Order>();
+                }
+                List<OrderCheckDto> orderDtos = new List<OrderCheckDto>();
+                foreach (var systemProfit in systemProfits) 
+                    {
+                        OrderCheckDto dto = new OrderCheckDto
+                            {
+                                orderID = systemProfit.OrderId,
+                                applicationUserID = systemProfit.UserId,
+                                OrderDate = systemProfit.OrderDate,
+                                CanceledDate = systemProfit.CancelledDate,
+                                TotalAmount = systemProfit.TotalAmount,
+                                IsRefunded = systemProfit.IsRefunded,
+                                Status = systemProfit.Status.ToString(),
+                                DiscountId = systemProfit.DiscountId ?? 0,
+                                CartId = systemProfit.CartId
+                            };
+                         orderDtos.Add(dto);
+                    }
+                ProfitResponseDTO responseDTO = new ProfitResponseDTO
+                        {
+                            month = month,
+                            revenuePortal = revenuePortal,
+                            orderCheckDtos = orderDtos
+                        };
+                    list.Add(responseDTO);
+            }
 
+            return list;
+        }
+    }
 }

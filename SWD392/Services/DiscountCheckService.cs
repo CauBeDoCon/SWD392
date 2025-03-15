@@ -24,15 +24,18 @@ namespace SWD392.Services
                     {
                         var discountRepository = scope.ServiceProvider.GetRequiredService<IDiscountRepository>();
                         var discounts = await discountRepository.GetDiscountALLAsync();
-                        foreach(var discount in discounts){  
-                            if(discount.max_usage == 0){
-                                await discountRepository.UpdateDiscountStatusAsync(discount.id);
-                               _logger.LogInformation($"✅ Đã dung discount {discount.id} do hết lượt sử dụng.");
-                            } 
-                            if(DateTime.Now >= discount.EndDate){
-                                await discountRepository.UpdateDiscountStatusAsync(discount.id);
-                                _logger.LogInformation($"✅ Đã dung discount {discount.id} do hết hạn vào {discount.EndDate:yyyy-MM-dd}.");
+                        foreach(var discount in discounts){ 
+                            if(discount.discountStatus == Enums.DiscountStatus.valided){
+                                if(discount.max_usage == 0){
+                                    await discountRepository.UpdateDiscountStatusAsync(discount.id);
+                                _logger.LogInformation($"✅ Đã dung discount {discount.id} do hết lượt sử dụng.");
+                                } 
+                                if(DateTime.Now >= discount.EndDate){
+                                    await discountRepository.UpdateDiscountStatusAsync(discount.id);
+                                    _logger.LogInformation($"✅ Đã dung discount {discount.id} do hết hạn vào {discount.EndDate:yyyy-MM-dd}.");
+                                }
                             }
+                            
                         }
                     }
                 }catch(Exception e){

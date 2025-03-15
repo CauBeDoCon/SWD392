@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
+using SWD392.DB;
 using SWD392.DTOs;
 using SWD392.DTOs.Pagination;
 
@@ -24,5 +25,9 @@ namespace SWD392.Repositories
     Task<int> ConfirmOrderStatusOrder(int id);
     Task<List<OrderCheckDto>> GetAllOrdersByCancelStatus();
     Task<List<OrderCheckDto>> GetAllOrdersByPendingStatus();
+    Task<decimal> getProfitByMonth(int month, int year);
+    Task<List<Order>> getAllHistoryOrderByMonthAndYear( int month, int year);
+    Task<List<ProfitResponseDTO>> getProfit() ;
+        
     }
 }

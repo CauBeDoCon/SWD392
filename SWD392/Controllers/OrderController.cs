@@ -60,11 +60,13 @@ namespace SWD392.Controllers
         }
         
         [HttpGet("GetAllOrdersByCancelStatus")]
+        [Authorize(Roles = "Staff")]
         public async Task<ActionResult<IEnumerable<OrderCheckDto>>> GetAllOrdersByCancelStatus()
         {
             return Ok(await _orderRepository.GetAllOrdersByCancelStatus());
         }
          [HttpGet("GetAllOrdersByPendingStatus")]
+         [Authorize(Roles = "Staff")]
         public async Task<ActionResult<IEnumerable<OrderCheckDto>>> GetAllOrdersByPendingStatus()
         {
             return Ok(await _orderRepository.GetAllOrdersByPendingStatus());
@@ -96,6 +98,7 @@ namespace SWD392.Controllers
         }
 
         [HttpPut("ConfirmOrderStatusOrder/{id}")]
+        [Authorize(Roles = "Staff")]
         public async Task<IActionResult> ConfirmOrderStatusOrder(int id)
         {
             var result = await _orderRepository.ConfirmOrderStatusOrder(id);
@@ -109,6 +112,12 @@ namespace SWD392.Controllers
             var result = await _orderRepository.DeleteOrderAsync(id);
             if (!result) return NotFound();
             return NoContent();
+        }
+        [HttpGet("getProfit")]
+        [Authorize(Roles = "Staff")]
+        public async Task<ActionResult<List<ProfitResponseDTO>>> getProfit()
+        {
+            return Ok(await _orderRepository.getProfit());
         }
     }
 }

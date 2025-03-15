@@ -140,7 +140,7 @@ namespace SWD392.Repositories
                 {
                     Id = p.Id,
                     Name = p.Name,
-                    Description=p.Description,
+                    Description=p.Description,  
                     Images = p.Images.Select(i => new UpdateImageDto
                     {
                         ProductId = i.ProductId,
