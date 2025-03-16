@@ -11,7 +11,7 @@ namespace SWD392.Repositories
         public Task<object?> SignInAsync(SignInModel model);
         Task<ApplicationUser?> GetUserByUsernameAsync(string username);
         public Task<List<ApplicationUser>> GetAllAccountsAsync();
-        public Task<List<ApplicationUser>> GetAllCustomersAsync();
+        Task<List<ApplicationUser>> GetUsersByRoleAsync(string role);
         public Task<ApplicationUser> GetAccountByIdAsync(string id);
         public Task<IdentityResult> UpdateAccountInfoAsync(string id,UpdateAccountInfo updateAccountInfo);
     }
