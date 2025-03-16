@@ -253,7 +253,39 @@ namespace SWD392.Controllers
                 NewStatus = user.Status
             });
         }
- 
+
+        [HttpGet("getAllStaff")]
+        [Authorize(Roles = "Admin,Manager")]
+        public async Task<IActionResult> GetAllStaff()
+        {
+            var staffList = await accountRepo.GetUsersByRoleAsync(AppRole.Staff);
+            return Ok(new { Total = staffList.Count, Staff = staffList });
+        }
+
+        [HttpGet("getAllCustomer")]
+        [Authorize(Roles = "Admin,Manager")]
+        public async Task<IActionResult> GetAllCustomer()
+        {
+            var customerList = await accountRepo.GetUsersByRoleAsync(AppRole.Customer);
+            return Ok(new { Total = customerList.Count, Customers = customerList });
+        }
+
+        [HttpGet("getAllDoctor")]
+        [Authorize(Roles = "Admin,Manager")]
+        public async Task<IActionResult> GetAllDoctor()
+        {
+            var doctorList = await accountRepo.GetUsersByRoleAsync(AppRole.Doctor);
+            return Ok(new { Total = doctorList.Count, Doctors = doctorList });
+        }
+
+        [HttpGet("getAllManager")]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> GetAllManager()
+        {
+            var managerList = await accountRepo.GetUsersByRoleAsync(AppRole.Manager);
+            return Ok(new { Total = managerList.Count, Managers = managerList });
+        }
+
     }
 
 
