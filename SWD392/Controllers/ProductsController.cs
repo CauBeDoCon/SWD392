@@ -35,6 +35,43 @@ namespace SWD392.Controllers
             return product == null ? NotFound() : Ok(product);
         }
 
+        [HttpGet("price-under-100")]
+        public async Task<IActionResult> GetProductsByPriceUnder100([FromQuery] int? pageNumber, [FromQuery] int? pageSize)
+        {
+            int currentPage = pageNumber ?? 1;
+            int currentSize = pageSize ?? 10;
+            var result = await _productRepo.GetProductsByPriceUnder100Async(currentPage, currentSize);
+            return Ok(result);
+        }
+
+        [HttpGet("price-over-200")]
+        public async Task<IActionResult> GetProductsByPriceOver200([FromQuery] int? pageNumber, [FromQuery] int? pageSize)
+        {
+            int currentPage = pageNumber ?? 1;
+            int currentSize = pageSize ?? 10;
+            var result = await _productRepo.GetProductsByPriceOver200Async(currentPage, currentSize);
+            return Ok(result);
+        }
+
+        [HttpGet("category/{categoryName}")]
+        public async Task<IActionResult> GetProductsByCategoryName(string categoryName, [FromQuery] int? pageNumber, [FromQuery] int? pageSize)
+        {
+            int currentPage = pageNumber ?? 1;
+            int currentSize = pageSize ?? 10;
+            var result = await _productRepo.GetProductsByCategoryNameAsync(categoryName, currentPage, currentSize);
+            return Ok(result);
+        }
+
+        [HttpGet("solution/{solutionName}")]
+        public async Task<IActionResult> GetProductsBySolutionName(string solutionName, [FromQuery] int? pageNumber, [FromQuery] int? pageSize)
+        {
+            int currentPage = pageNumber ?? 1;
+            int currentSize = pageSize ?? 10;
+            var result = await _productRepo.GetProductsBySolutionNameAsync(solutionName, currentPage, currentSize);
+            return Ok(result);
+        }
+
+
         [HttpPost]
         [Authorize]
         public async Task<IActionResult> AddNewProduct([FromBody] UpdateProductDto dto)
