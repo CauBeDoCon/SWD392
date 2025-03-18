@@ -114,7 +114,7 @@ namespace SWD392.Controllers
             return NoContent();
         }
         [HttpGet("getProfit")]
-        [Authorize(Roles = "Staff")]
+        [Authorize(Roles = "Admin")]
         public async Task<ActionResult<List<ProfitResponseDTO>>> getProfit()
         {
             return Ok(await _orderRepository.getProfit());

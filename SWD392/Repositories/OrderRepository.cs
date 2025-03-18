@@ -368,7 +368,7 @@ namespace SWD392.Repositories
         }
         public async Task<decimal> getProfitByMonth(int month, int year)
         {
-            var orders = await _context.Orders.Where(o => o.OrderDate.Month == month && o.OrderDate.Year == year).ToListAsync();
+            var orders = await _context.Orders.Where(o => o.OrderDate.Month == month && o.OrderDate.Year == year&& o.Status == OrderStatus.successful &&o.IsRefunded==false).ToListAsync();
             decimal profit = 0;
             foreach (var order in orders)
             {
@@ -378,7 +378,7 @@ namespace SWD392.Repositories
         }
         public async Task<List<Order>> getAllHistoryOrderByMonthAndYear( int month, int year)
         {
-            var orders = await _context.Orders.Where(o=> o.OrderDate.Month == month && o.OrderDate.Year == year).ToListAsync();
+            var orders = await _context.Orders.Where(o=> o.OrderDate.Month == month && o.OrderDate.Year == year&& o.Status == OrderStatus.successful &&o.IsRefunded==false).ToListAsync();
             return orders;
         }
         public async Task<List<ProfitResponseDTO>> getProfit() {

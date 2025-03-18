@@ -66,7 +66,7 @@ namespace SWD392.Repositories
             var anceStatus = resultQuiz.Quiz7 == ResultQuizAnswer.A ? AnceStatus.Yes : AnceStatus.No;
             var result = new ResultQuiz{
                 UserId = userId,
-                SkinStatus = (mostChosenAnswer1.Key != secondChosenAnswer.Key ? skinStatus : SkinType.KhongXacDinh),
+                SkinStatus = (mostChosenAnswer1.Value != secondChosenAnswer.Value ? skinStatus : SkinType.KhongXacDinh),
                 AnceStatus = anceStatus,
                 CreateDate = DateTime.Now,
                 Quiz1 =    resultQuiz.Quiz1,
@@ -76,7 +76,7 @@ namespace SWD392.Repositories
                 Quiz5 =    resultQuiz.Quiz5,
                 Quiz6 =    resultQuiz.Quiz6,
                 Quiz7 =    resultQuiz.Quiz7,
-                Result = (int)mostChosenAnswer,
+                Result = (mostChosenAnswer1.Value != secondChosenAnswer.Value ? (int)mostChosenAnswer : 5) ,
             };
             var result1 = await _context.ResultQuizzes.AddAsync(result);  // Add the new result to the database
                 await _context.SaveChangesAsync();
