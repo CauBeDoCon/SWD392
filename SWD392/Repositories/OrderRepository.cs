@@ -62,7 +62,7 @@ namespace SWD392.Repositories
 
             var totalAmount = await _cartRepository.TotalPriceInCartProduct(Convert.ToInt32(cart.Id));
             var discount = await _context.discounts.FindAsync(orderDto.DiscountId);
-             var newOrder = new Order
+            var newOrder = new Order
             {
                 UserId = userId,
                 OrderDate = DateTime.Now,
@@ -76,7 +76,7 @@ namespace SWD392.Repositories
             {
                 discount.max_usage -= 1;
                 _context.Entry(discount).Property(p => p.max_usage).IsModified = true;
-                totalAmount -= totalAmount * discount.Percentage / 100;
+                newOrder.TotalAmount -= totalAmount * discount.Percentage / 100;
             }
             else {
                 return new OrderResponse

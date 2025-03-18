@@ -69,7 +69,9 @@ namespace SkincarePharmacyNetCore8.Helpers
 
             CreateMap<Comment, CommentModel>().ReverseMap();
             
-            CreateMap<Order, OrderCheckDto>().ReverseMap();
+            CreateMap<Order, OrderCheckDto>()
+            .ForMember(dest => dest.orderID, opt => opt.MapFrom(src => src.OrderId))
+            .ForMember(dest => dest.applicationUserID, opt => opt.MapFrom(src => src.UserId)); // nếu UserId là Guid, nên dùng ToString();
             
             CreateMap<Discount, DiscountRequestDto>().ReverseMap();
         }

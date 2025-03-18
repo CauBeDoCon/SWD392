@@ -318,7 +318,8 @@ namespace SWD392.Controllers
                 var role = roles.FirstOrDefault() ?? AppRole.Customer; // Nếu không có role thì mặc định là Customer
 
                 var token = GenerateJwtToken(user, role);
-                return Ok(new { Token = token });
+
+                return Ok(token);
             }
 
         private string GenerateJwtToken(ApplicationUser user, string role)
