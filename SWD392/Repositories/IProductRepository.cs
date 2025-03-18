@@ -13,5 +13,11 @@ namespace SWD392.Repositories
 
         public Task UpdateProductAsync(int id, Models.ProductModel model);
         public Task<string> DeleteProductAsync(int id);
+        Task<PagedResult<ProductModel>> GetProductsByPriceUnder100Async(int pageNumber, int pageSize);
+        Task<PagedResult<ProductModel>> GetProductsByPriceOver200Async(int pageNumber, int pageSize);
+
+        Task<PagedResult<ProductModel>> GetProductsByCategoryNameAsync(string categoryName, int pageNumber, int pageSize);
+        Task<PagedResult<ProductModel>> GetProductsBySolutionNameAsync(string solutionName, int pageNumber, int pageSize);
+
     }
 }
