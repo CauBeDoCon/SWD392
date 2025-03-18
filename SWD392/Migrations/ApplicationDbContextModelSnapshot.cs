@@ -493,6 +493,9 @@ namespace SWD392.Migrations
                     b.Property<DateTime>("StartDate")
                         .HasColumnType("datetime2");
 
+                    b.Property<int>("discountStatus")
+                        .HasColumnType("int");
+
                     b.Property<int>("max_usage")
                         .HasColumnType("int");
 
@@ -586,11 +589,17 @@ namespace SWD392.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("OrderId"));
 
+                    b.Property<DateTime?>("CancelledDate")
+                        .HasColumnType("datetime2");
+
                     b.Property<int>("CartId")
                         .HasColumnType("int");
 
                     b.Property<int?>("DiscountId")
                         .HasColumnType("int");
+
+                    b.Property<bool>("IsRefunded")
+                        .HasColumnType("bit");
 
                     b.Property<DateTime>("OrderDate")
                         .HasColumnType("datetime2");
@@ -710,6 +719,9 @@ namespace SWD392.Migrations
                     b.Property<int>("UnitId")
                         .HasColumnType("int");
 
+                    b.Property<int>("skinType")
+                        .HasColumnType("int");
+
                     b.HasKey("Id");
 
                     b.HasIndex("BrandId");
@@ -772,6 +784,58 @@ namespace SWD392.Migrations
                     b.ToTable("ProductDetail");
                 });
 
+            modelBuilder.Entity("SWD392.DB.ResultQuiz", b =>
+                {
+                    b.Property<int>("ResultQuizId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ResultQuizId"));
+
+                    b.Property<int>("AnceStatus")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("CreateDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("Quiz1")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Quiz2")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Quiz3")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Quiz4")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Quiz5")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Quiz6")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Quiz7")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Result")
+                        .HasColumnType("int");
+
+                    b.Property<int>("SkinStatus")
+                        .HasColumnType("int");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("ResultQuizId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("ResultQuizzes");
+                });
+
             modelBuilder.Entity("SWD392.DB.Review", b =>
                 {
                     b.Property<int>("Id")
@@ -804,6 +868,58 @@ namespace SWD392.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("Review");
+                });
+
+            modelBuilder.Entity("SWD392.DB.Routine", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("ResultQuizId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("RoutineCategory")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ResultQuizId");
+
+                    b.ToTable("Routines");
+                });
+
+            modelBuilder.Entity("SWD392.DB.RoutineStep", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("CategoryId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ProductId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("RoutineId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Step")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CategoryId");
+
+                    b.HasIndex("ProductId");
+
+                    b.HasIndex("RoutineId");
+
+                    b.ToTable("routineSteps");
                 });
 
             modelBuilder.Entity("SWD392.DB.Solution", b =>
@@ -1178,6 +1294,17 @@ namespace SWD392.Migrations
                     b.Navigation("Unit");
                 });
 
+            modelBuilder.Entity("SWD392.DB.ResultQuiz", b =>
+                {
+                    b.HasOne("SWD392.DB.ApplicationUser", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("SWD392.DB.Review", b =>
                 {
                     b.HasOne("SWD392.DB.OrderDetail", "OrderDetail")
@@ -1195,6 +1322,44 @@ namespace SWD392.Migrations
                     b.Navigation("OrderDetail");
 
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("SWD392.DB.Routine", b =>
+                {
+                    b.HasOne("SWD392.DB.ResultQuiz", "ResultQuiz")
+                        .WithMany("Routines")
+                        .HasForeignKey("ResultQuizId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("ResultQuiz");
+                });
+
+            modelBuilder.Entity("SWD392.DB.RoutineStep", b =>
+                {
+                    b.HasOne("SWD392.DB.Category", "Category")
+                        .WithMany()
+                        .HasForeignKey("CategoryId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("SWD392.DB.Product", "Product")
+                        .WithMany("routineSteps")
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("SWD392.DB.Routine", "Routine")
+                        .WithMany("routineSteps")
+                        .HasForeignKey("RoutineId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Category");
+
+                    b.Navigation("Product");
+
+                    b.Navigation("Routine");
                 });
 
             modelBuilder.Entity("SWD392.DB.Transaction", b =>
@@ -1280,6 +1445,8 @@ namespace SWD392.Migrations
                     b.Navigation("Images");
 
                     b.Navigation("orderDetails");
+
+                    b.Navigation("routineSteps");
                 });
 
             modelBuilder.Entity("SWD392.DB.ProductDetail", b =>
@@ -1287,10 +1454,20 @@ namespace SWD392.Migrations
                     b.Navigation("products");
                 });
 
+            modelBuilder.Entity("SWD392.DB.ResultQuiz", b =>
+                {
+                    b.Navigation("Routines");
+                });
+
             modelBuilder.Entity("SWD392.DB.Review", b =>
                 {
                     b.Navigation("Comment")
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("SWD392.DB.Routine", b =>
+                {
+                    b.Navigation("routineSteps");
                 });
 
             modelBuilder.Entity("SWD392.DB.Solution", b =>

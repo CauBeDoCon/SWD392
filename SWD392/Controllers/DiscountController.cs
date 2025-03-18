@@ -39,11 +39,17 @@ namespace SWD392.Controllers
 
         [HttpPost]
         [Authorize]
-        public async Task<IActionResult> AddNewDiscount([FromBody] DiscountDto dto)
+        public async Task<IActionResult> AddNewDiscount([FromBody] DiscountRequestDto dto)
         {
             if (dto == null)
             {
                 return BadRequest("Dữ liệu không hợp lệ.");
+            }
+             if (dto.StartDate == dto.EndDate )
+            {
+                return BadRequest("❌ Ngày bắt đầu và ngày kết thúc không được giống nhau.");
+            }else if(dto.StartDate > dto.EndDate){
+                return BadRequest("❌Ngày kết thúc phai lon hon Ngày bắt đầu");
             }
 
             var newDiscountId = await _discountRepo.AddDiscountAsync(dto);

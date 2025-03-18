@@ -4,6 +4,7 @@ using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Threading.Tasks;
+using SWD392.Enums;
 
 namespace SWD392.DB
 {
@@ -17,7 +18,7 @@ namespace SWD392.DB
         public DateTime EndDate { get; set; }
         public string Description { get; set; }
         public int max_usage { get; set; }
-
+        public DiscountStatus discountStatus { get; set; }
         public int DiscountCategoryId { get; set; }
         [ForeignKey("DiscountCategoryId")]
         public DiscountCategory discountCategory { get; set; }

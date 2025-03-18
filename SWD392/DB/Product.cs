@@ -1,5 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
+using SWD392.Enums;
+using System.Text.Json.Serialization;
 
 namespace SWD392.DB
 {
@@ -29,7 +31,8 @@ namespace SWD392.DB
         public ICollection<Image> Images { get; set; } = new List<Image>();
 
         public ICollection<CartProduct> CartProducts { get; set; } = new List<CartProduct>();
-
+        [JsonIgnore]
+        public ICollection<RoutineStep> routineSteps { get; set; } = new List<RoutineStep>();
         public int BrandId { get; set; }
         [ForeignKey("BrandId")]
         public Brand Brand { get; set; }
@@ -57,5 +60,7 @@ namespace SWD392.DB
         public int ProductDetailId { get; set; }
         [ForeignKey("ProductDetailId")]
         public ProductDetail ProductDetail { get; set; }
+        public SkinType skinType { get; set; }
+
     }
 }

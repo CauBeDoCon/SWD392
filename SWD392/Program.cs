@@ -9,6 +9,7 @@ using System.Text;
 using SWD392.Helpers;
 using System.Security.Claims;
 using SWD392.Services;
+using Microsoft.AspNetCore.Authentication.Google;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -112,12 +113,17 @@ builder.Services.AddScoped<IReviewRepository, ReviewRepository>();
 
 builder.Services.AddScoped<ICommentRepository, CommentRepository>();
 builder.Services.AddScoped<IDoctorRepository, DoctorRepository>();
-builder.Services.AddHostedService<DoctorScheduleBackgroundService>();
+builder.Services.AddScoped<IResultQuizRepository, ResultQuizRepository>();
 
+builder.Services.AddScoped<IRoutineStepRepository, RoutineStepRepository>();
+
+builder.Services.AddScoped<IRoutineRepository, RoutineRepository>();
+builder.Services.AddHostedService<DoctorScheduleBackgroundService>();
+//builder.Services.AddHostedService<DiscountCheckService>();
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = GoogleDefaults.AuthenticationScheme;
     options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
 }).AddJwtBearer(options =>
 {
@@ -133,6 +139,11 @@ builder.Services.AddAuthentication(options =>
         NameClaimType = ClaimTypes.NameIdentifier,
         RoleClaimType = ClaimTypes.Role 
     };
+}).AddGoogle(options =>
+{
+    options.ClientId = builder.Configuration["Authentication:Google:ClientId"];
+    options.ClientSecret = builder.Configuration["Authentication:Google:ClientSecret"];
+    options.CallbackPath = "/signin-google"; // Đúng với Redirect URI trên Google Cloud
 });
 
 
@@ -157,7 +168,7 @@ if (app.Environment.IsDevelopment())
 app.UseCors("AllowFrontend"); // Kích hoạt CORS
 app.UseHttpsRedirection();
 app.UseAuthentication(); // Đảm bảo middleware Authentication chạy trước Authorization
-app.UseHttpsRedirection();
+
 
 app.UseAuthorization();
 app.MapControllers();

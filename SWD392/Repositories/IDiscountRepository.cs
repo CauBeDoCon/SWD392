@@ -13,9 +13,11 @@ namespace SWD392.Repositories
         Task<PagedResult<DiscountDto>> GetAllDiscountAsync(int pageNumber, int pageSize);
         public Task<DiscountDto> GetDiscountAsync(int id);
 
-        public Task<int> AddDiscountAsync(DiscountDto model);
+        public Task<int> AddDiscountAsync(DiscountRequestDto model);
 
         public Task UpdateDiscountAsync(int id, DiscountDto model);
         public Task<string> DeleteDiscountAsync(int id);
+        Task<List<DiscountDto>> GetDiscountALLAsync();
+        Task UpdateDiscountStatusAsync(int id);
     }
 }

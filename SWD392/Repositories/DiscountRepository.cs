@@ -20,9 +20,18 @@ namespace SWD392.Repositories
             _context = context;
             _mapper = mapper;
         }
-        public async Task<int> AddDiscountAsync(DiscountDto model)
+        public async Task<int> AddDiscountAsync(DiscountRequestDto model)
         {
+            var isValidCategory = await _context.discountCategories
+                .AnyAsync(x => x.Id == model.DiscountCategoryId); //any tra true/false , tra ve 1 phan tu / where tra ve list
+            
+            if (!isValidCategory)
+            {
+                throw new Exception("Discount category không tồn tại.");
+            }
+
             var newDiscount = _mapper.Map<Discount>(model);
+             newDiscount.discountStatus = Enums.DiscountStatus.valided; // Hoặc trạng thái mong muốn
             _context.discounts!.Add(newDiscount);
             await _context.SaveChangesAsync();
             return newDiscount.Id;
@@ -62,6 +71,12 @@ namespace SWD392.Repositories
                 PageSize = pageSize
             };
         }
+        public async Task<List<DiscountDto>> GetDiscountALLAsync()
+        {
+            var discount = await _context.discounts.ToListAsync();
+            return _mapper.Map<List<DiscountDto>>(discount);
+        }
+
 
         public async Task<DiscountDto> GetDiscountAsync(int id)
         {
@@ -78,6 +93,21 @@ namespace SWD392.Repositories
             }
             // ✅ Sử dụng AutoMapper để cập nhật dữ liệu trực tiếp
             _mapper.Map(model, existingEntity);
+
+            // ✅ Đánh dấu entity đã chỉnh sửa để EF theo dõi
+            _context.discounts.Update(existingEntity);
+            await _context.SaveChangesAsync();
+        }
+        public async Task UpdateDiscountStatusAsync(int id)
+        {
+
+            var existingEntity = await _context.discounts!.FindAsync(id);
+           
+            if (existingEntity == null)
+            {
+                throw new KeyNotFoundException($"Danh mục với ID {id} không tìm thấy.");
+            }
+           existingEntity.discountStatus = Enums.DiscountStatus.expired;
 
             // ✅ Đánh dấu entity đã chỉnh sửa để EF theo dõi
             _context.discounts.Update(existingEntity);
