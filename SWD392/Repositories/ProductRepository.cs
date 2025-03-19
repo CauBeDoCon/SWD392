@@ -122,9 +122,9 @@ namespace SWD392.Repositories
             await _context.SaveChangesAsync();
         }
 
-        public async Task<PagedResult<ProductModel>> GetProductsByPriceUnder100Async(int pageNumber, int pageSize)
+        public async Task<PagedResult<ProductModel>> GetProductsByPriceUnder100000Async(int pageNumber, int pageSize)
         {
-            var query = _context.products.Where(p => p.Price < 100);
+            var query = _context.products.Where(p => p.Price < 100000);
 
             int totalCount = await query.CountAsync();
             var products = await query
@@ -149,9 +149,9 @@ namespace SWD392.Repositories
             };
         }
 
-        public async Task<PagedResult<ProductModel>> GetProductsByPriceOver200Async(int pageNumber, int pageSize)
+        public async Task<PagedResult<ProductModel>> GetProductsByPriceOver200000Async(int pageNumber, int pageSize)
         {
-            var query = _context.products.Where(p => p.Price > 200);
+            var query = _context.products.Where(p => p.Price > 200000);
 
             int totalCount = await query.CountAsync();
             var products = await query

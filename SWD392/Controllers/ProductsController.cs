@@ -35,21 +35,21 @@ namespace SWD392.Controllers
             return product == null ? NotFound() : Ok(product);
         }
 
-        [HttpGet("price-under-100")]
-        public async Task<IActionResult> GetProductsByPriceUnder100([FromQuery] int? pageNumber, [FromQuery] int? pageSize)
+        [HttpGet("price-under-100000")]
+        public async Task<IActionResult> GetProductsByPriceUnder100000([FromQuery] int? pageNumber, [FromQuery] int? pageSize)
         {
             int currentPage = pageNumber ?? 1;
             int currentSize = pageSize ?? 10;
-            var result = await _productRepo.GetProductsByPriceUnder100Async(currentPage, currentSize);
+            var result = await _productRepo.GetProductsByPriceUnder100000Async(currentPage, currentSize);
             return Ok(result);
         }
 
-        [HttpGet("price-over-200")]
-        public async Task<IActionResult> GetProductsByPriceOver200([FromQuery] int? pageNumber, [FromQuery] int? pageSize)
+        [HttpGet("price-over-200000")]
+        public async Task<IActionResult> GetProductsByPriceOver200000([FromQuery] int? pageNumber, [FromQuery] int? pageSize)
         {
             int currentPage = pageNumber ?? 1;
             int currentSize = pageSize ?? 10;
-            var result = await _productRepo.GetProductsByPriceOver200Async(currentPage, currentSize);
+            var result = await _productRepo.GetProductsByPriceOver200000Async(currentPage, currentSize);
             return Ok(result);
         }
 
