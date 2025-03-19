@@ -11,7 +11,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Security.Claims;
 using System.Data;
 using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authentication.Google;
+// using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Text;
@@ -261,89 +261,89 @@ namespace SWD392.Controllers
                 NewStatus = user.Status
             });
         }
-            [HttpGet("login-google")]
-            public IActionResult LoginWithGoogle()
-            {
-                var redirectUrl = Url.Action(nameof(HandleGoogleResponse), "Accounts", null, Request.Scheme);
-                var properties = _signInManager.ConfigureExternalAuthenticationProperties(GoogleDefaults.AuthenticationScheme, redirectUrl);
-                return Challenge(properties, GoogleDefaults.AuthenticationScheme);
-            }
+    //         [HttpGet("login-google")]
+    //         public IActionResult LoginWithGoogle()
+    //         {
+    //             var redirectUrl = Url.Action(nameof(HandleGoogleResponse), "Accounts", null, Request.Scheme);
+    //             var properties = _signInManager.ConfigureExternalAuthenticationProperties(GoogleDefaults.AuthenticationScheme, redirectUrl);
+    //             return Challenge(properties, GoogleDefaults.AuthenticationScheme);
+    //         }
 
-            [HttpGet("signin-google")]
-            public async Task<IActionResult> HandleGoogleResponse()
-            {
-                var result = await HttpContext.AuthenticateAsync(GoogleDefaults.AuthenticationScheme);
-                if (!result.Succeeded)
-                    return BadRequest(new { Message = "Google authentication failed" });
+    //         [HttpGet("signin-google")]
+    //         public async Task<IActionResult> HandleGoogleResponse()
+    //         {
+    //             var result = await HttpContext.AuthenticateAsync(GoogleDefaults.AuthenticationScheme);
+    //             if (!result.Succeeded)
+    //                 return BadRequest(new { Message = "Google authentication failed" });
 
-                var email = result.Principal.FindFirstValue(ClaimTypes.Email);
-                if (string.IsNullOrEmpty(email))
-                    return BadRequest(new { Message = "Không thể lấy email từ Google." });
+    //             var email = result.Principal.FindFirstValue(ClaimTypes.Email);
+    //             if (string.IsNullOrEmpty(email))
+    //                 return BadRequest(new { Message = "Không thể lấy email từ Google." });
 
-                var user = await _userManager.FindByEmailAsync(email);
-                if (user == null)
-                {
-                    user = new ApplicationUser
-                    {
-                        UserName = email,
-                        Email = email,
-                        EmailConfirmed = true
-                    };
+    //             var user = await _userManager.FindByEmailAsync(email);
+    //             if (user == null)
+    //             {
+    //                 user = new ApplicationUser
+    //                 {
+    //                     UserName = email,
+    //                     Email = email,
+    //                     EmailConfirmed = true
+    //                 };
 
-                    var createResult = await _userManager.CreateAsync(user);
-                    if (!createResult.Succeeded)
-                    {
-                        return BadRequest(new { Message = "Không thể tạo tài khoản mới." });
-                    }
+    //                 var createResult = await _userManager.CreateAsync(user);
+    //                 if (!createResult.Succeeded)
+    //                 {
+    //                     return BadRequest(new { Message = "Không thể tạo tài khoản mới." });
+    //                 }
 
-                    // Thêm user vào role "Customer"
-                    await _userManager.AddToRoleAsync(user, AppRole.Customer);
+    //                 // Thêm user vào role "Customer"
+    //                 await _userManager.AddToRoleAsync(user, AppRole.Customer);
 
-                    var cart = new Cart();
-                    _context.carts.Add(cart);
-                    await _context.SaveChangesAsync();
-                    user.CartId = cart.Id;
+    //                 var cart = new Cart();
+    //                 _context.carts.Add(cart);
+    //                 await _context.SaveChangesAsync();
+    //                 user.CartId = cart.Id;
 
-                    var wallet = new Wallet { AmountOfMoney = 0 };
-                    _context.Wallets.Add(wallet);
-                    await _context.SaveChangesAsync();
-                    user.WalletId = wallet.WalletId;
+    //                 var wallet = new Wallet { AmountOfMoney = 0 };
+    //                 _context.Wallets.Add(wallet);
+    //                 await _context.SaveChangesAsync();
+    //                 user.WalletId = wallet.WalletId;
 
-                    _context.Users.Update(user);
-                    await _context.SaveChangesAsync();
-                }
+    //                 _context.Users.Update(user);
+    //                 await _context.SaveChangesAsync();
+    //             }
 
-                // Lấy danh sách roles của user
-                var roles = await _userManager.GetRolesAsync(user);
-                var role = roles.FirstOrDefault() ?? AppRole.Customer; // Nếu không có role thì mặc định là Customer
+    //             // Lấy danh sách roles của user
+    //             var roles = await _userManager.GetRolesAsync(user);
+    //             var role = roles.FirstOrDefault() ?? AppRole.Customer; // Nếu không có role thì mặc định là Customer
 
-                var token = GenerateJwtToken(user, role);
+    //             var token = GenerateJwtToken(user, role);
 
-                return Ok(token);
-            }
+    //             return Ok(token);
+    //         }
 
-        private string GenerateJwtToken(ApplicationUser user, string role)
-        {
-            var authClaims = new List<Claim>
-     {
-         new Claim(ClaimTypes.NameIdentifier, user.Id),
-         new Claim(ClaimTypes.Email, user.Email),
-         new Claim(ClaimTypes.Role, role),
-         new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
-     };
+    //     private string GenerateJwtToken(ApplicationUser user, string role)
+    //     {
+    //         var authClaims = new List<Claim>
+    //  {
+    //      new Claim(ClaimTypes.NameIdentifier, user.Id),
+    //      new Claim(ClaimTypes.Email, user.Email),
+    //      new Claim(ClaimTypes.Role, role),
+    //      new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
+    //  };
 
-            var authSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["JWT:Secret"]));
+    //         var authSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["JWT:Secret"]));
 
-            var token = new JwtSecurityToken(
-                issuer: _configuration["JWT:ValidIssuer"],
-                audience: _configuration["JWT:ValidAudience"],
-                expires: DateTime.Now.AddHours(3),
-                claims: authClaims,
-                signingCredentials: new SigningCredentials(authSigningKey, SecurityAlgorithms.HmacSha256)
-            );
+    //         var token = new JwtSecurityToken(
+    //             issuer: _configuration["JWT:ValidIssuer"],
+    //             audience: _configuration["JWT:ValidAudience"],
+    //             expires: DateTime.Now.AddHours(3),
+    //             claims: authClaims,
+    //             signingCredentials: new SigningCredentials(authSigningKey, SecurityAlgorithms.HmacSha256)
+    //         );
 
-            return new JwtSecurityTokenHandler().WriteToken(token);
-        }
+    //         return new JwtSecurityTokenHandler().WriteToken(token);
+    //     }
 
 
     }
