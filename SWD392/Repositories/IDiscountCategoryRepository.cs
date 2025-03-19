@@ -10,7 +10,7 @@ namespace SWD392.Repositories
 {
     public interface IDiscountCategoryRepository
     {
-        Task<PagedResult<DiscountCategoryDto>> GetAllDiscountCategorysAsync(int pageNumber, int pageSize);
+        Task<PagedResult<DiscountCategoryResponseDto>> GetAllDiscountCategorysAsync(int pageNumber, int pageSize);
         public Task<DiscountCategoryDto> GetDiscountCategorysAsync(int id);
 
         public Task<int> AddDiscountCategoryAsync(DiscountCategoryDto model);

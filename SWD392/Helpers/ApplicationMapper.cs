@@ -58,8 +58,9 @@ namespace SkincarePharmacyNetCore8.Helpers
             CreateMap<CartProduct, CartProductModel>().ReverseMap();
 
             CreateMap<DiscountCategory, DiscountCategoryDto>().ReverseMap();
-
+            CreateMap<DiscountCategory, DiscountCategoryResponseDto>().ReverseMap();
             CreateMap<Discount, DiscountDto>().ReverseMap();
+            
             
             CreateMap<Wallet, WalletDTO>().ReverseMap();
 
@@ -74,6 +75,8 @@ namespace SkincarePharmacyNetCore8.Helpers
             .ForMember(dest => dest.applicationUserID, opt => opt.MapFrom(src => src.UserId)); // nếu UserId là Guid, nên dùng ToString();
             
             CreateMap<Discount, DiscountRequestDto>().ReverseMap();
+
+            
         }
     }
 }

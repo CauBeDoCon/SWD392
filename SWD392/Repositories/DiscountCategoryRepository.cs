@@ -43,7 +43,7 @@ namespace SWD392.Repositories
             return $"Danh mục với ID {id} đã xoá thành công.";
         }
 
-        public async Task<PagedResult<DiscountCategoryDto>> GetAllDiscountCategorysAsync(int pageNumber, int pageSize)
+        public async Task<PagedResult<DiscountCategoryResponseDto>> GetAllDiscountCategorysAsync(int pageNumber, int pageSize)
         {
            int totalCount = await _context.discountCategories!.CountAsync();
 
@@ -52,9 +52,9 @@ namespace SWD392.Repositories
                 .Take(pageSize)
                 .ToListAsync();
 
-            var mappedData = _mapper.Map<List<DiscountCategoryDto>>(DiscountCategorys);
+            var mappedData = _mapper.Map<List<DiscountCategoryResponseDto>>(DiscountCategorys);
 
-            return new PagedResult<DiscountCategoryDto>
+            return new PagedResult<DiscountCategoryResponseDto>
             {
                 Items = mappedData,
                 TotalCount = totalCount,
