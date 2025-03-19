@@ -21,6 +21,9 @@ namespace SWD392.DB
         public Wallet Wallet { get; set; }
 
         public string Status { get; set; } = "Active";
+        public int? AppointmentId { get; set; }
+
+        public virtual Appointment Appointment { get; set; }
 
         public ICollection<Blog> Blogs { get; set; } = new List<Blog>();
 
