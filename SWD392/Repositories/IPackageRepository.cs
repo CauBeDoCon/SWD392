@@ -9,8 +9,9 @@ public interface IPackageRepository
     Task<Package> CreatePackageAsync(PackageDTO packageDto);
     Task<bool> UpdatePackageAsync(int packageId, PackageDTO packageDto);
     Task<bool> DeletePackageAsync(int packageId);
-    Task<bool> UpdatePackageSessionAsync(PackageSessionDTO packageSessionDto);
 
     Task<List<PackageSession>> GetAllPackageSessionsAsync();
     Task<List<PackageSession>> GetPackageSessionsByPackageIdAsync(int packageId);
+    Task<bool> UpdatePackageSessionAsync(int packageId, PackageSessionDTO packageSessionDto);
+
 }

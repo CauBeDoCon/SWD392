@@ -72,22 +72,20 @@ namespace SWD392.Controllers
         }
 
         [Authorize(Roles = "Staff")]
-        [HttpPut("UpdatePackageSession")]
-        public async Task<IActionResult> UpdatePackageSession([FromBody] PackageSessionDTO packageSessionDto)
+        [HttpPut("UpdatePackageSession/{packageId}")]
+        public async Task<IActionResult> UpdatePackageSession(int packageId, [FromBody] PackageSessionDTO packageSessionDto)
         {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
 
-            var success = await _packageRepository.UpdatePackageSessionAsync(packageSessionDto);
+            var success = await _packageRepository.UpdatePackageSessionAsync(packageId, packageSessionDto);
+
             if (!success)
             {
-                return BadRequest(new { Message = "Không thể cập nhật PackageSession. Kiểm tra PackageId." });
+                return NotFound(new { Message = "Không tìm thấy PackageSession để cập nhật." });
             }
 
-            return Ok(new { Message = "PackageSession đã được cập nhật thành công." });
+            return Ok(new { Message = "Cập nhật thành công!" });
         }
+
 
         [HttpGet("GetAllPackageSessions")]
         [Authorize(Roles = "Staff,Doctor")]

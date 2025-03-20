@@ -94,40 +94,35 @@ public class PackageRepository : IPackageRepository
         return true;
     }
 
-    public async Task<bool> UpdatePackageSessionAsync(PackageSessionDTO packageSessionDto)
+    public async Task<bool> UpdatePackageSessionAsync(int packageId, PackageSessionDTO packageSessionDto)
     {
-        var packageSession = await _context.PackageSessions
-            .FirstOrDefaultAsync(ps => ps.PackageId == packageSessionDto.PackageId);
-
+        var packageSession = await _context.PackageSessions.FirstOrDefaultAsync(ps => ps.PackageId == packageId);
         if (packageSession == null)
         {
-            return false; 
+            return false;
         }
 
-        var package = await _context.Packages
-            .FirstOrDefaultAsync(p => p.Id == packageSessionDto.PackageId);
+        var package = await _context.Packages.FirstOrDefaultAsync(p => p.Id == packageId);
         if (package == null)
         {
-            return false; 
+            return false;
         }
 
-   
         packageSession.TimeSlot1 = packageSessionDto.TimeSlot1;
         packageSession.Description1 = packageSessionDto.Description1;
-
         packageSession.TimeSlot2 = package.Sessions >= 2 ? packageSessionDto.TimeSlot2 : null;
         packageSession.Description2 = package.Sessions >= 2 ? packageSessionDto.Description2 : null;
-
         packageSession.TimeSlot3 = package.Sessions >= 3 ? packageSessionDto.TimeSlot3 : null;
         packageSession.Description3 = package.Sessions >= 3 ? packageSessionDto.Description3 : null;
-
         packageSession.TimeSlot4 = package.Sessions == 4 ? packageSessionDto.TimeSlot4 : null;
         packageSession.Description4 = package.Sessions == 4 ? packageSessionDto.Description4 : null;
 
         _context.PackageSessions.Update(packageSession);
         await _context.SaveChangesAsync();
+
         return true;
     }
+
 
     public async Task<bool> DeletePackageAsync(int packageId)
     {

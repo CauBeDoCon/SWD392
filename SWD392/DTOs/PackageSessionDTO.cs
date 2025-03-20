@@ -2,8 +2,6 @@
 
 public class PackageSessionDTO
 {
-    [Required]
-    public int PackageId { get; set; }
 
     public string? TimeSlot1 { get; set; }
     public string? TimeSlot2 { get; set; }
