@@ -5,7 +5,6 @@ namespace SWD392.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize(Roles = "Staff")]
     public class PackageController : ControllerBase
     {
         private readonly IPackageRepository _packageRepository;
@@ -16,7 +15,6 @@ namespace SWD392.Controllers
            
         }
         [HttpGet("GetAllPackages")]
-        [Authorize(Roles = "Customer")]
         public async Task<IActionResult> GetAllPackages()
         {
             var packages = await _packageRepository.GetAllPackagesAsync();
@@ -33,7 +31,7 @@ namespace SWD392.Controllers
             }
             return Ok(package);
         }
-
+        [Authorize(Roles = "Staff")]
         [HttpPost("CreatePackage")]
         public async Task<IActionResult> CreatePackage([FromBody] PackageDTO packageDto)
         {
@@ -45,7 +43,7 @@ namespace SWD392.Controllers
             var newPackage = await _packageRepository.CreatePackageAsync(packageDto);
             return CreatedAtAction(nameof(GetPackage), new { packageId = newPackage.Id }, newPackage);
         }
-
+        [Authorize(Roles = "Staff")]
         [HttpPut("UpdatePackage/{packageId}")]
         public async Task<IActionResult> UpdatePackage(int packageId, [FromBody] PackageDTO packageDto)
         {
@@ -61,7 +59,7 @@ namespace SWD392.Controllers
             }
             return Ok(new { Message = "Gói điều trị đã được cập nhật." });
         }
-
+        [Authorize(Roles = "Staff")]
         [HttpDelete("DeletePackage/{packageId}")]
         public async Task<IActionResult> DeletePackage(int packageId)
         {
@@ -73,7 +71,7 @@ namespace SWD392.Controllers
             return Ok(new { Message = "Package đã được xóa thành công cùng với tất cả dữ liệu liên quan." });
         }
 
-
+        [Authorize(Roles = "Staff")]
         [HttpPut("UpdatePackageSession")]
         public async Task<IActionResult> UpdatePackageSession([FromBody] PackageSessionDTO packageSessionDto)
         {
