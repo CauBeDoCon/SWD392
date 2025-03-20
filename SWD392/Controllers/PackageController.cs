@@ -89,6 +89,25 @@ namespace SWD392.Controllers
             return Ok(new { Message = "PackageSession đã được cập nhật thành công." });
         }
 
+        [HttpGet("GetAllPackageSessions")]
+        [Authorize(Roles = "Staff,Doctor")]
+        public async Task<IActionResult> GetAllPackageSessions()
+        {
+            var packageSessions = await _packageRepository.GetAllPackageSessionsAsync();
+            return Ok(packageSessions);
+        }
 
+       
+        [HttpGet("GetPackageSessions/{packageId}")]
+        [Authorize(Roles = "Staff,Doctor")]
+        public async Task<IActionResult> GetPackageSessionsByPackageId(int packageId)
+        {
+            var packageSessions = await _packageRepository.GetPackageSessionsByPackageIdAsync(packageId);
+            if (packageSessions == null || packageSessions.Count == 0)
+            {
+                return NotFound(new { Message = "Không tìm thấy PackageSessions cho PackageId này." });
+            }
+            return Ok(packageSessions);
+        }
     }
 }

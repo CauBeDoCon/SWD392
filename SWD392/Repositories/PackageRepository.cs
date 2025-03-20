@@ -192,5 +192,16 @@ public class PackageRepository : IPackageRepository
         return true;
     }
 
+    public async Task<List<PackageSession>> GetAllPackageSessionsAsync()
+    {
+        return await _context.PackageSessions.ToListAsync();
+    }
 
+    
+    public async Task<List<PackageSession>> GetPackageSessionsByPackageIdAsync(int packageId)
+    {
+        return await _context.PackageSessions
+            .Where(ps => ps.PackageId == packageId)
+            .ToListAsync();
+    }
 }
