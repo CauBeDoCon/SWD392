@@ -35,6 +35,87 @@ namespace SWD392.Controllers
             return product == null ? NotFound() : Ok(product);
         }
 
+        [HttpGet("price-under-100000")]
+        public async Task<IActionResult> GetProductsByPriceUnder100000([FromQuery] int? pageNumber, [FromQuery] int? pageSize)
+        {
+            int currentPage = pageNumber ?? 1;
+            int currentSize = pageSize ?? 10;
+            var result = await _productRepo.GetProductsByPriceUnder100000Async(currentPage, currentSize);
+            return Ok(result);
+        }
+
+        [HttpGet("price-over-200000")]
+        public async Task<IActionResult> GetProductsByPriceOver200000([FromQuery] int? pageNumber, [FromQuery] int? pageSize)
+        {
+            int currentPage = pageNumber ?? 1;
+            int currentSize = pageSize ?? 10;
+            var result = await _productRepo.GetProductsByPriceOver200000Async(currentPage, currentSize);
+            return Ok(result);
+        }
+
+        [HttpGet("price-over-400000")]
+        public async Task<IActionResult> GetProductsByPriceOver400000([FromQuery] int? pageNumber, [FromQuery] int? pageSize)
+        {
+            int currentPage = pageNumber ?? 1;
+            int currentSize = pageSize ?? 10;
+            var result = await _productRepo.GetProductsByPriceOver400000Async(currentPage, currentSize);
+            return Ok(result);
+        }
+
+        [HttpGet("price-over-500000")]
+        public async Task<IActionResult> GetProductsByPriceOver500000([FromQuery] int? pageNumber, [FromQuery] int? pageSize)
+        {
+            int currentPage = pageNumber ?? 1;
+            int currentSize = pageSize ?? 10;
+            var result = await _productRepo.GetProductsByPriceOver500000Async(currentPage, currentSize);
+            return Ok(result);
+        }
+
+        [HttpGet("brand-name")]
+        public async Task<IActionResult> GetProductsByBrandName([FromQuery] string brandName, [FromQuery] int? pageNumber, [FromQuery] int? pageSize)
+        {
+            int currentPage = pageNumber ?? 1;
+            int currentSize = pageSize ?? 10;
+            var result = await _productRepo.GetProductsByBrandNameAsync(brandName, currentPage, currentSize);
+            return Ok(result);
+        }
+
+        [HttpGet("brand-origin-name")]
+        public async Task<IActionResult> GetProductsByBrandOriginName([FromQuery] string brandOriginName, [FromQuery] int? pageNumber, [FromQuery] int? pageSize)
+        {
+            int currentPage = pageNumber ?? 1;
+            int currentSize = pageSize ?? 10;
+            var result = await _productRepo.GetProductsByBrandOriginNameAsync(brandOriginName, currentPage, currentSize);
+            return Ok(result);
+        }
+
+        [HttpGet("manufactured-country-name")]
+        public async Task<IActionResult> GetProductsByManufacturedCountryName([FromQuery] string manufacturedCountryName, [FromQuery] int? pageNumber, [FromQuery] int? pageSize)
+        {
+            int currentPage = pageNumber ?? 1;
+            int currentSize = pageSize ?? 10;
+            var result = await _productRepo.GetProductsByManufacturedCountryNameAsync(manufacturedCountryName, currentPage, currentSize);
+            return Ok(result);
+        }
+
+        [HttpGet("category/{categoryName}")]
+        public async Task<IActionResult> GetProductsByCategoryName(string categoryName, [FromQuery] int? pageNumber, [FromQuery] int? pageSize)
+        {
+            int currentPage = pageNumber ?? 1;
+            int currentSize = pageSize ?? 10;
+            var result = await _productRepo.GetProductsByCategoryNameAsync(categoryName, currentPage, currentSize);
+            return Ok(result);
+        }
+
+        [HttpGet("solution/{solutionName}")]
+        public async Task<IActionResult> GetProductsBySolutionName(string solutionName, [FromQuery] int? pageNumber, [FromQuery] int? pageSize)
+        {
+            int currentPage = pageNumber ?? 1;
+            int currentSize = pageSize ?? 10;
+            var result = await _productRepo.GetProductsBySolutionNameAsync(solutionName, currentPage, currentSize);
+            return Ok(result);
+        }
+
         [HttpPost]
         [Authorize]
         public async Task<IActionResult> AddNewProduct([FromBody] UpdateProductDto dto)
