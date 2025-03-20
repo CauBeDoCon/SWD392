@@ -24,11 +24,33 @@ public class AppointmentRepository : IAppointmentRepository
         return await _context.Appointments.FindAsync(appointmentId);
     }
 
-    public async Task<Appointment?> CreateAppointmentAsync(string userId, AppointmentDTO appointmentDto)
+    public async Task<(bool Success, string Message, Appointment? Appointment)> CreateAppointmentAsync(string userId, AppointmentDTO appointmentDto)
     {
         var package = await _context.Packages.FindAsync(appointmentDto.PackageId);
-        if (package == null) return null;
+        if (package == null)
+            return (false, "Gói dịch vụ không tồn tại.", null);
 
+        var existingAppointment = await _context.Appointments
+         .FirstOrDefaultAsync(a => a.UserId == userId && (a.Status == "Pending" || a.Status == "Confirmed"));
+
+        if (existingAppointment != null)
+            return (false, "Bạn đã có lịch hẹn đang chờ hoặc đã xác nhận. Không thể đặt thêm.", null);
+
+        var user = await _context.Users
+            .Include(u => u.Wallet)
+            .FirstOrDefaultAsync(u => u.Id == userId);
+
+        if (user?.Wallet == null)
+            return (false, "Không tìm thấy ví của bạn.", null);
+
+      
+        if (user.Wallet.AmountOfMoney < package.Price)
+            return (false, "Số dư ví không đủ để đặt gói này.", null);
+
+     
+        user.Wallet.AmountOfMoney -= package.Price;
+
+     
         var newAppointment = new Appointment
         {
             UserId = userId,
@@ -38,14 +60,14 @@ public class AppointmentRepository : IAppointmentRepository
         };
 
         _context.Appointments.Add(newAppointment);
+
+ 
         await _context.SaveChangesAsync();
 
-        await _context.Database.ExecuteSqlRawAsync(
-            "UPDATE AspNetUsers SET AppointmentId = {0} WHERE Id = {1}", newAppointment.Id, userId
-        );
-
-        return newAppointment;
+        return (true, "Đặt lịch thành công.", newAppointment);
     }
+
+
 
     public async Task<(bool Success, string Message)> ConfirmAppointmentAsync(int appointmentId)
     {
@@ -230,6 +252,32 @@ public class AppointmentRepository : IAppointmentRepository
             .ToListAsync();
 
         return packageTrackings;
+    }
+    public async Task<List<DoctorAppointmentDTO>> GetDoctorAppointmentsAsync(string doctorId)
+    {
+        var appointments = await _context.Appointments
+            .Include(a => a.Package)
+            .Include(a => a.User) 
+            .Where(a => a.Package.DoctorId == doctorId) 
+            .Select(a => new DoctorAppointmentDTO
+            {
+                PatientName = a.User.FirstName + " " + a.User.LastName,
+                PackageName = a.Package.Name,
+                StartDate = a.StartDate,
+                Status = a.Status,
+                TreatmentSessions = _context.PackageTrackings
+                    .Where(pt => pt.TreatmentSession.AppointmentId == a.Id)
+                    .Select(pt => new TreatmentSessionDTO
+                    {
+                        Date = pt.Date,
+                        TimeSlot = pt.TimeSlot,
+                        Description = pt.Description, 
+                        Status = pt.Status
+                    }).ToList()
+            })
+            .ToListAsync();
+
+        return appointments;
     }
 
 }

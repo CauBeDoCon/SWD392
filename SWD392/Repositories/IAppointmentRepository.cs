@@ -5,7 +5,8 @@ public interface IAppointmentRepository
 {
     Task<IEnumerable<Appointment>> GetAllAppointmentsAsync();
     Task<Appointment?> GetAppointmentByIdAsync(int appointmentId);
-    Task<Appointment?> CreateAppointmentAsync(string userId, AppointmentDTO appointmentDto);
+    Task<(bool Success, string Message, Appointment? Appointment)> CreateAppointmentAsync(string userId, AppointmentDTO appointmentDto);
+
 
     Task<(bool Success, string Message)> ConfirmAppointmentAsync(int appointmentId);
     Task<(bool Success, string Message)> CancelAppointmentAsync(int appointmentId);
@@ -15,5 +16,6 @@ public interface IAppointmentRepository
     Task<bool> UpdatePackageTrackingAsync(int trackingId, UpdatePackageTrackingDTO updateDto);
 
     Task<List<PackageTrackingDTO>> GetMyPackageTrackingsAsync(string userId);
+    Task<List<DoctorAppointmentDTO>> GetDoctorAppointmentsAsync(string doctorId);
 
 }

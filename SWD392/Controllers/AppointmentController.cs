@@ -53,14 +53,15 @@ namespace SWD392.Controllers
                 return Unauthorized(new { Message = "Không thể xác định danh tính khách hàng." });
             }
 
-            var newAppointment = await _appointmentRepository.CreateAppointmentAsync(userId, appointmentDto);
-            if (newAppointment == null)
+            var result = await _appointmentRepository.CreateAppointmentAsync(userId, appointmentDto);
+            if (!result.Success)
             {
-                return BadRequest(new { Message = "Không thể tạo lịch hẹn. Kiểm tra lại PackageId." });
+                return BadRequest(new { Message = result.Message });
             }
 
-            return CreatedAtAction(nameof(GetAppointment), new { appointmentId = newAppointment.Id }, newAppointment);
+            return CreatedAtAction(nameof(GetAppointment), new { appointmentId = result.Appointment.Id }, result.Appointment);
         }
+
 
         [HttpPut("ConfirmAppointment/{appointmentId}")]
         [Authorize(Roles = "Staff")]
