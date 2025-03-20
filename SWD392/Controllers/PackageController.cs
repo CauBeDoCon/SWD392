@@ -67,10 +67,11 @@ namespace SWD392.Controllers
             var success = await _packageRepository.DeletePackageAsync(packageId);
             if (!success)
             {
-                return BadRequest(new { Message = "Không thể xóa gói điều trị." });
+                return BadRequest(new { Message = "Không thể xóa Package. Hãy kiểm tra lại các ràng buộc dữ liệu." });
             }
-            return Ok(new { Message = "Gói điều trị đã bị xóa." });
+            return Ok(new { Message = "Package đã được xóa thành công cùng với tất cả dữ liệu liên quan." });
         }
+
 
         [HttpPut("UpdatePackageSession")]
         public async Task<IActionResult> UpdatePackageSession([FromBody] PackageSessionDTO packageSessionDto)

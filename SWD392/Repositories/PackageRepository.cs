@@ -92,16 +92,6 @@ public class PackageRepository : IPackageRepository
         return true;
     }
 
-    public async Task<bool> DeletePackageAsync(int packageId)
-    {
-        var package = await _context.Packages.FindAsync(packageId);
-        if (package == null) return false;
-
-        _context.Packages.Remove(package);
-        await _context.SaveChangesAsync();
-        return true;
-    }
-
     public async Task<bool> UpdatePackageSessionAsync(PackageSessionDTO packageSessionDto)
     {
         var packageSession = await _context.PackageSessions
@@ -133,6 +123,71 @@ public class PackageRepository : IPackageRepository
         packageSession.Description4 = package.Sessions == 4 ? packageSessionDto.Description4 : null;
 
         _context.PackageSessions.Update(packageSession);
+        await _context.SaveChangesAsync();
+        return true;
+    }
+
+    public async Task<bool> DeletePackageAsync(int packageId)
+    {
+        var package = await _context.Packages
+            .Include(p => p.PackageSessions)
+            .Include(p => p.Appointments)
+            .FirstOrDefaultAsync(p => p.Id == packageId);
+
+        if (package == null)
+        {
+            return false;
+        }
+
+        
+        if (package.PackageSessions.Any())
+        {
+            _context.PackageSessions.RemoveRange(package.PackageSessions);
+        }
+
+   
+        var appointments = await _context.Appointments
+            .Where(a => a.PackageId == packageId)
+            .Include(a => a.TreatmentSessions)
+            .ToListAsync();
+
+        foreach (var appointment in appointments)
+        {
+         
+            var treatmentSessionIds = appointment.TreatmentSessions.Select(ts => ts.Id).ToList();
+            var packageTrackings = await _context.PackageTrackings
+                .Where(pt => treatmentSessionIds.Contains(pt.TreatmentSessionId))
+                .ToListAsync();
+
+            if (packageTrackings.Any())
+            {
+                _context.PackageTrackings.RemoveRange(packageTrackings);
+            }
+
+            
+            if (appointment.TreatmentSessions.Any())
+            {
+                _context.TreatmentSessions.RemoveRange(appointment.TreatmentSessions);
+            }
+
+           
+            var users = await _context.Users
+                .Where(u => u.AppointmentId == appointment.Id)
+                .ToListAsync();
+
+            foreach (var user in users)
+            {
+                user.AppointmentId = null;
+            }
+
+          
+            _context.Appointments.Remove(appointment);
+        }
+
+    
+        _context.Packages.Remove(package);
+
+      
         await _context.SaveChangesAsync();
         return true;
     }

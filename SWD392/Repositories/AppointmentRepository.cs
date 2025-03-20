@@ -57,7 +57,10 @@ public class AppointmentRepository : IAppointmentRepository
         {
             return (false, "Không tìm thấy Appointment.");
         }
-
+        if (appointment.Status == "Confirmed")
+        {
+            return (false, "Lịch hẹn đã được xác nhận trước đó. Không thể xác nhận lại.");
+        }
         var packageSessions = await _context.PackageSessions
             .Where(ps => ps.PackageId == appointment.PackageId)
             .FirstOrDefaultAsync();
@@ -67,10 +70,8 @@ public class AppointmentRepository : IAppointmentRepository
             return (false, "Không tìm thấy PackageSessions phù hợp.");
         }
 
-   
         var startDate = DateTime.Now;
 
-       
         var treatmentSessions = new List<TreatmentSession>();
         var packageTrackings = new List<PackageTracking>();
 
@@ -106,7 +107,6 @@ public class AppointmentRepository : IAppointmentRepository
         await _context.TreatmentSessions.AddRangeAsync(treatmentSessions);
         await _context.SaveChangesAsync();
 
-      
         var createdSessions = await _context.TreatmentSessions
             .Where(ts => ts.AppointmentId == appointment.Id)
             .ToListAsync();
@@ -125,12 +125,17 @@ public class AppointmentRepository : IAppointmentRepository
             packageTrackings.Add(tracking);
         }
 
-      
         await _context.PackageTrackings.AddRangeAsync(packageTrackings);
+
+        // 🔥 Cập nhật trạng thái của Appointment thành "Confirmed"
+        appointment.Status = "Confirmed";
+        _context.Appointments.Update(appointment);
+
         await _context.SaveChangesAsync();
 
         return (true, "Lịch hẹn đã được xác nhận, các buổi điều trị và theo dõi đã được tạo.");
     }
+
 
 
 
