@@ -37,7 +37,9 @@ public class PackageRepository : IPackageRepository
             Price = packageDto.Price,
             Sessions = packageDto.Sessions,
             DoctorId = packageDto.DoctorId,
-            Status = packageDto.DoctorId != null ? "active" : "inactive"
+            Status = packageDto.DoctorId != null ? "active" : "inactive",
+            PackageCount = packageDto.PackageCount
+
         };
 
         _context.Packages.Add(package);
@@ -84,7 +86,7 @@ public class PackageRepository : IPackageRepository
         if (packageDto.Price != null) package.Price = packageDto.Price;
         if (packageDto.Sessions != null) package.Sessions = packageDto.Sessions;
         if (packageDto.DoctorId != null) package.DoctorId = packageDto.DoctorId;
-
+        if (packageDto.PackageCount >= 0) package.PackageCount = packageDto.PackageCount;
         package.Status = package.DoctorId != null ? "active" : "inactive";
 
         _context.Packages.Update(package);

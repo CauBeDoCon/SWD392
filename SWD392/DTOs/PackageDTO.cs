@@ -13,7 +13,9 @@ public class PackageDTO
     [Required(ErrorMessage = "Số buổi là bắt buộc khi tạo mới.")]
     [Range(1, 4, ErrorMessage = "Số buổi phải từ 1 đến 4.")]
     public int Sessions { get; set; }
-
-    
+    [Required(ErrorMessage = "Số lượng gói còn lại là bắt buộc.")]
+    [Range(1, 5, ErrorMessage = "Số lượng gói phải từ 1 -> 5.")]
+    public int PackageCount { get; set; }
+    [Required(ErrorMessage = "Tên bác sĩ phụ trách là bắt buộc khi tạo mới.")]
     public string? DoctorId { get; set; }
 }

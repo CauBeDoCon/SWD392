@@ -22,7 +22,11 @@ namespace SWD392.DB
         public string? DoctorId { get; set; } 
 
         [Required]
-        public string Status { get; set; } = "inactive"; 
+        public string Status { get; set; } = "inactive";
+
+        [Required]
+        public int PackageCount { get; set; }
+
         [JsonIgnore]
         public virtual ICollection<PackageSession> PackageSessions { get; set; }
         [JsonIgnore]

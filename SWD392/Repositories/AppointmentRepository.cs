@@ -29,6 +29,8 @@ public class AppointmentRepository : IAppointmentRepository
         var package = await _context.Packages.FindAsync(appointmentDto.PackageId);
         if (package == null)
             return (false, "Gói dịch vụ không tồn tại.", null);
+        if (package.PackageCount <= 0)
+            return (false, "Gói dịch vụ này đã hết slot đăng ký.", null);
 
         var existingAppointment = await _context.Appointments
          .FirstOrDefaultAsync(a => a.UserId == userId && (a.Status == "Pending" || a.Status == "Confirmed"));
@@ -79,10 +81,24 @@ public class AppointmentRepository : IAppointmentRepository
         {
             return (false, "Không tìm thấy Appointment.");
         }
+
         if (appointment.Status == "Confirmed")
         {
             return (false, "Lịch hẹn đã được xác nhận trước đó. Không thể xác nhận lại.");
         }
+
+        var package = appointment.Package;
+        if (package == null)
+        {
+            return (false, "Gói dịch vụ không tồn tại.");
+        }
+
+       
+        if (package.PackageCount <= 0)
+        {
+            return (false, "Gói dịch vụ đã hết số lượng đăng ký.");
+        }
+
         var packageSessions = await _context.PackageSessions
             .Where(ps => ps.PackageId == appointment.PackageId)
             .FirstOrDefaultAsync();
@@ -149,9 +165,12 @@ public class AppointmentRepository : IAppointmentRepository
 
         await _context.PackageTrackings.AddRangeAsync(packageTrackings);
 
-        
+       
+        package.PackageCount--;
+
         appointment.Status = "Confirmed";
         _context.Appointments.Update(appointment);
+        _context.Packages.Update(package);
 
         await _context.SaveChangesAsync();
 
@@ -162,24 +181,58 @@ public class AppointmentRepository : IAppointmentRepository
 
 
 
+
     public async Task<(bool Success, string Message)> CancelAppointmentAsync(int appointmentId)
     {
-        var appointment = await _context.Appointments.FindAsync(appointmentId);
+        var appointment = await _context.Appointments
+            .Include(a => a.Package)
+            .FirstOrDefaultAsync(a => a.Id == appointmentId);
+
         if (appointment == null)
         {
             return (false, "Không tìm thấy lịch hẹn.");
         }
 
-        if (appointment.Status == "Cancelled")
+        Console.WriteLine($"Appointment tìm thấy: {appointment.Id}, UserId: {appointment.UserId}");
+
+        // 🔹 Truy xuất thẳng vào AspNetUsers để lấy WalletId
+        var userWalletId = await _context.Users
+            .Where(u => u.Id == appointment.UserId)
+            .Select(u => u.WalletId)
+            .FirstOrDefaultAsync();
+
+        if (userWalletId == null)
         {
-            return (false, "Lịch hẹn đã bị hủy trước đó.");
+            Console.WriteLine($"Không tìm thấy WalletId của User với ID: {appointment.UserId}");
+            return (false, "Không tìm thấy ví của khách hàng để hoàn tiền.");
         }
 
+        Console.WriteLine($"WalletId tìm thấy: {userWalletId}");
+
+        // 🔹 Lấy ví dựa trên WalletId
+        var wallet = await _context.Wallets.FirstOrDefaultAsync(w => w.WalletId == userWalletId);
+        if (wallet == null)
+        {
+            Console.WriteLine($"Không tìm thấy Wallet với ID {userWalletId}");
+            return (false, "Không tìm thấy ví của khách hàng để hoàn tiền.");
+        }
+
+        // 🔹 Hoàn tiền lại vào ví của khách hàng
+        wallet.AmountOfMoney += appointment.Package.Price;
         appointment.Status = "Cancelled";
+
+        // 🔹 Cập nhật vào database
         _context.Appointments.Update(appointment);
+        _context.Wallets.Update(wallet);
+
         await _context.SaveChangesAsync();
-        return (true, "Lịch hẹn đã bị hủy.");
+
+        return (true, "Lịch hẹn đã bị hủy và tiền đã được hoàn.");
     }
+
+
+
+
 
     public async Task<CustomerAppointmentDTO?> GetCustomerAppointmentAsync(string userId)
     {
@@ -232,18 +285,20 @@ public class AppointmentRepository : IAppointmentRepository
     public async Task<List<PackageTrackingDTO>> GetMyPackageTrackingsAsync(string userId)
     {
         var appointment = await _context.Appointments
+            .Include(a => a.Package) 
             .Where(a => a.UserId == userId && a.Status == "Confirmed")
             .FirstOrDefaultAsync();
 
         if (appointment == null)
         {
-            return new List<PackageTrackingDTO>(); 
+            return new List<PackageTrackingDTO>();
         }
 
         var packageTrackings = await _context.PackageTrackings
             .Where(pt => pt.TreatmentSession.AppointmentId == appointment.Id)
             .Select(pt => new PackageTrackingDTO
             {
+                PackageName = appointment.Package.Name,  
                 Date = pt.Date,
                 TimeSlot = pt.TimeSlot,
                 Status = pt.Status,
@@ -253,6 +308,7 @@ public class AppointmentRepository : IAppointmentRepository
 
         return packageTrackings;
     }
+
     public async Task<List<DoctorAppointmentDTO>> GetDoctorAppointmentsAsync(string doctorId)
     {
         var appointments = await _context.Appointments

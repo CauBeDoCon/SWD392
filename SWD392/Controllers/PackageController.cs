@@ -99,7 +99,7 @@ namespace SWD392.Controllers
 
        
         [HttpGet("GetPackageSessions/{packageId}")]
-        [Authorize(Roles = "Staff,Doctor")]
+        
         public async Task<IActionResult> GetPackageSessionsByPackageId(int packageId)
         {
             var packageSessions = await _packageRepository.GetPackageSessionsByPackageIdAsync(packageId);
