@@ -16,6 +16,7 @@ namespace SWD392.Controllers
            
         }
         [HttpGet("GetAllPackages")]
+        [Authorize(Roles = "Customer")]
         public async Task<IActionResult> GetAllPackages()
         {
             var packages = await _packageRepository.GetAllPackagesAsync();
@@ -89,5 +90,7 @@ namespace SWD392.Controllers
 
             return Ok(new { Message = "PackageSession đã được cập nhật thành công." });
         }
+
+
     }
 }

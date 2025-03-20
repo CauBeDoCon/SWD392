@@ -127,7 +127,7 @@ public class AppointmentRepository : IAppointmentRepository
 
         await _context.PackageTrackings.AddRangeAsync(packageTrackings);
 
-        // 🔥 Cập nhật trạng thái của Appointment thành "Confirmed"
+        
         appointment.Status = "Confirmed";
         _context.Appointments.Update(appointment);
 
@@ -158,4 +158,78 @@ public class AppointmentRepository : IAppointmentRepository
         await _context.SaveChangesAsync();
         return (true, "Lịch hẹn đã bị hủy.");
     }
+
+    public async Task<CustomerAppointmentDTO?> GetCustomerAppointmentAsync(string userId)
+    {
+        var appointment = await _context.Appointments
+            .Include(a => a.Package)
+            .Where(a => a.UserId == userId)
+            .OrderByDescending(a => a.StartDate)
+            .FirstOrDefaultAsync();
+
+        if (appointment == null) return null;
+
+        var treatmentSessions = await _context.TreatmentSessions
+            .Where(ts => ts.AppointmentId == appointment.Id)
+            .Select(ts => new TreatmentSessionDTO
+            {
+                Date = ts.Date,
+                TimeSlot = ts.TimeSlot,
+                Description = ts.Description,
+                Status = ts.Status
+            })
+            .ToListAsync();
+
+        return new CustomerAppointmentDTO
+        {
+            PackageName = appointment.Package.Name,
+            StartDate = appointment.StartDate,
+            Status = appointment.Status,
+            TreatmentSessions = treatmentSessions
+        };
+
+
+    }
+
+    public async Task<bool> UpdatePackageTrackingAsync(int trackingId, UpdatePackageTrackingDTO updateDto)
+    {
+        var tracking = await _context.PackageTrackings.FindAsync(trackingId);
+        if (tracking == null)
+        {
+            return false;
+        }
+
+        tracking.Description = updateDto.Description; 
+        tracking.Status = "Completed"; 
+        _context.PackageTrackings.Update(tracking);
+        await _context.SaveChangesAsync();
+
+        return true;
+    }
+
+    public async Task<List<PackageTrackingDTO>> GetMyPackageTrackingsAsync(string userId)
+    {
+        var appointment = await _context.Appointments
+            .Where(a => a.UserId == userId && a.Status == "Confirmed")
+            .FirstOrDefaultAsync();
+
+        if (appointment == null)
+        {
+            return new List<PackageTrackingDTO>(); 
+        }
+
+        var packageTrackings = await _context.PackageTrackings
+            .Where(pt => pt.TreatmentSession.AppointmentId == appointment.Id)
+            .Select(pt => new PackageTrackingDTO
+            {
+                Date = pt.Date,
+                TimeSlot = pt.TimeSlot,
+                Status = pt.Status,
+                Description = pt.Description
+            })
+            .ToListAsync();
+
+        return packageTrackings;
+    }
+
 }

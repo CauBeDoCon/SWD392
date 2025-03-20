@@ -85,5 +85,58 @@ namespace SWD392.Controllers
             }
             return Ok(new { Message = "Lịch hẹn đã bị hủy." });
         }
+
+        [HttpGet("GetMyAppointment")]
+        [Authorize(Roles = "Customer")]
+        public async Task<IActionResult> GetMyAppointment()
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userId))
+            {
+                return Unauthorized(new { Message = "Không thể xác định danh tính khách hàng." });
+            }
+
+            var appointment = await _appointmentRepository.GetCustomerAppointmentAsync(userId);
+            if (appointment == null)
+            {
+                return NotFound(new { Message = "Bạn chưa đăng ký gói nào." });
+            }
+
+            return Ok(appointment);
+        }
+
+        [HttpPut("Update/{packageTrackingId}")]
+        [Authorize(Roles = "Staff")]
+        public async Task<IActionResult> UpdatePackageTracking(int packageTrackingId, [FromBody] UpdatePackageTrackingDTO updateDto)
+        {
+            var success = await _appointmentRepository.UpdatePackageTrackingAsync(packageTrackingId, updateDto);
+            if (!success)
+            {
+                return BadRequest(new { Message = "Không tìm thấy PackageTracking để cập nhật." });
+            }
+            return Ok(new { Message = "Ghi chú bác sĩ đã được cập nhật." });
+        }
+
+
+        [HttpGet("GetMyTracking")]
+        [Authorize(Roles = "Customer")]
+        public async Task<IActionResult> GetMyPackageTracking()
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userId))
+            {
+                return Unauthorized(new { Message = "Không thể xác định danh tính khách hàng." });
+            }
+
+            var trackings = await _appointmentRepository.GetMyPackageTrackingsAsync(userId);
+
+            if (trackings == null || !trackings.Any())
+            {
+                return NotFound(new { Message = "Không tìm thấy lịch sử điều trị của bạn." });
+            }
+
+            return Ok(trackings);
+        }
+
     }
 }
