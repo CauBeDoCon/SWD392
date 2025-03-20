@@ -1,4 +1,4 @@
-﻿using AutoMapper;
+﻿    using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using SWD392.DB;
 using SWD392.DTOs.Pagination;
@@ -175,6 +175,142 @@ namespace SWD392.Repositories
                 PageSize = pageSize
             };
         }
+
+        public async Task<PagedResult<ProductModel>> GetProductsByPriceOver400000Async(int pageNumber, int pageSize)
+        {
+            var query = _context.products.Where(p => p.Price > 400000);
+
+            int totalCount = await query.CountAsync();
+            var products = await query
+                .Include(p => p.Unit)
+                .Include(p => p.Brand)
+                .Include(p => p.Packaging)
+                .Include(p => p.Category)
+                .Include(p => p.BrandOrigin)
+                .Include(p => p.Manufacturer)
+                .Include(p => p.ManufacturedCountry)
+                .Include(p => p.ProductDetail)
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+
+            return new PagedResult<ProductModel>
+            {
+                Items = _mapper.Map<List<ProductModel>>(products),
+                TotalCount = totalCount,
+                PageNumber = pageNumber,
+                PageSize = pageSize
+            };
+        }
+
+        public async Task<PagedResult<ProductModel>> GetProductsByPriceOver500000Async(int pageNumber, int pageSize)
+        {
+            var query = _context.products.Where(p => p.Price > 500000);
+
+            int totalCount = await query.CountAsync();
+            var products = await query
+                .Include(p => p.Unit)
+                .Include(p => p.Brand)
+                .Include(p => p.Packaging)
+                .Include(p => p.Category)
+                .Include(p => p.BrandOrigin)
+                .Include(p => p.Manufacturer)
+                .Include(p => p.ManufacturedCountry)
+                .Include(p => p.ProductDetail)
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+
+            return new PagedResult<ProductModel>
+            {
+                Items = _mapper.Map<List<ProductModel>>(products),
+                TotalCount = totalCount,
+                PageNumber = pageNumber,
+                PageSize = pageSize
+            };
+        }
+
+        public async Task<PagedResult<ProductModel>> GetProductsByBrandNameAsync(string brandName, int pageNumber, int pageSize)
+        {
+            var query = _context.products.Where(p => p.Brand.Name == brandName);
+
+            int totalCount = await query.CountAsync();
+            var products = await query
+                .Include(p => p.Unit)
+                .Include(p => p.Brand)
+                .Include(p => p.Packaging)
+                .Include(p => p.Category)
+                .Include(p => p.BrandOrigin)
+                .Include(p => p.Manufacturer)
+                .Include(p => p.ManufacturedCountry)
+                .Include(p => p.ProductDetail)
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+
+            return new PagedResult<ProductModel>
+            {
+                Items = _mapper.Map<List<ProductModel>>(products),
+                TotalCount = totalCount,
+                PageNumber = pageNumber,
+                PageSize = pageSize
+            };
+        }
+
+        public async Task<PagedResult<ProductModel>> GetProductsByBrandOriginNameAsync(string brandOriginName, int pageNumber, int pageSize)
+        {
+            var query = _context.products.Where(p => p.BrandOrigin.Name == brandOriginName);
+
+            int totalCount = await query.CountAsync();
+            var products = await query
+                .Include(p => p.Unit)
+                .Include(p => p.Brand)
+                .Include(p => p.Packaging)
+                .Include(p => p.Category)
+                .Include(p => p.BrandOrigin)
+                .Include(p => p.Manufacturer)
+                .Include(p => p.ManufacturedCountry)
+                .Include(p => p.ProductDetail)
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+
+            return new PagedResult<ProductModel>
+            {
+                Items = _mapper.Map<List<ProductModel>>(products),
+                TotalCount = totalCount,
+                PageNumber = pageNumber,
+                PageSize = pageSize
+            };
+        }
+
+        public async Task<PagedResult<ProductModel>> GetProductsByManufacturedCountryNameAsync(string manufacturedCountryName, int pageNumber, int pageSize)
+        {
+            var query = _context.products.Where(p => p.ManufacturedCountry.Name == manufacturedCountryName);
+
+            int totalCount = await query.CountAsync();
+            var products = await query
+                .Include(p => p.Unit)
+                .Include(p => p.Brand)
+                .Include(p => p.Packaging)
+                .Include(p => p.Category)
+                .Include(p => p.BrandOrigin)
+                .Include(p => p.Manufacturer)
+                .Include(p => p.ManufacturedCountry)
+                .Include(p => p.ProductDetail)
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+
+            return new PagedResult<ProductModel>
+            {
+                Items = _mapper.Map<List<ProductModel>>(products),
+                TotalCount = totalCount,
+                PageNumber = pageNumber,
+                PageSize = pageSize
+            };
+        }
+
 
         public async Task<PagedResult<ProductModel>> GetProductsByCategoryNameAsync(string categoryName, int pageNumber, int pageSize)
         {
