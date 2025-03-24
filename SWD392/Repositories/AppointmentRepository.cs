@@ -60,10 +60,10 @@ public class AppointmentRepository : IAppointmentRepository
             StartDate = DateTime.Now,
             Status = "Pending"
         };
-
+        await _context.SaveChangesAsync();
         _context.Appointments.Add(newAppointment);
+        _context.Users.Update(user);
 
- 
         await _context.SaveChangesAsync();
 
         return (true, "Đặt lịch thành công.", newAppointment);
@@ -171,6 +171,12 @@ public class AppointmentRepository : IAppointmentRepository
         appointment.Status = "Confirmed";
         _context.Appointments.Update(appointment);
         _context.Packages.Update(package);
+        var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == appointment.UserId);
+        if (user != null)
+        {
+            user.AppointmentId = appointment.Id;
+            _context.Users.Update(user);
+        }
 
         await _context.SaveChangesAsync();
 
@@ -334,6 +340,42 @@ public class AppointmentRepository : IAppointmentRepository
             .ToListAsync();
 
         return appointments;
+    }
+    public async Task<List<ConfirmedAppointmentWithTrackingDTO>> GetConfirmedAppointmentsWithTrackingAsync()
+    {
+        var confirmedAppointments = await _context.Appointments
+            .Include(a => a.User)
+            .Include(a => a.Package)
+            .Where(a => a.Status == "Confirmed")
+            .ToListAsync();
+
+        var result = new List<ConfirmedAppointmentWithTrackingDTO>();
+
+        foreach (var appointment in confirmedAppointments)
+        {
+            var trackings = await _context.PackageTrackings
+                .Where(pt => pt.TreatmentSession.AppointmentId == appointment.Id)
+                .Select(pt => new PackageTrackingDTO
+                {
+                    Date = pt.Date,
+                    TimeSlot = pt.TimeSlot,
+                    Status = pt.Status,
+                    Description = pt.Description
+                })
+                .ToListAsync();
+
+            result.Add(new ConfirmedAppointmentWithTrackingDTO
+            {
+                AppointmentId = appointment.Id,
+                CustomerName = appointment.User.FirstName + " " + appointment.User.LastName,
+                PhoneNumber = appointment.User.PhoneNumber,
+                PackageName = appointment.Package.Name,
+                StartDate = appointment.StartDate,
+                Trackings = trackings
+            });
+        }
+
+        return result;
     }
 
 }

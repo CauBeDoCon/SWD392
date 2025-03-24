@@ -17,5 +17,6 @@ public interface IAppointmentRepository
 
     Task<List<PackageTrackingDTO>> GetMyPackageTrackingsAsync(string userId);
     Task<List<DoctorAppointmentDTO>> GetDoctorAppointmentsAsync(string doctorId);
+    Task<List<ConfirmedAppointmentWithTrackingDTO>> GetConfirmedAppointmentsWithTrackingAsync();
 
 }

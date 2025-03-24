@@ -138,6 +138,13 @@ namespace SWD392.Controllers
 
             return Ok(trackings);
         }
+        [HttpGet("GetConfirmedAppointmentsWithTracking")]
+        [Authorize(Roles = "Staff")]
+        public async Task<IActionResult> GetConfirmedAppointmentsWithTracking()
+        {
+            var result = await _appointmentRepository.GetConfirmedAppointmentsWithTrackingAsync();
+            return Ok(result);
+        }
 
     }
 }
