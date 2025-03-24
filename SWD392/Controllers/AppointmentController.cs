@@ -146,5 +146,50 @@ namespace SWD392.Controllers
             return Ok(result);
         }
 
+
+        [HttpGet("GetCustomerScheduleByPhone")]
+        [Authorize(Roles = "Staff")]
+        public async Task<IActionResult> GetCustomerScheduleByPhone([FromQuery] string phoneNumber)
+        {
+            if (string.IsNullOrWhiteSpace(phoneNumber))
+                return BadRequest(new { Message = "Vui lòng nhập số điện thoại." });
+
+            var schedule = await _appointmentRepository.GetCustomerScheduleByPhoneAsync(phoneNumber);
+            if (schedule == null)
+                return NotFound(new { Message = "Không tìm thấy lộ trình điều trị cho khách hàng này." });
+
+            return Ok(schedule);
+        }
+        [HttpPut("CheckinTreatment/{trackingId}")]
+        [Authorize(Roles = "Staff")]
+        public async Task<IActionResult> CheckinTreatmentSession(int trackingId, [FromBody] CheckinTrackingDTO dto)
+        {
+            var success = await _appointmentRepository.CheckinTreatmentSessionAsync(trackingId, dto);
+            if (!success)
+                return NotFound(new { Message = "Không tìm thấy buổi điều trị để cập nhật." });
+
+            return Ok(new { Message = "Đã check-in bệnh nhân thành công. Trạng thái cập nhật thành 'Done'." });
+        }
+        [HttpDelete("DeleteCompletedAppointment/{appointmentId}")]
+        [Authorize(Roles = "Customer,Staff")]
+        public async Task<IActionResult> DeleteCompletedAppointment(int appointmentId)
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var role = User.FindFirst(ClaimTypes.Role)?.Value;
+
+            if (string.IsNullOrEmpty(userId))
+                return Unauthorized(new { Message = "Không xác định được người dùng." });
+
+            var result = await _appointmentRepository.DeleteCompletedAppointmentAsync(appointmentId, userId, role);
+
+            if (!result.Success)
+                return BadRequest(new { result.Message });
+
+            return Ok(new { result.Message });
+        }
+
+
+
+
     }
 }

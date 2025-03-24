@@ -378,4 +378,124 @@ public class AppointmentRepository : IAppointmentRepository
         return result;
     }
 
+    public async Task<CustomerTreatmentScheduleDTO?> GetCustomerScheduleByPhoneAsync(string phoneNumber)
+    {
+        var user = await _context.Users
+            .FirstOrDefaultAsync(u => u.PhoneNumber == phoneNumber);
+
+        if (user == null)
+            return null;
+
+        var appointment = await _context.Appointments
+            .Include(a => a.Package)
+            .ThenInclude(p => p.Doctor)
+            .Where(a => a.UserId == user.Id && a.Status == "Confirmed")
+            .OrderByDescending(a => a.StartDate)
+            .FirstOrDefaultAsync();
+
+        if (appointment == null)
+            return null;
+
+        var sessions = await _context.TreatmentSessions
+     .Where(ts => ts.AppointmentId == appointment.Id)
+     .Select(ts => new
+     {
+         ts.Id,
+         ts.Date,
+         ts.TimeSlot,
+         ts.Description,
+         Tracking = _context.PackageTrackings
+             .FirstOrDefault(pt => pt.TreatmentSessionId == ts.Id)
+     })
+     .Select(data => new TreatmentSessionDTO
+     {
+         Id = data.Id,
+         Date = data.Date,
+         TimeSlot = data.TimeSlot,
+         Description = data.Description,
+         Status = data.Tracking != null ? data.Tracking.Status : "Chưa cập nhật"
+     })
+     .ToListAsync();
+
+
+        return new CustomerTreatmentScheduleDTO
+        {
+            AppointmentId = appointment.Id,
+            CustomerName = user.FirstName + " " + user.LastName,
+            PhoneNumber = user.PhoneNumber,
+            PackageName = appointment.Package.Name,
+            StartDate = appointment.StartDate,
+            Status = appointment.Status,
+            DoctorId = appointment.Package.DoctorId,
+            DoctorName = appointment.Package.Doctor != null
+        ? appointment.Package.Doctor.FirstName + " " + appointment.Package.Doctor.LastName
+        : "Chưa phân công",
+            DoctorAvatar = appointment.Package.Doctor?.Avatar ?? "",
+            DoctorPhone = appointment.Package.Doctor?.PhoneNumber ?? "", 
+
+
+            TreatmentSessions = sessions
+        };
+
+    }
+    public async Task<bool> CheckinTreatmentSessionAsync(int trackingId, CheckinTrackingDTO dto)
+    {
+        var tracking = await _context.PackageTrackings.FindAsync(trackingId);
+        if (tracking == null)
+            return false;
+
+        tracking.Status = "Done";
+        if (!string.IsNullOrWhiteSpace(dto.Description))
+            tracking.Description = dto.Description;
+
+        _context.PackageTrackings.Update(tracking);
+        await _context.SaveChangesAsync();
+
+        return true;
+    }
+    public async Task<(bool Success, string Message)> DeleteCompletedAppointmentAsync(int appointmentId, string userId, string userRole)
+    {
+        var appointment = await _context.Appointments
+            .Include(a => a.TreatmentSessions)
+            .Include(a => a.Package)
+            .FirstOrDefaultAsync(a => a.Id == appointmentId && a.Status == "Confirmed");
+
+        if (appointment == null)
+            return (false, "Không tìm thấy lịch hẹn đã xác nhận.");
+
+    
+        if (userRole == "Customer" && appointment.UserId != userId)
+            return (false, "Bạn không có quyền xoá lịch hẹn này.");
+
+        var sessionIds = appointment.TreatmentSessions.Select(ts => ts.Id).ToList();
+
+        var trackings = await _context.PackageTrackings
+            .Where(pt => sessionIds.Contains(pt.TreatmentSessionId))
+            .ToListAsync();
+
+        if (trackings.Any(pt => pt.Status != "Done"))
+            return (false, "Lộ trình chưa hoàn tất. Không thể xoá.");
+
+     
+        _context.PackageTrackings.RemoveRange(trackings);
+        _context.TreatmentSessions.RemoveRange(appointment.TreatmentSessions);
+        _context.Appointments.Remove(appointment);
+
+     
+        appointment.Package.PackageCount++;
+
+  
+        var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == appointment.UserId);
+        if (user != null)
+        {
+            user.AppointmentId = null;
+            _context.Users.Update(user);
+        }
+
+        await _context.SaveChangesAsync();
+        return (true, "Đã xoá lộ trình và hoàn lại slot.");
+    }
+
+
+
 }

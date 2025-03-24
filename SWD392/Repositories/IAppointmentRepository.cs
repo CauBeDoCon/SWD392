@@ -18,5 +18,10 @@ public interface IAppointmentRepository
     Task<List<PackageTrackingDTO>> GetMyPackageTrackingsAsync(string userId);
     Task<List<DoctorAppointmentDTO>> GetDoctorAppointmentsAsync(string doctorId);
     Task<List<ConfirmedAppointmentWithTrackingDTO>> GetConfirmedAppointmentsWithTrackingAsync();
+    Task<CustomerTreatmentScheduleDTO?> GetCustomerScheduleByPhoneAsync(string phoneNumber);
+    Task<bool> CheckinTreatmentSessionAsync(int trackingId, CheckinTrackingDTO dto);
+    Task<(bool Success, string Message)> DeleteCompletedAppointmentAsync(int appointmentId, string userId, string role);
+
+
 
 }
