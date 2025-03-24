@@ -15,9 +15,10 @@ namespace SWD392.Controllers
            
         }
         [HttpGet("GetAllPackages")]
+        [Authorize]
         public async Task<IActionResult> GetAllPackages()
         {
-            var packages = await _packageRepository.GetAllPackagesAsync();
+            var packages = await _packageRepository.GetAllPackagesWithDoctorAsync();
             return Ok(packages);
         }
 

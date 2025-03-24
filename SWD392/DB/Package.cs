@@ -19,8 +19,9 @@ namespace SWD392.DB
         [Required]
         public int Sessions { get; set; }
 
-        public string? DoctorId { get; set; } 
-
+        public string? DoctorId { get; set; }
+        [ForeignKey("DoctorId")]
+        public virtual ApplicationUser? Doctor { get; set; }
         [Required]
         public string Status { get; set; } = "inactive";
 

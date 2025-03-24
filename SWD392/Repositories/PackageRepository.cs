@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using SWD392.DB;
+using SWD392.DTOs;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -201,4 +202,27 @@ public class PackageRepository : IPackageRepository
             .Where(ps => ps.PackageId == packageId)
             .ToListAsync();
     }
+
+    public async Task<List<PackageWithDoctorDTO>> GetAllPackagesWithDoctorAsync()
+    {
+        var packages = await _context.Packages
+            .Include(p => p.Doctor) 
+            .ToListAsync();
+
+        var result = packages.Select(p => new PackageWithDoctorDTO
+        {
+            Id = p.Id,
+            Name = p.Name,
+            Price = p.Price,
+            Sessions = p.Sessions,
+            PackageCount = p.PackageCount,
+            Status = p.Status,
+            DoctorId = p.DoctorId,
+            DoctorName = p.Doctor != null ? p.Doctor.FirstName + " " + p.Doctor.LastName : "Chưa gán bác sĩ",
+            DoctorAvatar = p.Doctor?.Avatar ?? ""
+        }).ToList();
+
+        return result;
+    }
+
 }
