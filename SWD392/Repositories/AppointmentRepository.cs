@@ -379,6 +379,7 @@ public class AppointmentRepository : IAppointmentRepository
         var confirmedAppointments = await _context.Appointments
             .Include(a => a.User)
             .Include(a => a.Package)
+                .ThenInclude(p => p.Doctor)
             .Where(a => a.Status == "Confirmed")
             .ToListAsync();
 
@@ -390,9 +391,11 @@ public class AppointmentRepository : IAppointmentRepository
                 .Where(pt => pt.TreatmentSession.AppointmentId == appointment.Id)
                 .Select(pt => new PackageTrackingDTO
                 {
+                    Id = pt.Id,
                     Date = pt.Date,
                     TimeSlot = pt.TimeSlot,
-                    Status = pt.Status
+                    Status = pt.Status,
+                    Description = pt.Description
                 })
                 .ToListAsync();
 
@@ -403,12 +406,21 @@ public class AppointmentRepository : IAppointmentRepository
                 PhoneNumber = appointment.User.PhoneNumber,
                 PackageName = appointment.Package.Name,
                 StartDate = appointment.StartDate,
-                Trackings = trackings
+
+                DoctorId = appointment.Package.DoctorId,
+                DoctorName = appointment.Package.Doctor != null
+                    ? appointment.Package.Doctor.FirstName + " " + appointment.Package.Doctor.LastName
+                    : "Chưa phân công",
+                DoctorAvatar = appointment.Package.Doctor?.Avatar ?? "",
+                DoctorPhone = appointment.Package.Doctor?.PhoneNumber ?? "",
+
+                PackageTracking = trackings
             });
         }
 
         return result;
     }
+
 
     public async Task<CustomerTreatmentScheduleDTO?> GetCustomerScheduleByPhoneAsync(string phoneNumber)
     {
