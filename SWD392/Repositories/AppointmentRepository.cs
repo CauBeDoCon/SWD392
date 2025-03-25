@@ -164,8 +164,15 @@ public class AppointmentRepository : IAppointmentRepository
 
         await _context.PackageTrackings.AddRangeAsync(packageTrackings);
 
-       
+
         package.PackageCount--;
+
+        if (package.PackageCount == 0)
+        {
+            package.Status = "inactive";
+        }
+
+
 
         appointment.Status = "Confirmed";
         _context.Appointments.Update(appointment);
@@ -192,6 +199,21 @@ public class AppointmentRepository : IAppointmentRepository
         var appointment = await _context.Appointments
             .Include(a => a.Package)
             .FirstOrDefaultAsync(a => a.Id == appointmentId);
+        if (appointment.Status == "Confirmed")
+        {
+            return (false, "Lịch hẹn đã được xác nhận, không thể huỷ.");
+        }
+        if (appointment.Status == "Pending")
+        {
+            appointment.Package.PackageCount++;
+
+            if (appointment.Package.PackageCount > 0)
+            {
+                appointment.Package.Status = appointment.Package.DoctorId != null ? "active" : "inactive";
+            }
+
+            _context.Packages.Update(appointment.Package);
+        }
 
         if (appointment == null)
         {
@@ -200,7 +222,7 @@ public class AppointmentRepository : IAppointmentRepository
 
         Console.WriteLine($"Appointment tìm thấy: {appointment.Id}, UserId: {appointment.UserId}");
 
-        // 🔹 Truy xuất thẳng vào AspNetUsers để lấy WalletId
+      
         var userWalletId = await _context.Users
             .Where(u => u.Id == appointment.UserId)
             .Select(u => u.WalletId)
@@ -214,7 +236,7 @@ public class AppointmentRepository : IAppointmentRepository
 
         Console.WriteLine($"WalletId tìm thấy: {userWalletId}");
 
-        // 🔹 Lấy ví dựa trên WalletId
+    
         var wallet = await _context.Wallets.FirstOrDefaultAsync(w => w.WalletId == userWalletId);
         if (wallet == null)
         {
@@ -222,11 +244,11 @@ public class AppointmentRepository : IAppointmentRepository
             return (false, "Không tìm thấy ví của khách hàng để hoàn tiền.");
         }
 
-        // 🔹 Hoàn tiền lại vào ví của khách hàng
+ 
         wallet.AmountOfMoney += appointment.Package.Price;
         appointment.Status = "Cancelled";
 
-        // 🔹 Cập nhật vào database
+    
         _context.Appointments.Update(appointment);
         _context.Wallets.Update(wallet);
 
@@ -491,10 +513,16 @@ public class AppointmentRepository : IAppointmentRepository
         _context.TreatmentSessions.RemoveRange(appointment.TreatmentSessions);
         _context.Appointments.Remove(appointment);
 
-     
+
         appointment.Package.PackageCount++;
 
-  
+        if (appointment.Package.PackageCount > 0)
+        {
+            appointment.Package.Status = appointment.Package.DoctorId != null ? "active" : "inactive";
+        }
+
+
+
         var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == appointment.UserId);
         if (user != null)
         {

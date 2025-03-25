@@ -38,7 +38,9 @@ public class PackageRepository : IPackageRepository
             Price = packageDto.Price,
             Sessions = packageDto.Sessions,
             DoctorId = packageDto.DoctorId,
-            Status = packageDto.DoctorId != null ? "active" : "inactive",
+            Status = (packageDto.PackageCount == 0) ? "NotAvailable"
+        : packageDto.DoctorId != null ? "active" : "inactive",
+
             PackageCount = packageDto.PackageCount
 
         };
@@ -87,8 +89,21 @@ public class PackageRepository : IPackageRepository
         if (packageDto.Price != null) package.Price = packageDto.Price;
         if (packageDto.Sessions != null) package.Sessions = packageDto.Sessions;
         if (packageDto.DoctorId != null) package.DoctorId = packageDto.DoctorId;
-        if (packageDto.PackageCount >= 0) package.PackageCount = packageDto.PackageCount;
-        package.Status = package.DoctorId != null ? "active" : "inactive";
+        if (packageDto.PackageCount < 0)
+            throw new ArgumentException("Số lượng gói (PackageCount) không hợp lệ.");
+
+        package.PackageCount = packageDto.PackageCount;
+
+        if (package.PackageCount == 0)
+        {
+            package.Status = "inactive";
+        }
+        else
+        {
+            package.Status = package.DoctorId != null ? "active" : "inactive";
+        }
+
+
 
         _context.Packages.Update(package);
         await _context.SaveChangesAsync();
