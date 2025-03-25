@@ -23,6 +23,6 @@ namespace SWD392.DB
         [Required]
         public string Status { get; set; } = "not_done";
 
-        public string Description { get; set; }
+        public string? Description { get; set; }
     }
 }

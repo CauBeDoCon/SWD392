@@ -157,7 +157,6 @@ public class AppointmentRepository : IAppointmentRepository
                 Date = session.Date,
                 TimeSlot = session.TimeSlot,
                 Status = "In Progress",
-                Description = session.Description
             };
 
             packageTrackings.Add(tracking);
@@ -359,8 +358,7 @@ public class AppointmentRepository : IAppointmentRepository
                 {
                     Date = pt.Date,
                     TimeSlot = pt.TimeSlot,
-                    Status = pt.Status,
-                    Description = pt.Description
+                    Status = pt.Status
                 })
                 .ToListAsync();
 
