@@ -441,25 +441,27 @@ public class AppointmentRepository : IAppointmentRepository
             return null;
 
         var sessions = await _context.TreatmentSessions
-     .Where(ts => ts.AppointmentId == appointment.Id)
-     .Select(ts => new
-     {
-         ts.Id,
-         ts.Date,
-         ts.TimeSlot,
-         ts.Description,
-         Tracking = _context.PackageTrackings
-             .FirstOrDefault(pt => pt.TreatmentSessionId == ts.Id)
-     })
-     .Select(data => new TreatmentSessionDTO
-     {
-         Id = data.Id,
-         Date = data.Date,
-         TimeSlot = data.TimeSlot,
-         Description = data.Description,
-         Status = data.Tracking != null ? data.Tracking.Status : "Chưa cập nhật"
-     })
-     .ToListAsync();
+    .Where(ts => ts.AppointmentId == appointment.Id)
+    .Select(ts => new
+    {
+        ts.Id,
+        ts.Date,
+        ts.TimeSlot,
+        ts.Description,
+        Tracking = _context.PackageTrackings
+            .FirstOrDefault(pt => pt.TreatmentSessionId == ts.Id)
+    })
+    .Select(data => new TreatmentSessionDTO
+    {
+        Id = data.Id,
+        Date = data.Date,
+        TimeSlot = data.TimeSlot,
+        Description = data.Description,
+        Status = data.Tracking != null ? data.Tracking.Status : "Chưa cập nhật",
+        DescriptionNote = data.Tracking != null ? data.Tracking.Description : null
+    })
+    .ToListAsync();
+
 
 
         return new CustomerTreatmentScheduleDTO
