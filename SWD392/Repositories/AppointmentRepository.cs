@@ -287,32 +287,44 @@ public class AppointmentRepository : IAppointmentRepository
         return true;
     }
 
-    public async Task<List<PackageTrackingDTO>> GetMyPackageTrackingsAsync(string userId)
+    public async Task<PackageTrackingGroupDTO?> GetMyPackageTrackingsAsync(string userId)
     {
         var appointment = await _context.Appointments
-            .Include(a => a.Package) 
-            .Where(a => a.UserId == userId && a.Status == "Confirmed")
-            .FirstOrDefaultAsync();
+            .Include(a => a.Package).ThenInclude(p => p.Doctor)
+            .Include(a => a.TreatmentSessions)
+            .FirstOrDefaultAsync(a => a.UserId == userId && a.Status == "Confirmed");
 
         if (appointment == null)
-        {
-            return new List<PackageTrackingDTO>();
-        }
+            return null;
 
-        var packageTrackings = await _context.PackageTrackings
-            .Where(pt => pt.TreatmentSession.AppointmentId == appointment.Id)
-            .Select(pt => new PackageTrackingDTO
-            {
-                PackageName = appointment.Package.Name,  
-                Date = pt.Date,
-                TimeSlot = pt.TimeSlot,
-                Status = pt.Status,
-                Description = pt.Description
-            })
+        var sessionIds = appointment.TreatmentSessions.Select(ts => ts.Id).ToList();
+
+        var trackings = await _context.PackageTrackings
+            .Where(pt => sessionIds.Contains(pt.TreatmentSessionId))
             .ToListAsync();
 
-        return packageTrackings;
+        var doctor = appointment.Package.Doctor;
+
+        var result = new PackageTrackingGroupDTO
+        {
+            PackageName = appointment.Package.Name,
+            DoctorName = doctor != null ? $"{doctor.FirstName} {doctor.LastName}" : "Không có bác sĩ",
+            DoctorAvatar = doctor?.Avatar ?? "",
+            DoctorPhone = doctor?.PhoneNumber ?? "",
+            PackageTracking = trackings.Select(t => new PackageTrackingItemDTO
+            {
+                Id = t.Id,
+                Date = t.Date,
+                TimeSlot = t.TimeSlot,
+                Status = t.Status,
+                Description = t.Description
+            }).ToList()
+        };
+
+        return result;
     }
+
+
 
     public async Task<List<DoctorAppointmentDTO>> GetDoctorAppointmentsAsync(string doctorId)
     {

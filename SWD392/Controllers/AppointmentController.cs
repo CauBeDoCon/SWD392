@@ -131,10 +131,11 @@ namespace SWD392.Controllers
 
             var trackings = await _appointmentRepository.GetMyPackageTrackingsAsync(userId);
 
-            if (trackings == null || !trackings.Any())
+            if (trackings == null || trackings.PackageTracking == null || !trackings.PackageTracking.Any())
             {
                 return NotFound(new { Message = "Không tìm thấy lịch sử điều trị của bạn." });
             }
+
 
             return Ok(trackings);
         }
