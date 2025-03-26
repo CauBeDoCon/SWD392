@@ -224,5 +224,31 @@ namespace SWD392.Repositories
             return await userManager.FindByNameAsync(username); 
         }
 
+        public async Task<Dictionary<string, int>> GetUserCountsByRolesAsync()
+        {
+            var roleCounts = new Dictionary<string, int>();
+
+            var roles = await _context.Roles.ToListAsync();
+
+            foreach (var role in roles)
+            {
+                int count = await _context.UserRoles.CountAsync(ur => ur.RoleId == role.Id);
+                roleCounts.Add($"total{role.Name}", count);
+            }
+
+            string[] defaultRoles = { "Customer", "Doctor", "Admin", "Manager", "Staff" };
+
+            foreach (var role in defaultRoles)
+            {
+                string key = $"total{role}";
+                if (!roleCounts.ContainsKey(key))
+                {
+                    roleCounts[key] = 0;
+                }
+            }
+
+            return roleCounts;
+        }
+
     }
 }
