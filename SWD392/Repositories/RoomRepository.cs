@@ -16,36 +16,41 @@ namespace SWD392.Repositories
         {
             return await _context.Rooms
                 .Include(r => r.Doctor)
+                .Include(r => r.Package)
                 .Select(r => new RoomDTO
                 {
                     RoomId = r.RoomId,
                     RoomName = r.RoomName,
+                    TimeSlot = r.TimeSlot,
                     SlotMax = r.SlotMax,
                     SlotNow = r.SlotNow,
                     Status = r.Status,
                     DoctorName = r.Doctor.FirstName + " " + r.Doctor.LastName,
-                    PackageName = r.PackageName
+                    PackageName = r.Package != null ? r.Package.Name : "Không xác định" 
                 })
                 .ToListAsync();
         }
+
 
         public async Task<bool> CreateRoomAsync(CreateRoomDTO dto)
         {
             var room = new Room
             {
                 RoomName = dto.RoomName,
+                TimeSlot = dto.TimeSlot,
                 SlotMax = dto.SlotMax,
                 SlotNow = 0,
                 Status = "Available",
                 DoctorId = dto.DoctorId,
                 CheckinTime = DateTime.Now,
-                PackageName = dto.PackageName
+                PackageId = dto.PackageId 
             };
 
             _context.Rooms.Add(room);
             await _context.SaveChangesAsync();
             return true;
         }
+
 
         public async Task<(bool Success, string Message)> CheckinCustomerAsync(CheckinCustomerDTO dto)
         {
