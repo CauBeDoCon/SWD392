@@ -67,6 +67,20 @@ namespace SWD392.Controllers
             return Ok(appointments);
         }
 
+        [HttpGet("SearchBookingByPhone")]
+        [Authorize(Roles = "Doctor")]
+        public async Task<IActionResult> SearchBookingByPhone([FromQuery] string phoneNumber)
+        {
+            if (string.IsNullOrEmpty(phoneNumber))
+                return BadRequest(new { Message = "Vui lòng nhập số điện thoại." });
+
+            var result = await _bookingRepository.SearchBookingByPhoneAsync(phoneNumber);
+
+            if (result == null || !result.Any())
+                return NotFound(new { Message = "Không tìm thấy lịch hẹn nào với số điện thoại này." });
+
+            return Ok(result);
+        }
 
     }
 }

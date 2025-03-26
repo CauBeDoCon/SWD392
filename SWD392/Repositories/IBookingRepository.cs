@@ -10,7 +10,7 @@ namespace SWD392.Repositories
         Task<bool> RequestAppointmentAsync(BookingRequestDTO request, string customerUsername);
         Task<List<BookingDTO>> GetCustomerAppointmentsAsync(string customerUsername);
         Task<bool> CancelAppointmentAsync(int bookingId, string customerUsername);
-        Task<List<BookingDTO>> GetDoctorScheduleAsync(string doctorId);
+        Task<List<DoctorScheduleDTO>> GetDoctorScheduleAsync(string doctorId);
         Task<bool> CompleteAppointmentAsync(int bookingId, string doctorId, UpdateBookingDTO request);
         Task<bool> ConfirmAppointmentAsync(int bookingId);
         Task<bool> CancelAppointmentAsync(int bookingId);
@@ -34,6 +34,7 @@ namespace SWD392.Repositories
         Task<BookingFrequencyDTO> GetConfirmedBookingFrequencyByWeekAsync(DateTime startDate, DateTime endDate);
         Task<BookingFrequencyDTO> GetConfirmedBookingFrequencyByMonthAsync(int year);
 
+        Task<List<DoctorScheduleDTO>> SearchBookingByPhoneAsync(string phoneNumber);
 
     }
 }
