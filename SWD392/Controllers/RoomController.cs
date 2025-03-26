@@ -15,6 +15,12 @@ namespace SWD392.Controllers
         {
             _roomRepository = roomRepository;
         }
+        [HttpGet("GetAll")]
+        public async Task<IActionResult> GetAllRooms()
+        {
+            var rooms = await _roomRepository.GetAllRoomsAsync();
+            return Ok(rooms);
+        }
 
         [HttpPost("Create")]
         [Authorize(Roles = "Staff")]
@@ -31,5 +37,7 @@ namespace SWD392.Controllers
             var (success, message) = await _roomRepository.CheckinCustomerAsync(dto);
             return success ? Ok(new { message }) : BadRequest(new { message });
         }
+
+
     }
 }

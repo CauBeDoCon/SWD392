@@ -12,6 +12,21 @@ namespace SWD392.Repositories
         {
             _context = context;
         }
+        public async Task<List<RoomDTO>> GetAllRoomsAsync()
+        {
+            return await _context.Rooms
+                .Include(r => r.Doctor)
+                .Select(r => new RoomDTO
+                {
+                    RoomId = r.RoomId,
+                    RoomName = r.RoomName,
+                    SlotMax = r.SlotMax,
+                    SlotNow = r.SlotNow,
+                    Status = r.Status,
+                    DoctorName = r.Doctor.FirstName + " " + r.Doctor.LastName
+                })
+                .ToListAsync();
+        }
 
         public async Task<bool> CreateRoomAsync(CreateRoomDTO dto)
         {
@@ -22,7 +37,7 @@ namespace SWD392.Repositories
                 SlotNow = 0,
                 Status = "Available",
                 DoctorId = dto.DoctorId,
-                CheckinTime = dto.CheckinTime
+                CheckinTime = DateTime.Now
             };
 
             _context.Rooms.Add(room);

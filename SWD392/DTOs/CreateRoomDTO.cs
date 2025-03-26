@@ -5,6 +5,6 @@
         public string RoomName { get; set; }
         public int SlotMax { get; set; }
         public string DoctorId { get; set; }
-        public DateTime CheckinTime { get; set; }
+      
     }
 }
