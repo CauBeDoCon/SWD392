@@ -31,9 +31,6 @@ namespace SWD392.Repositories
 
         public async Task<bool> CreateRoomAsync(CreateRoomDTO dto)
         {
-            var package = await _context.Packages.FindAsync(dto.PackageId);
-            if (package == null)
-                return false;
             var room = new Room
             {
                 RoomName = dto.RoomName,
@@ -42,7 +39,7 @@ namespace SWD392.Repositories
                 Status = "Available",
                 DoctorId = dto.DoctorId,
                 CheckinTime = DateTime.Now,
-                PackageName = package.Name
+                PackageName = dto.PackageName
             };
 
             _context.Rooms.Add(room);
