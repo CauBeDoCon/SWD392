@@ -23,13 +23,17 @@ namespace SWD392.Repositories
                     SlotMax = r.SlotMax,
                     SlotNow = r.SlotNow,
                     Status = r.Status,
-                    DoctorName = r.Doctor.FirstName + " " + r.Doctor.LastName
+                    DoctorName = r.Doctor.FirstName + " " + r.Doctor.LastName,
+                    PackageName = r.PackageName
                 })
                 .ToListAsync();
         }
 
         public async Task<bool> CreateRoomAsync(CreateRoomDTO dto)
         {
+            var package = await _context.Packages.FindAsync(dto.PackageId);
+            if (package == null)
+                return false;
             var room = new Room
             {
                 RoomName = dto.RoomName,
@@ -37,7 +41,8 @@ namespace SWD392.Repositories
                 SlotNow = 0,
                 Status = "Available",
                 DoctorId = dto.DoctorId,
-                CheckinTime = DateTime.Now
+                CheckinTime = DateTime.Now,
+                PackageName = package.Name
             };
 
             _context.Rooms.Add(room);

@@ -8,5 +8,7 @@
         public int SlotNow { get; set; }
         public string Status { get; set; }
         public string DoctorName { get; set; }
+        public string PackageName { get; set; }
+
     }
 }

@@ -9,7 +9,7 @@
         public string Status { get; set; } = "Available";
         public string DoctorId { get; set; }
         public DateTime CheckinTime { get; set; }
-
+        public string PackageName { get; set; }
         public ApplicationUser Doctor { get; set; }
         public ICollection<RoomCheckin> RoomCheckins { get; set; }
     }
