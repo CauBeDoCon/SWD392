@@ -40,6 +40,10 @@ namespace SWD392.DB
         public DbSet<TreatmentSession> TreatmentSessions { get; set; }
         public DbSet<PackageTracking> PackageTrackings { get; set; }
         public DbSet<Appointment> Appointments { get; set; }
+
+        public DbSet<Room> Rooms { get; set; }
+        public DbSet<RoomCheckin> RoomCheckins { get; set; }
+
         #endregion
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
