@@ -113,31 +113,57 @@ public class PackageRepository : IPackageRepository
     public async Task<bool> UpdatePackageSessionAsync(int packageId, PackageSessionDTO packageSessionDto)
     {
         var packageSession = await _context.PackageSessions.FirstOrDefaultAsync(ps => ps.PackageId == packageId);
-        if (packageSession == null)
-        {
-            return false;
-        }
-
         var package = await _context.Packages.FirstOrDefaultAsync(p => p.Id == packageId);
-        if (package == null)
+
+        if (packageSession == null || package == null)
         {
             return false;
         }
 
+    
         packageSession.TimeSlot1 = packageSessionDto.TimeSlot1;
         packageSession.Description1 = packageSessionDto.Description1;
-        packageSession.TimeSlot2 = package.Sessions >= 2 ? packageSessionDto.TimeSlot2 : null;
-        packageSession.Description2 = package.Sessions >= 2 ? packageSessionDto.Description2 : null;
-        packageSession.TimeSlot3 = package.Sessions >= 3 ? packageSessionDto.TimeSlot3 : null;
-        packageSession.Description3 = package.Sessions >= 3 ? packageSessionDto.Description3 : null;
-        packageSession.TimeSlot4 = package.Sessions == 4 ? packageSessionDto.TimeSlot4 : null;
-        packageSession.Description4 = package.Sessions == 4 ? packageSessionDto.Description4 : null;
+
+        if (package.Sessions >= 2)
+        {
+            packageSession.TimeSlot2 = packageSessionDto.TimeSlot2;
+            packageSession.Description2 = packageSessionDto.Description2;
+        }
+        else
+        {
+            packageSession.TimeSlot2 = null;
+            packageSession.Description2 = null;
+        }
+
+        if (package.Sessions >= 3)
+        {
+            packageSession.TimeSlot3 = packageSessionDto.TimeSlot3;
+            packageSession.Description3 = packageSessionDto.Description3;
+        }
+        else
+        {
+            packageSession.TimeSlot3 = null;
+            packageSession.Description3 = null;
+        }
+
+        if (package.Sessions == 4)
+        {
+            packageSession.TimeSlot4 = packageSessionDto.TimeSlot4;
+            packageSession.Description4 = packageSessionDto.Description4;
+        }
+        else
+        {
+            packageSession.TimeSlot4 = null;
+            packageSession.Description4 = null;
+        }
 
         _context.PackageSessions.Update(packageSession);
         await _context.SaveChangesAsync();
 
         return true;
     }
+
+
 
 
     public async Task<bool> DeletePackageAsync(int packageId)
