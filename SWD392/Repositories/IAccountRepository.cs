@@ -14,5 +14,7 @@ namespace SWD392.Repositories
         public Task<List<ApplicationUser>> GetAllCustomersAsync();
         public Task<ApplicationUser> GetAccountByIdAsync(string id);
         public Task<IdentityResult> UpdateAccountInfoAsync(string id,UpdateAccountInfo updateAccountInfo);
+        Task<Dictionary<string, int>> GetUserCountsByRolesAsync();
+
     }
 }

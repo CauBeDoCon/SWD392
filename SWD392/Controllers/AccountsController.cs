@@ -253,7 +253,15 @@ namespace SWD392.Controllers
                 NewStatus = user.Status
             });
         }
- 
+
+        [HttpGet("GetUserCountsByRoles")]
+        public async Task<IActionResult> GetUserCountsByRoles()
+        {
+            var roleCounts = await accountRepo.GetUserCountsByRolesAsync();
+            return Ok(roleCounts);
+        }
+
+
     }
 
 
