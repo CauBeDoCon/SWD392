@@ -12,5 +12,10 @@
         public string? DoctorFirstName { get; set; } 
         public string? DoctorLastName { get; set; }
 
+        public string CustomerName { get; set; }
+        public string CustomerPhone { get; set; }
+        public string CustomerAvatar { get; set; }
+
+
     }
 }

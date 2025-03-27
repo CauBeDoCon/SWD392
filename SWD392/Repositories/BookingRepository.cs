@@ -344,24 +344,32 @@ namespace SWD392.Repositories
 
         public async Task<List<BookingDTO>> GetAllConfirmedAppointmentsAsync()
         {
-            return await _context.Bookings
-                .Where(b => b.Status == "Confirmed")
-                .OrderBy(b => b.TimeSlot)
-                .Join(_context.Users,
-                      booking => booking.DoctorId,
-                      user => user.Id,
-                      (booking, user) => new BookingDTO
-                      {
-                          BookingId = booking.BookingId,
-                          TimeSlot = booking.TimeSlot,
-                          Status = booking.Status,
-                          CustomerId = booking.CustomerId,
-                          DoctorAvatar = user.Avatar,
-                          DoctorFirstName = user.FirstName,
-                          DoctorLastName = user.LastName
-                      })
-                .ToListAsync();
+            return await (
+                from booking in _context.Bookings
+                join doctor in _context.Users on booking.DoctorId equals doctor.Id
+                join customer in _context.Users on booking.CustomerId equals customer.Id
+                where booking.Status == "Confirmed"
+                orderby booking.TimeSlot
+                select new BookingDTO
+                {
+                    BookingId = booking.BookingId,
+                    TimeSlot = booking.TimeSlot,
+                    Status = booking.Status,
+
+                   
+                    CustomerId = customer.Id,
+                    CustomerName = customer.FirstName + " " + customer.LastName,
+                    CustomerPhone = customer.PhoneNumber,
+                    CustomerAvatar = customer.Avatar,
+
+                    
+                    DoctorFirstName = doctor.FirstName,
+                    DoctorLastName = doctor.LastName,
+                    DoctorAvatar = doctor.Avatar
+                }
+            ).ToListAsync();
         }
+
 
 
         public async Task<bool> HasScheduleForDateAsync(string doctorId, DateTime date)
