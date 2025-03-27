@@ -109,10 +109,16 @@ namespace SWD392.Repositories
             var room = await _context.Rooms.FindAsync(roomId);
             if (room == null) return false;
 
+            if (room.SlotNow > 0)
+            {
+                return false;
+            }
+
             _context.Rooms.Remove(room);
             await _context.SaveChangesAsync();
             return true;
         }
+
 
     }
 }
