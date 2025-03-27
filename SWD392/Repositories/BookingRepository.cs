@@ -125,22 +125,28 @@ namespace SWD392.Repositories
         {
             var result = await (
                 from b in _context.Bookings
-                join u in _context.Users on b.CustomerId equals u.Id
-                where b.Status == "Confirmed"
-                      && u.PhoneNumber == phoneNumber
+                join cus in _context.Users on b.CustomerId equals cus.Id
+                join doc in _context.Users on b.DoctorId equals doc.Id
+                where b.Status == "Confirmed" && cus.PhoneNumber == phoneNumber
                 select new DoctorScheduleDTO
                 {
                     BookingId = b.BookingId,
                     TimeSlot = b.TimeSlot,
                     Status = b.Status,
-                    CustomerId = u.Id,
-                    CustomerName = u.FirstName + " " + u.LastName,
-                    CustomerPhone = u.PhoneNumber,
-                    CustomerAvatar = u.Avatar
+
+                    CustomerId = cus.Id,
+                    CustomerName = cus.FirstName + " " + cus.LastName,
+                    CustomerPhone = cus.PhoneNumber,
+                    CustomerAvatar = cus.Avatar,
+
+                    DoctorId = doc.Id,
+                    DoctorName = doc.FirstName + " " + doc.LastName,
+                    DoctorAvatar = doc.Avatar
                 }).ToListAsync();
 
             return result;
         }
+
 
 
 

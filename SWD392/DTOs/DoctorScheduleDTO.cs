@@ -10,6 +10,9 @@
         public string CustomerName { get; set; }
         public string CustomerPhone { get; set; }
         public string CustomerAvatar { get; set; }
+        public string DoctorId { get; set; }
+        public string DoctorName { get; set; }
+        public string DoctorAvatar { get; set; }
     }
 
 
