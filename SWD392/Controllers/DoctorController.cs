@@ -68,7 +68,7 @@ namespace SWD392.Controllers
         }
 
         [HttpGet("SearchBookingByPhone")]
-        [Authorize(Roles = "Doctor")]
+        [Authorize(Roles = "Doctor,Staff")]
         public async Task<IActionResult> SearchBookingByPhone([FromQuery] string phoneNumber)
         {
             if (string.IsNullOrEmpty(phoneNumber))
