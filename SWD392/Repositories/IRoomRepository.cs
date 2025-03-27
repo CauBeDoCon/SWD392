@@ -9,6 +9,8 @@ namespace SWD392.Repositories
         Task<(bool Success, string Message)> CheckinCustomerAsync(CheckinCustomerDTO dto);
         Task<List<RoomDTO>> GetAllRoomsAsync();
 
+        Task<bool> UpdateRoomAsync(int roomId, CreateRoomDTO dto);
+        Task<bool> DeleteRoomAsync(int roomId);
 
     }
 }

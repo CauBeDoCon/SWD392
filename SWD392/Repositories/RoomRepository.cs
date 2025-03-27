@@ -87,5 +87,32 @@ namespace SWD392.Repositories
 
             return (true, "Checkin thành công.");
         }
+
+        public async Task<bool> UpdateRoomAsync(int roomId, CreateRoomDTO dto)
+        {
+            var room = await _context.Rooms.FindAsync(roomId);
+            if (room == null) return false;
+
+            room.RoomName = dto.RoomName;
+            room.TimeSlot = dto.TimeSlot;
+            room.SlotMax = dto.SlotMax;
+            room.DoctorId = dto.DoctorId;
+            room.PackageId = dto.PackageId;
+
+            _context.Rooms.Update(room);
+            await _context.SaveChangesAsync();
+            return true;
+        }
+
+        public async Task<bool> DeleteRoomAsync(int roomId)
+        {
+            var room = await _context.Rooms.FindAsync(roomId);
+            if (room == null) return false;
+
+            _context.Rooms.Remove(room);
+            await _context.SaveChangesAsync();
+            return true;
+        }
+
     }
 }

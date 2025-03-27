@@ -38,6 +38,21 @@ namespace SWD392.Controllers
             return success ? Ok(new { message }) : BadRequest(new { message });
         }
 
+        [HttpPut("Update/{roomId}")]
+        [Authorize(Roles = "Staff")]
+        public async Task<IActionResult> UpdateRoom(int roomId, [FromBody] CreateRoomDTO dto)
+        {
+            var updated = await _roomRepository.UpdateRoomAsync(roomId, dto);
+            return updated ? Ok(new { Message = "Cập nhật phòng thành công." }) : NotFound("Không tìm thấy phòng.");
+        }
+
+        [HttpDelete("Delete/{roomId}")]
+        [Authorize(Roles = "Staff")]
+        public async Task<IActionResult> DeleteRoom(int roomId)
+        {
+            var deleted = await _roomRepository.DeleteRoomAsync(roomId);
+            return deleted ? Ok(new { Message = "Xoá phòng thành công." }) : NotFound("Không tìm thấy phòng.");
+        }
 
     }
 }

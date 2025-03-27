@@ -486,19 +486,45 @@ public class AppointmentRepository : IAppointmentRepository
     }
     public async Task<bool> CheckinTreatmentSessionAsync(int trackingId, CheckinTrackingDTO dto)
     {
-        var tracking = await _context.PackageTrackings.FindAsync(trackingId);
+        var tracking = await _context.PackageTrackings
+            .Include(t => t.TreatmentSession)
+            .FirstOrDefaultAsync(t => t.Id == trackingId);
+
         if (tracking == null)
             return false;
 
+        
         tracking.Status = "Done";
         if (!string.IsNullOrWhiteSpace(dto.Description))
             tracking.Description = dto.Description;
 
         _context.PackageTrackings.Update(tracking);
-        await _context.SaveChangesAsync();
 
+    
+        var appointmentId = tracking.TreatmentSession.AppointmentId;
+
+        var checkin = await _context.RoomCheckins
+            .FirstOrDefaultAsync(rc => rc.AppointmentId == appointmentId);
+
+        if (checkin != null)
+        {
+            var room = await _context.Rooms.FindAsync(checkin.RoomId);
+            if (room != null)
+            {
+                room.SlotNow -= 1;
+                if (room.SlotNow < room.SlotMax)
+                    room.Status = "Available";
+
+                _context.Rooms.Update(room);
+            }
+
+            _context.RoomCheckins.Remove(checkin); 
+        }
+
+        await _context.SaveChangesAsync();
         return true;
     }
+
     public async Task<(bool Success, string Message)> DeleteCompletedAppointmentAsync(int appointmentId, string userId, string userRole)
     {
         var appointment = await _context.Appointments
