@@ -13,11 +13,12 @@ namespace SWD392.Controllers
     {
         private readonly IBookingRepository _bookingRepository;
         private readonly IDoctorRepository _doctorRepository;
-
+        
         public StaffController(IBookingRepository bookingRepository, IDoctorRepository doctorRepository)
         {
             _bookingRepository = bookingRepository;
             _doctorRepository = doctorRepository;
+           
         }
 
         [HttpGet("GetPendingAppointments")]
@@ -73,5 +74,9 @@ namespace SWD392.Controllers
             }
             return Ok(new { Message = "Bác sĩ đã bị xóa." });
         }
+
+        
+
     }
+
 }

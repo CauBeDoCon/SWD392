@@ -34,6 +34,16 @@ namespace SWD392.DB
         public DbSet<Booking> Bookings { get; set; }
         public DbSet<Comment> Comments { get; set; }
         public DbSet<Review> Reviews { get; set; }
+
+        public DbSet<Package> Packages { get; set; }
+        public DbSet<PackageSession> PackageSessions { get; set; }
+        public DbSet<TreatmentSession> TreatmentSessions { get; set; }
+        public DbSet<PackageTracking> PackageTrackings { get; set; }
+        public DbSet<Appointment> Appointments { get; set; }
+
+        public DbSet<Room> Rooms { get; set; }
+        public DbSet<RoomCheckin> RoomCheckins { get; set; }
+
         #endregion
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -166,7 +176,39 @@ namespace SWD392.DB
                 .HasForeignKey(b => b.DoctorId)
                 .OnDelete(DeleteBehavior.Cascade);
 
+            modelBuilder.Entity<ApplicationUser>()
+                .HasOne(u => u.Appointment)
+                .WithOne(a => a.User)
+                .HasForeignKey<ApplicationUser>(u => u.AppointmentId)
+                .OnDelete(DeleteBehavior.Restrict);
 
+            
+            modelBuilder.Entity<PackageSession>()
+                .HasOne(ps => ps.Package)
+                .WithMany(p => p.PackageSessions)
+                .HasForeignKey(ps => ps.PackageId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            
+            modelBuilder.Entity<Appointment>()
+                .HasOne(a => a.Package)
+                .WithMany(p => p.Appointments)
+                .HasForeignKey(a => a.PackageId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            
+            modelBuilder.Entity<TreatmentSession>()
+                .HasOne(ts => ts.Appointment)
+                .WithMany(a => a.TreatmentSessions)
+                .HasForeignKey(ts => ts.AppointmentId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            
+            modelBuilder.Entity<PackageTracking>()
+                .HasOne(pt => pt.TreatmentSession)
+                .WithMany(ts => ts.PackageTrackings)
+                .HasForeignKey(pt => pt.TreatmentSessionId)
+                .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }

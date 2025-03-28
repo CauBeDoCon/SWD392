@@ -31,26 +31,26 @@ public class DoctorScheduleBackgroundService : BackgroundService
                     var doctorRepository = scope.ServiceProvider.GetRequiredService<IDoctorRepository>();
 
                     var doctors = await doctorRepository.GetAllDoctorsAsync();
-                    DateTime today = DateTime.Today.AddDays(-1);
-                    DateTime nextAvailableDate = today.AddDays(7);
+                    DateTime expiredDate = DateTime.Today.AddDays(-1);      
+                    DateTime nextDateToCreate = DateTime.Today.AddDays(7);   
 
                     foreach (var doctor in doctors)
                     {
-                  
-                        bool hasOldSchedule = await bookingRepository.HasScheduleForDateAsync(doctor.Id, today);
+
+                        bool hasOldSchedule = await bookingRepository.HasScheduleForDateAsync(doctor.Id, expiredDate);
                         if (hasOldSchedule)
                         {
-                            await bookingRepository.DeleteDoctorBookingsForDateAsync(doctor.Id, today);
-                            _logger.LogInformation($"🗑️ Đã xóa lịch khám ngày {today:yyyy-MM-dd} của bác sĩ {doctor.Id}.");
+                            await bookingRepository.DeleteDoctorBookingsForDateAsync(doctor.Id, expiredDate);
+                            _logger.LogInformation($"🗑️ Đã xóa lịch khám ngày {expiredDate:yyyy-MM-dd} của bác sĩ {doctor.Id}.");
                         }
 
-                       
-                        bool hasNewSchedule = await bookingRepository.HasScheduleForDateAsync(doctor.Id, nextAvailableDate);
+                        bool hasNewSchedule = await bookingRepository.HasScheduleForDateAsync(doctor.Id, nextDateToCreate);
                         if (!hasNewSchedule)
                         {
-                            await bookingRepository.CreateDoctorBookingsAsync(doctor.Id, 1); 
-                            _logger.LogInformation($"✅ Đã tạo lịch cho bác sĩ {doctor.Id} vào ngày {nextAvailableDate:yyyy-MM-dd}.");
+                            await bookingRepository.CreateDoctorBookingsAsync(doctor.Id, 1);
+                            _logger.LogInformation($"✅ Đã tạo lịch cho bác sĩ {doctor.Id} vào ngày {nextDateToCreate:yyyy-MM-dd}.");
                         }
+
                     }
                 }
             }

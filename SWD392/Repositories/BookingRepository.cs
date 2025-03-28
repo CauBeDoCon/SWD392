@@ -99,20 +99,56 @@ namespace SWD392.Repositories
 
 
 
-        public async Task<List<BookingDTO>> GetDoctorScheduleAsync(string doctorId)
+        public async Task<List<DoctorScheduleDTO>> GetDoctorScheduleAsync(string doctorId)
         {
-            return await _context.Bookings
-                .Where(b => b.DoctorId == doctorId && b.Status == "Confirmed")
-                .OrderBy(b => b.TimeSlot)
-                .Select(b => new BookingDTO
+            var result = await (
+                from b in _context.Bookings
+                join u in _context.Users on b.CustomerId equals u.Id
+                where b.DoctorId == doctorId
+                      && b.Status == "Confirmed"
+                      && b.CustomerId != null
+                select new DoctorScheduleDTO
                 {
                     BookingId = b.BookingId,
                     TimeSlot = b.TimeSlot,
                     Status = b.Status,
-                    CustomerId = b.CustomerId
-                })
-                .ToListAsync();
+                    CustomerId = u.Id,
+                    CustomerName = u.FirstName + " " + u.LastName,
+                    CustomerPhone = u.PhoneNumber,
+                    CustomerAvatar = u.Avatar
+                }).ToListAsync();
+
+            return result;
         }
+
+        public async Task<List<DoctorScheduleDTO>> SearchBookingByPhoneAsync(string phoneNumber)
+        {
+            var result = await (
+                from b in _context.Bookings
+                join cus in _context.Users on b.CustomerId equals cus.Id
+                join doc in _context.Users on b.DoctorId equals doc.Id
+                where b.Status == "Confirmed" && cus.PhoneNumber == phoneNumber
+                select new DoctorScheduleDTO
+                {
+                    BookingId = b.BookingId,
+                    TimeSlot = b.TimeSlot,
+                    Status = b.Status,
+
+                    CustomerId = cus.Id,
+                    CustomerName = cus.FirstName + " " + cus.LastName,
+                    CustomerPhone = cus.PhoneNumber,
+                    CustomerAvatar = cus.Avatar,
+
+                    DoctorId = doc.Id,
+                    DoctorName = doc.FirstName + " " + doc.LastName,
+                    DoctorAvatar = doc.Avatar
+                }).ToListAsync();
+
+            return result;
+        }
+
+
+
 
 
         public async Task<bool> CompleteAppointmentAsync(int bookingId, string doctorId, UpdateBookingDTO request)
@@ -314,24 +350,32 @@ namespace SWD392.Repositories
 
         public async Task<List<BookingDTO>> GetAllConfirmedAppointmentsAsync()
         {
-            return await _context.Bookings
-                .Where(b => b.Status == "Confirmed")
-                .OrderBy(b => b.TimeSlot)
-                .Join(_context.Users,
-                      booking => booking.DoctorId,
-                      user => user.Id,
-                      (booking, user) => new BookingDTO
-                      {
-                          BookingId = booking.BookingId,
-                          TimeSlot = booking.TimeSlot,
-                          Status = booking.Status,
-                          CustomerId = booking.CustomerId,
-                          DoctorAvatar = user.Avatar,
-                          DoctorFirstName = user.FirstName,
-                          DoctorLastName = user.LastName
-                      })
-                .ToListAsync();
+            return await (
+                from booking in _context.Bookings
+                join doctor in _context.Users on booking.DoctorId equals doctor.Id
+                join customer in _context.Users on booking.CustomerId equals customer.Id
+                where booking.Status == "Confirmed"
+                orderby booking.TimeSlot
+                select new BookingDTO
+                {
+                    BookingId = booking.BookingId,
+                    TimeSlot = booking.TimeSlot,
+                    Status = booking.Status,
+
+                   
+                    CustomerId = customer.Id,
+                    CustomerName = customer.FirstName + " " + customer.LastName,
+                    CustomerPhone = customer.PhoneNumber,
+                    CustomerAvatar = customer.Avatar,
+
+                    
+                    DoctorFirstName = doctor.FirstName,
+                    DoctorLastName = doctor.LastName,
+                    DoctorAvatar = doctor.Avatar
+                }
+            ).ToListAsync();
         }
+
 
 
         public async Task<bool> HasScheduleForDateAsync(string doctorId, DateTime date)

@@ -187,7 +187,7 @@ namespace SWD392.Repositories
             {
                 return IdentityResult.Failed(new IdentityError { Description = "Không tìm thấy tài khoản." });
             }
-            // Cập nhật các thông tin nếu có giá trị mới được truyền vào
+            
             if (!string.IsNullOrWhiteSpace(updateAccountDto.FirstName))
                 account.FirstName = updateAccountDto.FirstName;
 
@@ -209,7 +209,7 @@ namespace SWD392.Repositories
             if (updateAccountDto.Birthday.HasValue)
                 account.Birthday = updateAccountDto.Birthday.Value;
 
-            // Cập nhật tài khoản
+           
             return await userManager.UpdateAsync(account);
         }
 
@@ -223,6 +223,9 @@ namespace SWD392.Repositories
         {
             return await userManager.FindByNameAsync(username); 
         }
+
+        
+
 
     }
 }

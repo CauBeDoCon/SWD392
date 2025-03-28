@@ -12,10 +12,12 @@ namespace SWD392.Controllers
     public class DoctorController : ControllerBase
     {
         private readonly IBookingRepository _bookingRepository;
+        private readonly IAppointmentRepository _appointmentRepository;
 
-        public DoctorController(IBookingRepository bookingRepository)
+        public DoctorController(IBookingRepository bookingRepository, IAppointmentRepository appointmentRepository)
         {
             _bookingRepository = bookingRepository;
+            _appointmentRepository = appointmentRepository;
         }
 
      
@@ -48,6 +50,36 @@ namespace SWD392.Controllers
             }
 
             return Ok(new { Message = "Cập nhật thông tin thành công!" });
+        }
+
+
+        [HttpGet("GetDoctorAppointments")]
+        [Authorize(Roles = "Doctor")]
+        public async Task<IActionResult> GetDoctorAppointments()
+        {
+            var doctorId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(doctorId))
+            {
+                return Unauthorized(new { Message = "Không xác định được tài khoản bác sĩ." });
+            }
+
+            var appointments = await _appointmentRepository.GetDoctorAppointmentsAsync(doctorId);
+            return Ok(appointments);
+        }
+
+        [HttpGet("SearchBookingByPhone")]
+        [Authorize(Roles = "Doctor,Staff")]
+        public async Task<IActionResult> SearchBookingByPhone([FromQuery] string phoneNumber)
+        {
+            if (string.IsNullOrEmpty(phoneNumber))
+                return BadRequest(new { Message = "Vui lòng nhập số điện thoại." });
+
+            var result = await _bookingRepository.SearchBookingByPhoneAsync(phoneNumber);
+
+            if (result == null || !result.Any())
+                return NotFound(new { Message = "Không tìm thấy lịch hẹn nào với số điện thoại này." });
+
+            return Ok(result);
         }
 
     }
